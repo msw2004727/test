@@ -7,6 +7,77 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+.interrogation-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  margin: 0 auto;
+  padding: 28px 20px 22px 20px;
+  background: #1a2332;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px #000a, 0 2px 8px #14223b33;
+  border: 2px solid #356cc9;
+}
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Inter', 'Noto Sans TC', Arial, sans-serif;
+  font-weight: bold;
+  color: #f3f8ff;
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+}
+.badge-icon {
+  font-size: 2.3rem;
+  filter: drop-shadow(0 1px 4px #262f51aa);
+  margin-right: 4px;
+}
+.badge-text {
+  letter-spacing: 3px;
+  text-shadow: 0 2px 8px #356cc9aa;
+}
+.loading-bar {
+  width: 90%;
+  height: 14px;
+  border-radius: 8px;
+  background: #28344d;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px #3e5d96 inset, 0 2px 6px #0005;
+  margin-bottom: 12px;
+}
+.loading-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,#3ec6e0,#5e89ee 60%,#ffe57f 100%);
+  border-radius: 8px;
+  animation: loadBarAnim 2.2s cubic-bezier(.65,.05,.36,1) infinite;
+}
+@keyframes loadBarAnim {
+  0% { width: 0%; opacity: .7; }
+  40% { width: 87%; opacity: 1; }
+  95% { width: 99%; opacity: 1; }
+  100% { width: 0%; opacity: .7; }
+}
+.interrogation-text {
+  color: #8cb5f1;
+  margin-top: 6px;
+  font-size: 1.1rem;
+  letter-spacing: 1.5px;
+  font-family: 'Noto Sans TC', 'Inter', Arial, sans-serif;
+  text-shadow: 0 1px 4px #1a2332cc;
+  animation: textAnim 1.6s linear infinite alternate;
+  min-height: 1.5em;
+  transition: opacity 0.5s;
+}
+@keyframes textAnim {
+  from { opacity: 0.6; letter-spacing: 1px; }
+  to   { opacity: 1; letter-spacing: 3px; }
+}
+
         body {
             font-family: 'Noto Sans TC', 'Inter', sans-serif;
             background-color: #1a202c; 
@@ -232,11 +303,20 @@
 <body class="overscroll-y-contain">
     <audio id="background-music" src="PensivePiano.mp3" autoplay loop onerror="console.error('Audio Error:', event.target.error)"></audio>
 
-    <div id="initial-loading-overlay">
-        <div class="loading-spinner !w-12 !h-12"></div>
-        <p id="initial-loading-message" class="mt-4 text-lg">正在準備偵訊環境...</p>
-        <p class="text-sm text-gray-400 mt-1">(首次開局生成中，等待很久屬正常，請稍候...)</p>
+<div id="initial-loading-overlay">
+  <div class="interrogation-loader">
+    <div class="badge">
+      <span class="badge-icon">🕵️‍♂️</span>
+      <span class="badge-text">POLICE</span>
     </div>
+    <div class="loading-bar">
+      <div class="loading-fill"></div>
+    </div>
+    <div class="interrogation-text" id="interrogation-text">警方正在布置偵訊室…</div>
+    <p class="text-sm text-gray-400 mt-1">(首次開局生成中，等待很久屬正常，請稍候...)</p>
+  </div>
+</div>
+
 
     <div class="game-main-area container mx-auto" style="display: none;"> 
         <header class="mb-2 flex justify-between items-center">
@@ -250,6 +330,7 @@
                  UID: <span id="user-id-display">載入中...</span>
             </span>
         </header>
+
 
         <div class="flex gap-2 mb-2"> 
             <div id="avatar" class="w-20 h-20 sm:w-24 sm:h-24 rounded-md flex-shrink-0 flex flex-col items-center justify-center text-gray-300 text-xs p-0.5 text-center bg-gray-700 shadow">
@@ -392,14 +473,55 @@
     <div id="ai-thinking-modal" class="modal hidden">
         <div class="modal-content text-center">
             <div class="flex flex-col items-center justify-center min-h-[100px]"> 
-                <p class="text-lg">🤖犯嫌正在努力思考回應...</p>
+                <p class="text-lg">🤖狗美拿賽，AI正在努力撰寫中...</p>
                 <p class="text-sm text-gray-400 mt-1">(因內容豐富加載很久屬正常)</p>
                 <p class="text-xs text-gray-500 mt-1">(創作者還在努力優化中)</p>
             </div>
             <div class="loading-spinner my-4"></div>
         </div>
     </div>
-
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const interrogationTips = [
+    "警方正在布置偵訊室…",
+    "檢查錄音與監控設備中…",
+    "案件資料調閱中，請稍候…",
+    "將嫌犯帶往偵訊室…",
+    "準備調查證據中…",
+    "檢查筆錄與相關卷宗…",
+    "開啟現場攝影機與麥克風…",
+    "安排觀察人員進入暗房…",
+    "案發現場資料同步中…",
+    "檢查嫌犯心理狀態…",
+    "審核證供清單與筆錄…",
+    "偵訊專家即將進入現場…",
+    "警官正在穿戴防護裝備…",
+    "準備審問策略與對策…",
+    "案件資料加密傳輸中…"
+  ];
+  const tipElem = document.getElementById('interrogation-text');
+  let lastIdx = 0;
+  let tipTimer = null;
+  function startInterrogationTips() {
+    if (!tipElem) return;
+    tipElem.textContent = interrogationTips[0];
+    tipTimer = setInterval(() => {
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * interrogationTips.length);
+      } while (idx === lastIdx);
+      lastIdx = idx;
+      tipElem.style.opacity = 0;
+      setTimeout(() => {
+        tipElem.textContent = interrogationTips[idx];
+        tipElem.style.opacity = 1;
+      }, 400);
+    }, 3000); // 3秒切換
+  }
+  startInterrogationTips();
+  // 關閉 overlay 時請呼叫 clearInterval(tipTimer);
+});
+</script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -581,7 +703,7 @@
         async function callDeepSeekAPI(systemPrompt, userPrompt, forMultipleFields = false) {
             if(aiThinkingModal && initialLoadingOverlay && initialLoadingOverlay.style.display === 'none') { 
                 const thinkingText = aiThinkingModal.querySelector('p.text-lg');
-                if(thinkingText) thinkingText.textContent = '🤖犯嫌正在努力思考回應...';
+                if(thinkingText) thinkingText.textContent = '🤖狗美拿賽，AI正在努力撰寫中...';
                 aiThinkingModal.classList.remove('hidden');
             }
             const payload = {

@@ -81,7 +81,7 @@
             width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
             text-align: left; color: #e2e8f0;
         }
-        .modal-content.modal-lg { max-width: 600px; }
+        .modal-content.modal-lg { max-width: 700px; } /* 稍微加寬排行榜的 Modal */
         .modal-content h3 { text-align: center; margin-bottom: 16px; }
         .story-summary-text { font-size: 0.9rem; line-height: 1.6;} 
         .story-summary-divider { border-top: 1px solid #4a5568; margin: 12px 0; }
@@ -99,10 +99,10 @@
         }
         /* 排行榜表格樣式 */
         #leaderboard-table { width: 100%; margin-top: 16px; border-collapse: collapse; }
-        #leaderboard-table th, #leaderboard-table td { border: 1px solid #4a5568; padding: 8px; text-align: left; }
+        #leaderboard-table th, #leaderboard-table td { border: 1px solid #4a5568; padding: 8px; text-align: left; font-size: 0.875rem; }
         #leaderboard-table th { background-color: #374151; color: #a0aec0; }
         #leaderboard-table tr:nth-child(even) { background-color: #2a303c; }
-        #leaderboard-table .rank-medal { font-size: 1.2em; margin-right: 8px; }
+        #leaderboard-table .rank-medal { font-size: 1.1em; margin-right: 6px; }
 
 
         .interrogation-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;width:300px;margin:0 auto;padding:28px 20px 22px 20px;background:#1a2332;border-radius:18px;box-shadow:0 8px 24px #000a,0 2px 8px #14223b33;border:2px solid #356cc9}.badge{display:flex;align-items:center;gap:10px;font-family:'Inter','Noto Sans TC',Arial,sans-serif;font-weight:700;color:#f3f8ff;font-size:1.5rem;margin-bottom:16px;letter-spacing:2px}.badge-icon{font-size:2.3rem;filter:drop-shadow(0 1px 4px #262f51aa);margin-right:4px}.badge-text{letter-spacing:3px;text-shadow:0 2px 8px #356cc9aa}.loading-bar{width:90%;height:14px;border-radius:8px;background:#28344d;overflow:hidden;box-shadow:0 0 0 2px #3e5d96 inset,0 2px 6px #0005;margin-bottom:12px}.loading-fill{height:100%;width:0%;background:linear-gradient(90deg,#3ec6e0,#5e89ee 60%,#ffe57f 100%);border-radius:8px;animation:loadBarAnim 2.2s cubic-bezier(.65,.05,.36,1) infinite}.interrogation-text{color:#8cb5f1;margin-top:6px;font-size:1.1rem;letter-spacing:1.5px;font-family:'Noto Sans TC','Inter',Arial,sans-serif;text-shadow:0 1px 4px #1a2332cc;animation:textAnim 1.6s linear infinite alternate;min-height:1.5em;transition:opacity .5s}@keyframes loadBarAnim{0%{width:0%;opacity:.7}40%{width:87%;opacity:1}95%{width:99%;opacity:1}100%{width:0%;opacity:.7}}@keyframes textAnim{from{opacity:.6;letter-spacing:1px}to{opacity:1;letter-spacing:3px}}.tone-button{color:#e2e8f0;border:1px solid #718096;flex-grow:1;padding:8px 0;transition:background-color .2s,border-color .2s}.tone-button-calm{background-color:#2c5282}.tone-button-calm.active{background-color:#3182ce;border-color:#3182ce;color:#fff}.tone-button-angry{background-color:#9b2c2c}.tone-button-angry.active{background-color:#e53e3e;border-color:#e53e3e;color:#fff}.tone-button-provocative{background-color:#975a16}.tone-button-provocative.active{background-color:#d69e2e;border-color:#d69e2e;color:#fff}.loading-spinner{border:4px solid #f3f3f3;border-top:4px solid #3498db;border-radius:50%;width:24px;height:24px;animation:spin 1s linear infinite;margin:0 auto}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}.game-main-area{display:flex;flex-direction:column;height:calc(100vh - 16px);padding:8px}.interrogation-tip{font-size:.75rem;color:#a0aec0;text-align:center;margin-top:4px;padding:4px;background-color:#2a303c;border-radius:4px;min-height:2.5em;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#suspect-status-details>div{display:flex;flex-direction:column;justify-content:space-around}#suspect-status-card{padding:8px;max-height:6rem;overflow:hidden}#suspect-status-details p{font-size:.68rem;line-height:1.2;margin-bottom:.1rem}@media (min-width:640px){#suspect-status-details p{font-size:.75rem}}.analysis-section-title{font-weight:700;color:#90cdf4;margin-top:10px;margin-bottom:4px}.analysis-section-content{margin-left:10px;white-space:pre-wrap}#initial-loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(26,32,44,.95);z-index:2000;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#e2e8f0}#initial-loading-message{font-size:1.1rem;margin-top:1rem;text-align:center;padding:0 10px}#error-message-area{color:#f56565;background-color:#4a2424;padding:8px 12px;border-radius:4px;margin-top:8px;text-align:center;font-size:.8rem;display:none;border:1px solid #c53030}.achievement-banner{margin-top:16px;padding:8px;background-color:#374151;border-radius:6px;font-size:1.1rem;color:#f6e05e}.confession-color-white{color:#e2e8f0}.confession-color-green{color:#68d391}.confession-color-blue{color:#63b3ed}.confession-color-pink{color:#f687b3}.confession-color-red{color:#fc8181}.confession-color-purple{color:#b794f4}.folder-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:38px 0 22px 0}.folder-stack{position:relative;width:66px;height:56px}.folder{position:absolute;left:0;top:0;width:60px;height:38px;border-radius:5px 8px 6px 6px;background:#f1c672;box-shadow:0 6px 24px #886b3022,0 2px 5px #674f2133;border:2.2px solid #b99e61;z-index:1}.folder1{top:18px;left:8px;background:#d3b16a;z-index:1;transform:rotate(-7deg);box-shadow:0 2px 12px #a28d5e22}.folder2{top:9px;left:4px;background:#ebcc89;z-index:2;transform:rotate(3deg);box-shadow:0 2px 14px #e9c98433}.folder3{top:0;left:0;background:#f6d184;z-index:3;animation:folderShake 1.45s cubic-bezier(.66,-.11,.48,1.31) infinite alternate;box-shadow:0 8px 22px #e6ba6255,0 2px 8px #baa45333}@keyframes folderShake{0%{transform:rotate(-4deg) translateY(0)}15%{transform:rotate(1.2deg) translateY(-2px)}35%{transform:rotate(-1deg) translateY(1px)}65%{transform:rotate(1deg) translateY(-2.2px)}100%{transform:rotate(-2deg) translateY(0)}}.folder-pages{display:flex;align-items:center;justify-content:center;margin:14px 0 4px 0;gap:7px}.page-dot{width:16px;height:8px;background:#e8d199;border-radius:6px;opacity:.35;transition:all .2s;box-shadow:0 2px 6px #9e9e8455;border:1.2px solid #b6a26a}.page-dot.active{background:#f1c672;opacity:1;box-shadow:0 0 0 2px #ffe7ad55,0 4px 8px #e2b64944;border-color:#a2813b}.folder-text{margin-top:16px;color:#e6c175;font-size:1.13rem;font-family:'Noto Sans TC','Inter',Arial,sans-serif;letter-spacing:2px;text-shadow:0 2px 8px #9b782322;animation:fadeText 1.7s linear infinite alternate;min-height:1.8em}@keyframes fadeText{from{opacity:.6;letter-spacing:1px}to{opacity:1;letter-spacing:4px}}
@@ -135,8 +135,7 @@
     </div>
 
     <div id="leaderboard-modal" class="modal hidden">
-        <div class="modal-content modal-lg">
-            <h3 class="text-xl font-bold text-yellow-400">🏆 偵訊高手排行榜 🏆</h3>
+        <div class="modal-content modal-lg"> <h3 class="text-xl font-bold text-yellow-400">🏆 偵訊高手排行榜 🏆</h3>
             <div id="leaderboard-loading" class="text-center py-4 hidden">
                 <div class="loading-spinner"></div>
                 <p class="mt-2 text-gray-300">排行榜載入中...</p>
@@ -150,7 +149,7 @@
                         <th>排名</th>
                         <th>警官代號</th>
                         <th>回合數</th>
-                        <th>完成時間</th>
+                        <th>獲得成就</th> <th>完成時間</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboard-body">
@@ -636,7 +635,7 @@
         }
     }
 
-    function handleConfirmNickname() {
+    function handleConfirmNickname() { // 修改此函數，將 loadOrCreateNewGame 的調用移到這裡
         const nickname = officerNicknameInput.value.trim();
         if (!nickname) {
             if (nicknameErrorEl) {
@@ -647,7 +646,7 @@
         }
         if (nicknameErrorEl) nicknameErrorEl.classList.add('hidden');
         
-        officerNickname = nickname;
+        officerNickname = nickname; // 設定全域警官暱稱
         if (officerDisplayNameEl) officerDisplayNameEl.textContent = `(${officerNickname})`;
         
         hideNicknameModal(); 
@@ -657,24 +656,23 @@
         if (confirmNicknameButton) confirmNicknameButton.disabled = true;
         if (leaderboardNicknameButton) leaderboardNicknameButton.disabled = true;
 
-        // 確認暱稱後，立即開始加載遊戲數據 (如果還沒開始的話)
-        // 並且嘗試進入遊戲 (如果數據已加載)
-        if (!isGameDataLoaded) { // 避免重複調用 loadOrCreateNewGame
-            loadOrCreateNewGame();
+        // 在暱稱確認後，才開始加載遊戲數據 (如果尚未加載)
+        if (!isGameDataLoaded) {
+            loadOrCreateNewGame(); // 現在 loadOrCreateNewGame 會傳遞 officerNickname
         } else {
+            // 如果遊戲數據已在暱稱輸入前加載完畢，直接嘗試進入遊戲
             tryProceedToGame(); 
         }
     }
 
-    async function loadOrCreateNewGame() {
+    async function loadOrCreateNewGame() { // officerNickname 參數已移除，會從全域變數獲取
         isGameDataLoaded = false; 
         clearErrorMessage();
         
-        // 確保 initialLoadingOverlay 是可見的，因為現在 loadOrCreateNewGame 可能在暱稱確認後才被調用
         if (initialLoadingOverlay && initialLoadingOverlay.classList.contains('hidden')) {
             initialLoadingOverlay.classList.remove('hidden');
             initialLoadingOverlay.style.display = 'flex';
-            startInitialLoadingAnimation(); // 如果動畫停止了，重新啟動
+            startInitialLoadingAnimation(); 
         }
         if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "連接伺服器並創建新遊戲...";
 
@@ -690,12 +688,14 @@
             }
 
             if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "正在向伺服器請求新遊戲...";
-            // 在請求中加入 officerNickname
+            
             const requestBody = { userId: userAuthId };
-            if (officerNickname) { // 只有在 officerNickname 存在時才加入
-                requestBody.officerNickname = officerNickname;
+            if (officerNickname) { 
+                requestBody.officerNickname = officerNickname; // 從全域變數獲取
             } else {
-                console.warn("loadOrCreateNewGame: officerNickname 未設定，將使用後端預設值。");
+                // 這種情況理論上不應該發生，因為 loadOrCreateNewGame 現在在暱稱確認後調用
+                console.warn("loadOrCreateNewGame: officerNickname 未設定，將使用後端預設值。這不應該發生！");
+                requestBody.officerNickname = "未知警探"; // 提供一個備用值
             }
 
             const response = await fetch(`${BACKEND_URL}game/new`, {
@@ -987,7 +987,7 @@
         startInitialLoadingAnimation();
         showNicknameModal();
 
-        loadOrCreateNewGame(); 
+        // loadOrCreateNewGame(); // 不再在此處立即調用，改為暱稱確認後調用
     }
 
     const initialLoadingTips = ["警方正在布置偵訊室…", "檢查錄音與監控設備中…", "案件資料調閱中，請稍候…", "將嫌犯帶往偵訊室…", "準備調查證據中…", "檢查筆錄與相關卷宗…", "開啟現場攝影機與麥克風…", "安排觀察人員進入暗房…", "案發現場資料同步中…", "檢查嫌犯心理狀態…", "審核證供清單與筆錄…", "偵訊專家即將進入現場…", "警官正在穿戴防護裝備…", "準備審問策略與對策…", "案件資料加密傳輸中…"];
@@ -1028,9 +1028,9 @@
             return;
         }
 
-        leaderboardTableEl.classList.add('hidden'); // 先隱藏表格
-        leaderboardErrorEl.classList.add('hidden'); // 隱藏錯誤訊息
-        leaderboardLoadingEl.classList.remove('hidden'); // 顯示載入中
+        leaderboardTableEl.classList.add('hidden'); 
+        leaderboardErrorEl.classList.add('hidden'); 
+        leaderboardLoadingEl.classList.remove('hidden'); 
 
         try {
             const response = await fetch(`${BACKEND_URL}leaderboard`);
@@ -1044,7 +1044,7 @@
             }
             const leaderboardData = await response.json();
             
-            leaderboardBodyEl.innerHTML = ''; // 清空舊的排行榜內容
+            leaderboardBodyEl.innerHTML = ''; 
 
             if (leaderboardData && leaderboardData.length > 0) {
                 leaderboardData.forEach((entry, index) => {
@@ -1058,13 +1058,13 @@
                     row.insertCell().innerHTML = `<span class="rank-medal">${medal}</span>${rank}`;
                     row.insertCell().textContent = entry.officerNickname || '匿名警官';
                     row.insertCell().textContent = entry.rounds !== undefined ? entry.rounds : 'N/A';
-                    
+                    row.insertCell().textContent = entry.achievementTitle || '無'; // 顯示成就
+
                     let formattedTimestamp = 'N/A';
                     if (entry.timestamp) {
                         try {
-                            // 嘗試將 ISO 格式的時間戳轉換為更易讀的本地時間格式
                             const dateObj = new Date(entry.timestamp);
-                            if (!isNaN(dateObj)) { // 檢查是否為有效日期
+                            if (!isNaN(dateObj)) { 
                                 formattedTimestamp = dateObj.toLocaleString('zh-TW', { 
                                     year: 'numeric', month: '2-digit', day: '2-digit', 
                                     hour: '2-digit', minute: '2-digit' 
@@ -1072,22 +1072,22 @@
                             }
                         } catch (e) {
                             console.warn("轉換時間戳失敗:", e, "原始值:", entry.timestamp);
-                            formattedTimestamp = entry.timestamp; // 如果轉換失敗，顯示原始值
+                            formattedTimestamp = entry.timestamp; 
                         }
                     }
                     row.insertCell().textContent = formattedTimestamp;
                 });
-                leaderboardTableEl.classList.remove('hidden'); // 顯示表格
+                leaderboardTableEl.classList.remove('hidden'); 
             } else {
-                leaderboardBodyEl.innerHTML = '<tr><td colspan="4" class="text-center py-4">目前尚無排行榜記錄。</td></tr>';
-                leaderboardTableEl.classList.remove('hidden'); // 仍然顯示表格框架，但內容是無記錄
+                leaderboardBodyEl.innerHTML = '<tr><td colspan="5" class="text-center py-4">目前尚無排行榜記錄。</td></tr>'; // 修改 colspan
+                leaderboardTableEl.classList.remove('hidden'); 
             }
         } catch (error) {
             console.error("獲取或顯示排行榜失敗:", error);
             leaderboardErrorEl.textContent = `無法載入排行榜：${error.message}`;
             leaderboardErrorEl.classList.remove('hidden');
         } finally {
-            leaderboardLoadingEl.classList.add('hidden'); // 隱藏載入中
+            leaderboardLoadingEl.classList.add('hidden'); 
         }
     }
 
@@ -1103,36 +1103,13 @@
     if (showStorySummaryButton) showStorySummaryButton.addEventListener('click', () => storySummaryModal.classList.remove('hidden'));
     if (restartGameButton) restartGameButton.addEventListener('click', restartGame);
     
-    if (confirmNicknameButton) { // 修改：將 loadOrCreateNewGame 的調用移到暱稱確認後
-        confirmNicknameButton.addEventListener('click', () => {
-            const nickname = officerNicknameInput.value.trim();
-            if (!nickname) {
-                if (nicknameErrorEl) {
-                    nicknameErrorEl.textContent = "警官代號不能為空。";
-                    nicknameErrorEl.classList.remove('hidden');
-                }
-                return;
-            }
-            if (nicknameErrorEl) nicknameErrorEl.classList.add('hidden');
-            
-            officerNickname = nickname; // 設定全域警官暱稱
-            if (officerDisplayNameEl) officerDisplayNameEl.textContent = `(${officerNickname})`;
-            
-            hideNicknameModal(); 
-            isNicknameConfirmed = true;
-            
-            if (officerNicknameInput) officerNicknameInput.disabled = true;
-            if (confirmNicknameButton) confirmNicknameButton.disabled = true;
-            if (leaderboardNicknameButton) leaderboardNicknameButton.disabled = true;
-
-            // 在暱稱確認後，才開始加載遊戲數據
-            loadOrCreateNewGame(); 
-        });
+    if (confirmNicknameButton) { 
+        confirmNicknameButton.addEventListener('click', handleConfirmNickname); // 直接調用 handleConfirmNickname
     }
     if (officerNicknameInput) {
          officerNicknameInput.addEventListener('keypress', (e) => { 
             if (e.key === 'Enter') { 
-                confirmNicknameButton.click(); // 觸發確認按鈕的點擊事件
+                confirmNicknameButton.click(); 
             }
         });
     }
@@ -1150,10 +1127,10 @@
     // --- 頁面載入完成後執行 ---
     window.addEventListener('load', () => {
         isGameStarted = false; 
-        showNicknameModal(); // 先顯示暱稱輸入
-        if (initialLoadingOverlay) initialLoadingOverlay.classList.remove('hidden'); // 同時顯示背景載入動畫
+        showNicknameModal(); 
+        if (initialLoadingOverlay) initialLoadingOverlay.classList.remove('hidden'); 
         startInitialLoadingAnimation();
-        // loadOrCreateNewGame(); // 不再在此處立即調用，改為暱稱確認後調用
+        // loadOrCreateNewGame(); // 改為在暱稱確認後調用
     });
 
 </script>

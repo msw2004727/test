@@ -126,8 +126,8 @@
 
     <div id="nickname-modal" class="modal hidden">
         <div class="modal-content">
-            <h3 class="text-xl font-bold text-blue-300">輸入警官代號</h3>
-            <input type="text" id="officer-nickname-input" class="w-full p-2 mt-4 border border-gray-500 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="請輸入您的警官代號（例如：飛鷹隊長）">
+            <h3 class="text-xl font-bold text-blue-300">輸入警官暱稱</h3>
+            <input type="text" id="officer-nickname-input" class="w-full p-2 mt-4 border border-gray-500 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="請輸入您的警官暱稱（例如：明天隊長）">
             <p id="nickname-error" class="text-red-400 text-sm mt-1 hidden">警官代號不能為空。</p>
             <div class="mt-6 flex items-center gap-2"> <button id="confirm-nickname-button" class="flex-grow bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md">確認進入偵訊室</button>
                 <button id="leaderboard-nickname-button" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-3 rounded-md text-sm">🏆</button> </div>
@@ -337,7 +337,7 @@
         <div class="modal-content text-center">
             <div class="flex flex-col items-center justify-center min-h-[100px]">
                 <p class="text-lg" id="ai-thinking-message">🤖 AI正在努力思考中...</p>
-                <p class="text-sm text-gray-400 mt-1">(因內容豐富加載很久屬正常)</p>
+                <p class="text-sm text-gray-400 mt-1">(因即時應對加載稍慢屬正常)</p>
                 <p class="text-xs text-gray-500 mt-1">(創作者還在努力優化中)</p>
             </div>
             <div class="loading-spinner my-4"></div>
@@ -687,7 +687,7 @@
                 throw new Error("無法獲取用戶識別碼，無法創建遊戲。");
             }
 
-            if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "正在向伺服器請求新遊戲...";
+            if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "開局加載很久正常!不用擔心";
             
             const requestBody = { userId: userAuthId };
             if (officerNickname) { 
@@ -796,7 +796,7 @@
         }
         bindKeywordClickEvents(); 
         if (state.gameOver) {
-            if(gameOverTitle) gameOverTitle.textContent = (state.confessionMeter != null && state.confessionMeter <= 0) ? "⚖️ 審問成功！" : "⚖️ 審問失敗！";
+            if(gameOverTitle) gameOverTitle.textContent = (state.confessionMeter != null && state.confessionMeter <= 0) ? "⚖️ 審問成功 ⚖️" : "⚖️ 審問失敗 ⚖️";
             if(totalRoundsEl) totalRoundsEl.textContent = state.round ?? '0';
             if(gameAnalysisContainerEl && typeof state.gameAnalysis === 'object' && state.gameAnalysis.interrogationStyle) {
                 gameAnalysisContainerEl.innerHTML = `<p class="analysis-section-title">1. 偵訊員審問風格分析:</p><p class="analysis-section-content">${state.gameAnalysis.interrogationStyle}</p><p class="analysis-section-title">2. 與嫌犯鬥智過程技巧分析:</p><p class="analysis-section-content">${state.gameAnalysis.techniqueAnalysis}</p><p class="analysis-section-title">3. 分析玩家在現實世界潛在人格特質:</p><p class="analysis-section-content">${state.gameAnalysis.playerPersonalityTrait}</p>`;
@@ -940,7 +940,7 @@
         const originalDemandButtonText = demandConfessionButton.textContent;
         if (isDemandConfession) { demandConfessionButton.innerHTML = '<div class="loading-spinner !w-4 !h-4 border-t-white mx-auto"></div>'; }
         else { sendButton.innerHTML = '<div class="loading-spinner !w-5 !h-5 border-t-white"></div>'; }
-        showThinkingModal(isDemandConfession ? '正在要求對方認罪...' : 'AI正在分析您的輸入...');
+        showThinkingModal(isDemandConfession ? '正在要求對方認罪...' : 'AI正在分析中');
         const currentTone = gameState.selectedTone || "平緩"; 
         const payload = { message: isDemandConfession ? "" : playerMessage, tone: isDemandConfession ? "憤怒" : currentTone, isDemandConfession: isDemandConfession };
         try {

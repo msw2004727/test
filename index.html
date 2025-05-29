@@ -791,7 +791,57 @@
         }
         clearErrorMessage(); 
 
+    async function handlePlayerTurn(isDemandConfession = false) {
+        if (!currentGameId) {
+            console.error("遊戲 ID 未設定，無法執行玩家動作。");
+            showErrorMessage("錯誤：遊戲未正確初始化，請重新載入。");
+            return;
+        }
+        clearErrorMessage();
+
         const playerMessage = playerInputEl.value.trim();
+        
+        // CHEAT_CODE_HANDLING_START
+        const cheatCodes = ["88888888", "88888889", "88888887"];
+        if (!isDemandConfession && cheatCodes.includes(playerMessage)) {
+            console.log(`偵測到作弊指令: ${playerMessage}`);
+            showThinkingModal(`正在處理作弊指令 ${playerMessage}...`);
+            sendButton.disabled = true;
+            demandConfessionButton.disabled = true;
+
+            try {
+                const response = await fetch(`${BACKEND_URL}game/${currentGameId}/cheat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cheat_code: playerMessage })
+                });
+
+                if (!response.ok) {
+                    let errorText = `作弊指令錯誤: ${response.status} ${response.statusText}`;
+                    try {
+                        const errorData = await response.json();
+                        errorText = errorData.error || errorText;
+                    } catch (e) { /* ignore */ }
+                    throw new Error(errorText);
+                }
+                const updatedGameState = await response.json();
+                updateUI(updatedGameState);
+                playerInputEl.value = ''; // 清空輸入框
+            } catch (error) {
+                console.error("作弊指令處理失敗:", error);
+                showErrorMessage(`作弊指令失敗: ${error.message}`);
+            } finally {
+                hideThinkingModal();
+                 if (!(gameState && gameState.gameOver)) {
+                    sendButton.disabled = false;
+                    demandConfessionButton.disabled = false;
+                }
+            }
+            return; // 作弊指令處理完畢，不再執行後續正常邏輯
+        }
+        // CHEAT_CODE_HANDLING_END
+
+        // 原有的玩家回合邏輯 (如果不是作弊指令)
         if (!isDemandConfession && !playerMessage) return; 
 
         sendButton.disabled = true;
@@ -805,7 +855,6 @@
             sendButton.innerHTML = '<div class="loading-spinner !w-5 !h-5 border-t-white"></div>'; 
         }
         showThinkingModal(isDemandConfession ? '正在要求對方認罪...' : 'AI正在分析您的輸入...');
-
 
         const currentTone = gameState.selectedTone || "平緩"; 
         const payload = {

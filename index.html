@@ -120,7 +120,7 @@
         /* AI (嫌犯) 發言氣泡 */
         .ai-bubble { background-color: #4a5568; color: #e2e8f0; margin-right: auto; }
 
-        .keyword, .case-keyword { text-decoration: underline; color: #63b3ed; cursor: pointer; }
+        .keyword, .case-keyword { text-decoration: underline; color: #63b3ed; cursor: pointer; } /* 統一關鍵字樣式 */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.8); /* 半透明黑色背景 */
@@ -235,7 +235,8 @@
           <span class="badge-text">POLICE</span>
         </div>
         <div class="loading-bar">
-          <div id="loading-fill-bar" class="loading-fill"></div> </div>
+          <div id="loading-fill-bar" class="loading-fill"></div>
+        </div>
         <div class="interrogation-text" id="loading-animation-text">警方正在布置偵訊室…</div>
         <p class="text-sm text-gray-400 mt-1" id="initial-loading-message">遊戲初始化中...</p>
       </div>
@@ -719,17 +720,21 @@
         // 更新案件概要 Modal
         if (state.caseDetails) {
             const caseDetails = state.caseDetails;
-            const processKeywords = (text) => (text ?? "讀取中...").replace(/##(.*?)##/g, '<span class="case-keyword" data-keyword="$1">$1</span>').replace(/\n/g, "<br>");
+            // 修改 processKeywordsForModal 函式，使其能被 updateUI 內部呼叫
+            const processKeywordsForModal = (text) => {
+                if (typeof text !== 'string') return "讀取中...";
+                return text.replace(/##(.*?)##/g, '<span class="case-keyword" data-keyword="$1">$1</span>').replace(/\n/g, "<br>");
+            };
 
-            if(autopsyReportModalContentEl) autopsyReportModalContentEl.innerHTML = processKeywords(caseDetails.autopsyReport);
+            if(autopsyReportModalContentEl) autopsyReportModalContentEl.innerHTML = processKeywordsForModal(caseDetails.autopsyReport);
             if(evidenceListModalContentEl) {
                 evidenceListModalContentEl.innerHTML = (caseDetails.evidence ?? [])
-                    .map(e => `<li data-id="${e.id || ''}">${processKeywords(e.text)}</li>`)
+                    .map(e => `<li data-id="${e.id || ''}">${processKeywordsForModal(e.text)}</li>`)
                     .join('');
             }
             if(doubtsListModalContentEl) {
                 doubtsListModalContentEl.innerHTML = (caseDetails.doubts ?? [])
-                    .map(d => `<li data-id="${d.id || ''}">${processKeywords(d.text)}</li>`)
+                    .map(d => `<li data-id="${d.id || ''}">${processKeywordsForModal(d.text)}</li>`)
                     .join('');
             }
         }
@@ -745,7 +750,7 @@
             interrogationTipAreaEl.textContent = "※貼心提示： " + state.interrogationTip;
         }
 
-        // 為新渲染的關鍵字綁定事件 (如果關鍵字是動態加入的)
+        // 為新渲染的關鍵字綁定事件 (包含案件概要中的 case-keyword 和對話中的 keyword)
         document.querySelectorAll('.case-keyword, .keyword').forEach(el => {
             el.onclick = () => {
                 const keyword = el.dataset.keyword;
@@ -775,7 +780,7 @@
                 } else if (achievementBannerEl) {
                     achievementBannerEl.classList.add('hidden');
                 }
-            } else if (gameAnalysisTextEl) { // 修正此處，應使用 gameAnalysisContainerEl
+            } else if (gameAnalysisContainerEl) { // 修正此處，應使用 gameAnalysisContainerEl
                 gameAnalysisContainerEl.innerHTML = `<p class="analysis-section-content">${typeof state.gameAnalysis === 'string' ? state.gameAnalysis : "分析生成失敗或格式不符。"}</p>`;
                  if(achievementBannerEl) achievementBannerEl.classList.add('hidden');
             }
@@ -806,7 +811,7 @@
             messageDiv.classList.add('ai-bubble');
         }
 
-        // 處理關鍵字 @@keyword@@
+        // 處理關鍵字 @@keyword@@ (對話中)
         const processedText = messageContent.replace(/@@(.*?)@@/g, '<span class="keyword" data-keyword="$1">$1</span>');
         messageDiv.innerHTML = processedText;
 
@@ -815,7 +820,7 @@
             dialogueAreaEl.scrollTop = dialogueAreaEl.scrollHeight; // 自動滾動到底部
         }
 
-        // 為新加入的關鍵字綁定點擊事件
+        // 為新加入的對話中的關鍵字綁定點擊事件
         messageDiv.querySelectorAll('.keyword').forEach(el => {
             el.onclick = () => {
                 const keyword = el.dataset.keyword;
@@ -825,7 +830,6 @@
             };
         });
     }
-    // 移除了多餘的 '}'
 
     async function fetchKeywordInfo(keyword) {
         if (!currentGameId) {

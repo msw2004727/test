@@ -112,7 +112,7 @@
 
         <div class="flex gap-2 mb-2">
             <div id="avatar" class="w-20 h-20 sm:w-24 sm:h-24 rounded-md flex-shrink-0 flex flex-col items-center justify-center text-gray-300 text-xs p-0.5 text-center bg-gray-700 shadow">
-                <img id="suspect-avatar-img" src="test00.jpg" alt="嫌犯頭像" class="w-full h-3/4 object-cover rounded-t-sm" onerror="this.onerror=null; this.src='https://placehold.co/80x60/718096/E2E8F0?text=頭像載入失敗';">
+                <img id="suspect-avatar-img" src="test00.png" alt="嫌犯頭像" class="w-full h-3/4 object-cover rounded-t-sm" onerror="this.onerror=null; this.src='https://placehold.co/80x60/718096/E2E8F0?text=頭像載入失敗';">
                 <div id="suspect-name-display" class="w-full bg-black bg-opacity-70 text-white text-xs py-1 text-center truncate rounded-b-sm h-1/4 flex items-center justify-center">
                     <span id="suspect-status-name">讀取中...</span>
                 </div>
@@ -560,7 +560,7 @@
 
         const suspectAvatarImg = document.getElementById('suspect-avatar-img');
         if (suspectAvatarImg) {
-            suspectAvatarImg.src = 'test00.jpg'; // 確保路徑正確
+            suspectAvatarImg.src = 'test00.png'; // 確保路徑正確
         }
 
         if (roundCountHeaderEl) roundCountHeaderEl.textContent = state.round ?? '0';

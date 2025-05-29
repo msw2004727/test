@@ -7,88 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Tailwind CSS 已經包含，這裡保留您原有的自訂樣式 */
-        /* Loader 動畫樣式 */
-        .interrogation-loader {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          width: 300px;
-          margin: 0 auto;
-          padding: 28px 20px 22px 20px;
-          background: #1a2332;
-          border-radius: 18px;
-          box-shadow: 0 8px 24px #000a, 0 2px 8px #14223b33;
-          border: 2px solid #356cc9;
-        }
-        .badge {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          font-family: 'Inter', 'Noto Sans TC', Arial, sans-serif;
-          font-weight: bold;
-          color: #f3f8ff;
-          font-size: 1.5rem;
-          margin-bottom: 16px;
-          letter-spacing: 2px;
-        }
-        .badge-icon {
-          font-size: 2.3rem;
-          filter: drop-shadow(0 1px 4px #262f51aa);
-          margin-right: 4px;
-        }
-        .badge-text {
-          letter-spacing: 3px;
-          text-shadow: 0 2px 8px #356cc9aa;
-        }
-        .loading-bar {
-          width: 90%;
-          height: 14px;
-          border-radius: 8px;
-          background: #28344d;
-          overflow: hidden;
-          box-shadow: 0 0 0 2px #3e5d96 inset, 0 2px 6px #0005;
-          margin-bottom: 12px;
-        }
-        .loading-fill {
-          height: 100%;
-          width: 0%; /* 將由 JS 控制 */
-          background: linear-gradient(90deg,#3ec6e0,#5e89ee 60%,#ffe57f 100%);
-          border-radius: 8px;
-          animation: loadBarAnim 2.2s cubic-bezier(.65,.05,.36,1) infinite; /* 保留動畫以提供視覺回饋 */
-        }
-        @keyframes loadBarAnim {
-          0% { width: 0%; opacity: .7; }
-          40% { width: 87%; opacity: 1; }
-          95% { width: 99%; opacity: 1; }
-          100% { width: 0%; opacity: .7; }
-        }
-        .interrogation-text { /* 用於載入動畫中的文字 */
-          color: #8cb5f1;
-          margin-top: 6px;
-          font-size: 1.1rem;
-          letter-spacing: 1.5px;
-          font-family: 'Noto Sans TC', 'Inter', Arial, sans-serif;
-          text-shadow: 0 1px 4px #1a2332cc;
-          animation: textAnim 1.6s linear infinite alternate;
-          min-height: 1.5em;
-          transition: opacity 0.5s;
-        }
-         @keyframes textAnim {
-          from { opacity: 0.6; letter-spacing: 1px; }
-          to   { opacity: 1; letter-spacing: 3px; }
-        }
-
-        /* 基本樣式 */
+        /* Tailwind CSS 已經包含 */
         body {
             font-family: 'Noto Sans TC', 'Inter', sans-serif;
-            background-color: #1a202c; /* 深藍灰色背景 */
-            color: #e2e8f0; /* 淺灰色文字 */
-            overscroll-behavior-y: contain; /* 防止在行動裝置上滑動時觸發頁面刷新 */
+            background-color: #1a202c; 
+            color: #e2e8f0; 
+            overscroll-behavior-y: contain; 
         }
         .card {
-            background-color: #2d3748; /* 卡片背景色 */
+            background-color: #2d3748; 
             border-radius: 8px;
             padding: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -96,34 +23,40 @@
         .dialogue-area {
             flex-grow: 1;
             overflow-y: auto;
-            border: 1px solid #4a5568; /* 邊框顏色 */
+            border: 1px solid #4a5568; 
             padding: 10px;
             border-radius: 8px;
-            background-color: #1f2937; /* 對話區域背景色 */
-            min-height: 200px; /* 最小高度 */
+            background-color: #1f2937; 
+            min-height: 200px; 
         }
         .dialogue-bubble {
             padding: 8px 12px;
             border-radius: 15px;
             margin-bottom: 8px;
             max-width: 85%;
-            word-wrap: break-word; /* 自動換行 */
-            color: white; /* 氣泡文字顏色 */
+            word-wrap: break-word; 
+            color: white; 
         }
-        /* 玩家發言氣泡 */
         .player-bubble { background-color: #4299e1; margin-left: auto; text-align: right; }
         .player-bubble-calm { background-color: #38a169; }
         .player-bubble-angry { background-color: #e53e3e; }
         .player-bubble-provocative { background-color: #d69e2e; }
-        /* 警官發言氣泡 */
         .officer-bubble { background-color: #38a169; color: white; margin-left: auto; text-align: right; }
-        /* AI (嫌犯) 發言氣泡 */
         .ai-bubble { background-color: #4a5568; color: #e2e8f0; margin-right: auto; }
 
-        .keyword, .case-keyword { text-decoration: underline; color: #63b3ed; cursor: pointer; } /* 統一關鍵字樣式 */
+        .keyword, .case-keyword { 
+            text-decoration: underline; 
+            color: #63b3ed; 
+            cursor: pointer; 
+            font-weight: 500; 
+        }
+        .keyword:hover, .case-keyword:hover {
+            color: #90cdf4; 
+        }
+
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.8); /* 半透明黑色背景 */
+            background-color: rgba(0,0,0,0.8); 
             display: flex; justify-content: center; align-items: center;
             z-index: 1000; padding: 16px;
         }
@@ -134,95 +67,20 @@
         }
         .modal-content.modal-lg { max-width: 600px; }
         .modal-content h3 { text-align: center; margin-bottom: 16px; }
-        .story-summary-text { font-size: 0.8rem; }
+        .story-summary-text { font-size: 0.9rem; line-height: 1.6;} /* 調整了案件概要文字大小和行高 */
         .story-summary-divider { border-top: 1px solid #4a5568; margin: 12px 0; }
         .personality-block { background-color: #374151; padding: 10px; border-radius: 6px; margin-top: 10px; border: 1px solid #4a5568; }
         #personality-modal { font-style: normal; }
+        
+        /* NEW_STYLE: 權益宣告 Modal 內容樣式 */
+        #rights-declaration-modal-content ul { list-style-type: decimal; margin-left: 20px; margin-top: 10px; }
+        #rights-declaration-modal-content li { margin-bottom: 8px; line-height: 1.5; }
+        #rights-declaration-modal-content p { margin-bottom: 10px; }
 
-        /* 語氣按鈕樣式 */
-        .tone-button {
-            color: #e2e8f0; border: 1px solid #718096;
-            flex-grow: 1; padding: 8px 0; transition: background-color 0.2s, border-color 0.2s;
-        }
-        .tone-button-calm { background-color: #2c5282; }
-        .tone-button-calm.active { background-color: #3182ce; border-color: #3182ce; color:white; }
-        .tone-button-angry { background-color: #9b2c2c; }
-        .tone-button-angry.active { background-color: #e53e3e; border-color: #e53e3e; color:white; }
-        .tone-button-provocative { background-color: #975a16; }
-        .tone-button-provocative.active { background-color: #d69e2e; border-color: #d69e2e; color:white; }
 
-        /* 載入中 Spinner */
-        .loading-spinner {
-            border: 4px solid #f3f3f3; border-top: 4px solid #3498db;
-            border-radius: 50%; width: 24px; height: 24px;
-            animation: spin 1s linear infinite; margin: 0 auto;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* 其他樣式保持不變 */
+        .interrogation-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;width:300px;margin:0 auto;padding:28px 20px 22px 20px;background:#1a2332;border-radius:18px;box-shadow:0 8px 24px #000a,0 2px 8px #14223b33;border:2px solid #356cc9}.badge{display:flex;align-items:center;gap:10px;font-family:'Inter','Noto Sans TC',Arial,sans-serif;font-weight:700;color:#f3f8ff;font-size:1.5rem;margin-bottom:16px;letter-spacing:2px}.badge-icon{font-size:2.3rem;filter:drop-shadow(0 1px 4px #262f51aa);margin-right:4px}.badge-text{letter-spacing:3px;text-shadow:0 2px 8px #356cc9aa}.loading-bar{width:90%;height:14px;border-radius:8px;background:#28344d;overflow:hidden;box-shadow:0 0 0 2px #3e5d96 inset,0 2px 6px #0005;margin-bottom:12px}.loading-fill{height:100%;width:0%;background:linear-gradient(90deg,#3ec6e0,#5e89ee 60%,#ffe57f 100%);border-radius:8px;animation:loadBarAnim 2.2s cubic-bezier(.65,.05,.36,1) infinite}.interrogation-text{color:#8cb5f1;margin-top:6px;font-size:1.1rem;letter-spacing:1.5px;font-family:'Noto Sans TC','Inter',Arial,sans-serif;text-shadow:0 1px 4px #1a2332cc;animation:textAnim 1.6s linear infinite alternate;min-height:1.5em;transition:opacity .5s}@keyframes loadBarAnim{0%{width:0%;opacity:.7}40%{width:87%;opacity:1}95%{width:99%;opacity:1}100%{width:0%;opacity:.7}}@keyframes textAnim{from{opacity:.6;letter-spacing:1px}to{opacity:1;letter-spacing:3px}}.tone-button{color:#e2e8f0;border:1px solid #718096;flex-grow:1;padding:8px 0;transition:background-color .2s,border-color .2s}.tone-button-calm{background-color:#2c5282}.tone-button-calm.active{background-color:#3182ce;border-color:#3182ce;color:#fff}.tone-button-angry{background-color:#9b2c2c}.tone-button-angry.active{background-color:#e53e3e;border-color:#e53e3e;color:#fff}.tone-button-provocative{background-color:#975a16}.tone-button-provocative.active{background-color:#d69e2e;border-color:#d69e2e;color:#fff}.loading-spinner{border:4px solid #f3f3f3;border-top:4px solid #3498db;border-radius:50%;width:24px;height:24px;animation:spin 1s linear infinite;margin:0 auto}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}.game-main-area{display:flex;flex-direction:column;height:calc(100vh - 16px);padding:8px}.interrogation-tip{font-size:.75rem;color:#a0aec0;text-align:center;margin-top:4px;padding:4px;background-color:#2a303c;border-radius:4px;min-height:2.5em;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#suspect-status-details>div{display:flex;flex-direction:column;justify-content:space-around}#suspect-status-card{padding:8px;max-height:6rem;overflow:hidden}#suspect-status-details p{font-size:.68rem;line-height:1.2;margin-bottom:.1rem}@media (min-width:640px){#suspect-status-details p{font-size:.75rem}}.analysis-section-title{font-weight:700;color:#90cdf4;margin-top:10px;margin-bottom:4px}.analysis-section-content{margin-left:10px;white-space:pre-wrap}#initial-loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(26,32,44,.95);z-index:2000;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#e2e8f0}#initial-loading-message{font-size:1.1rem;margin-top:1rem;text-align:center;padding:0 10px}#error-message-area{color:#f56565;background-color:#4a2424;padding:8px 12px;border-radius:4px;margin-top:8px;text-align:center;font-size:.8rem;display:none;border:1px solid #c53030}.achievement-banner{margin-top:16px;padding:8px;background-color:#374151;border-radius:6px;font-size:1.1rem;color:#f6e05e}.confession-color-white{color:#e2e8f0}.confession-color-green{color:#68d391}.confession-color-blue{color:#63b3ed}.confession-color-pink{color:#f687b3}.confession-color-red{color:#fc8181}.confession-color-purple{color:#b794f4}.folder-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:38px 0 22px 0}.folder-stack{position:relative;width:66px;height:56px}.folder{position:absolute;left:0;top:0;width:60px;height:38px;border-radius:5px 8px 6px 6px;background:#f1c672;box-shadow:0 6px 24px #886b3022,0 2px 5px #674f2133;border:2.2px solid #b99e61;z-index:1}.folder1{top:18px;left:8px;background:#d3b16a;z-index:1;transform:rotate(-7deg);box-shadow:0 2px 12px #a28d5e22}.folder2{top:9px;left:4px;background:#ebcc89;z-index:2;transform:rotate(3deg);box-shadow:0 2px 14px #e9c98433}.folder3{top:0;left:0;background:#f6d184;z-index:3;animation:folderShake 1.45s cubic-bezier(.66,-.11,.48,1.31) infinite alternate;box-shadow:0 8px 22px #e6ba6255,0 2px 8px #baa45333}@keyframes folderShake{0%{transform:rotate(-4deg) translateY(0)}15%{transform:rotate(1.2deg) translateY(-2px)}35%{transform:rotate(-1deg) translateY(1px)}65%{transform:rotate(1deg) translateY(-2.2px)}100%{transform:rotate(-2deg) translateY(0)}}.folder-pages{display:flex;align-items:center;justify-content:center;margin:14px 0 4px 0;gap:7px}.page-dot{width:16px;height:8px;background:#e8d199;border-radius:6px;opacity:.35;transition:all .2s;box-shadow:0 2px 6px #9e9e8455;border:1.2px solid #b6a26a}.page-dot.active{background:#f1c672;opacity:1;box-shadow:0 0 0 2px #ffe7ad55,0 4px 8px #e2b64944;border-color:#a2813b}.folder-text{margin-top:16px;color:#e6c175;font-size:1.13rem;font-family:'Noto Sans TC','Inter',Arial,sans-serif;letter-spacing:2px;text-shadow:0 2px 8px #9b782322;animation:fadeText 1.7s linear infinite alternate;min-height:1.8em}@keyframes fadeText{from{opacity:.6;letter-spacing:1px}to{opacity:1;letter-spacing:4px}}
 
-        /* 遊戲主區域佈局 */
-        .game-main-area { display: flex; flex-direction: column; height: calc(100vh - 16px); padding: 8px; }
-        .interrogation-tip {
-            font-size: 0.75rem; color: #a0aec0; text-align: center;
-            margin-top: 4px; padding: 4px; background-color: #2a303c;
-            border-radius: 4px; min-height: 2.5em; line-height: 1.3;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        /* 嫌犯狀態卡片細節 */
-        #suspect-status-details > div { display: flex; flex-direction: column; justify-content: space-around; }
-        #suspect-status-card { padding: 8px; max-height: 6rem; overflow: hidden; }
-        #suspect-status-details p { font-size: 0.68rem; line-height: 1.2; margin-bottom: 0.1rem; }
-        @media (min-width: 640px) { #suspect-status-details p { font-size: 0.75rem; } }
-
-        /* 遊戲結束分析區塊 */
-        .analysis-section-title { font-weight: bold; color: #90cdf4; margin-top: 10px; margin-bottom: 4px; }
-        .analysis-section-content { margin-left: 10px; white-space: pre-wrap; }
-
-        /* 初始載入覆蓋層 */
-        #initial-loading-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(26, 32, 44, 0.95); z-index: 2000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: #e2e8f0;
-        }
-        #initial-loading-message { font-size: 1.1rem; margin-top: 1rem; text-align: center; padding: 0 10px;}
-        #error-message-area {
-            color: #f56565;
-            background-color: #4A2424;
-            padding: 8px 12px;
-            border-radius: 4px;
-            margin-top: 8px;
-            text-align: center;
-            font-size: 0.8rem;
-            display: none;
-            border: 1px solid #c53030;
-        }
-
-        /* 成就橫幅 */
-        .achievement-banner { margin-top: 16px; padding: 8px; background-color: #374151; border-radius: 6px; font-size: 1.1rem; color: #f6e05e; }
-
-        /* 頑抗度顏色 */
-        .confession-color-white { color: #E2E8F0; } .confession-color-green { color: #68D391; }
-        .confession-color-blue { color: #63B3ED; }  .confession-color-pink { color: #F687B3; }
-        .confession-color-red { color: #FC8181; }   .confession-color-purple { color: #B794F4; }
-
-        /* 資料夾載入動畫 */
-        .folder-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 38px 0 22px 0; }
-        .folder-stack { position: relative; width: 66px; height: 56px; }
-        .folder {
-          position: absolute; left: 0; top: 0; width: 60px; height: 38px;
-          border-radius: 5px 8px 6px 6px; background: #f1c672;
-          box-shadow: 0 6px 24px #886b3022, 0 2px 5px #674f2133;
-          border: 2.2px solid #b99e61; z-index: 1;
-        }
-        .folder1 { top: 18px; left: 8px; background: #d3b16a; z-index: 1; transform: rotate(-7deg); box-shadow: 0 2px 12px #a28d5e22; }
-        .folder2 { top: 9px; left: 4px; background: #ebcc89; z-index: 2; transform: rotate(3deg); box-shadow: 0 2px 14px #e9c98433; }
-        .folder3 { top: 0; left: 0; background: #f6d184; z-index: 3; animation: folderShake 1.45s cubic-bezier(.66,-0.11,.48,1.31) infinite alternate; box-shadow: 0 8px 22px #e6ba6255, 0 2px 8px #baa45333; }
-        @keyframes folderShake { 0%   { transform: rotate(-4deg) translateY(0px);} 15%  { transform: rotate(1.2deg) translateY(-2px);} 35%  { transform: rotate(-1deg) translateY(1px);} 65%  { transform: rotate(1deg) translateY(-2.2px);} 100% { transform: rotate(-2deg) translateY(0px);} }
-        .folder-pages { display: flex; align-items: center; justify-content: center; margin: 14px 0 4px 0; gap: 7px; }
-        .page-dot { width: 16px; height: 8px; background: #e8d199; border-radius: 6px; opacity: 0.35; transition: all .2s; box-shadow: 0 2px 6px #9e9e8455; border: 1.2px solid #b6a26a; }
-        .page-dot.active { background: #f1c672; opacity: 1; box-shadow: 0 0 0 2px #ffe7ad55, 0 4px 8px #e2b64944; border-color: #a2813b; }
-        .folder-text { margin-top: 16px; color: #e6c175; font-size: 1.13rem; font-family: 'Noto Sans TC', 'Inter', Arial, sans-serif; letter-spacing: 2px; text-shadow: 0 2px 8px #9b782322; animation: fadeText 1.7s linear infinite alternate; min-height: 1.8em; }
-        @keyframes fadeText { from { opacity: 0.6; letter-spacing: 1px; } to   { opacity: 1; letter-spacing: 4px;  } }
     </style>
 </head>
 <body class="overscroll-y-contain">
@@ -257,7 +115,7 @@
 
         <div class="flex gap-2 mb-2">
             <div id="avatar" class="w-20 h-20 sm:w-24 sm:h-24 rounded-md flex-shrink-0 flex flex-col items-center justify-center text-gray-300 text-xs p-0.5 text-center bg-gray-700 shadow">
-                <img id="suspect-avatar-img" src="https://placehold.co/80x60/4A5568/E2E8F0?text=嫌犯" alt="嫌犯頭像" class="w-full h-3/4 object-cover rounded-t-sm" onerror="this.onerror=null; this.src='https://placehold.co/80x60/718096/E2E8F0?text=頭像載入失敗';">
+                <img id="suspect-avatar-img" src="test00.jpg" alt="嫌犯頭像" class="w-full h-3/4 object-cover rounded-t-sm" onerror="this.onerror=null; this.src='https://placehold.co/80x60/718096/E2E8F0?text=頭像載入失敗';">
                 <div id="suspect-name-display" class="w-full bg-black bg-opacity-70 text-white text-xs py-1 text-center truncate rounded-b-sm h-1/4 flex items-center justify-center">
                     <span id="suspect-status-name">讀取中...</span>
                 </div>
@@ -385,6 +243,14 @@
         </div>
     </div>
 
+    <div id="rights-declaration-modal" class="modal hidden">
+        <div class="modal-content modal-lg"> <h3 class="text-xl font-bold text-blue-300">📜 權益宣告書</h3>
+            <div id="rights-declaration-modal-content" class="story-summary-text mt-4">
+                <p>讀取中...</p>
+            </div>
+            <button onclick="document.getElementById('rights-declaration-modal').classList.add('hidden')" class="mt-6 w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md">關閉</button>
+        </div>
+    </div>
     <div id="game-over-modal" class="modal hidden">
         <div class="modal-content text-center">
             <h3 id="game-over-title" class="text-2xl font-bold mb-4">⚖️ 審問結束</h3>
@@ -479,36 +345,45 @@
     const gameMainAreaEl = document.querySelector('.game-main-area');
     const backgroundMusicEl = document.getElementById('background-music');
     const errorMessageAreaEl = document.getElementById('error-message-area');
+    
+    // NEW_ELEMENT_GETTER: 獲取權益宣告 Modal 的元素
+    const rightsDeclarationModal = document.getElementById('rights-declaration-modal');
+    const rightsDeclarationModalContentEl = document.getElementById('rights-declaration-modal-content');
+
 
     // --- 配置區域 ---
-    // 後端 API 網址 (已根據您提供的 Replit 網址更新)
     const BACKEND_URL = 'https://d1d5ef45-d04b-4a1c-be4b-64a0680c6847-00-xxpggv06ka2e.sisko.replit.dev/';
-
-    // Firebase 設定 (已根據您提供的金鑰更新)
     const firebaseConfig = typeof __firebase_config !== 'undefined'
-        ? JSON.parse(__firebase_config) // 主要用於 Canvas 環境
-        : { // 用於 GitHub Pages 或其他獨立部署環境
+        ? JSON.parse(__firebase_config) 
+        : { 
             apiKey: "AIzaSyCACjjC1S-9gj6hKCyfAedzH9kTf_JZwDE",
             authDomain: "aigame-fb578.firebaseapp.com",
             projectId: "aigame-fb578",
-            storageBucket: "aigame-fb578.appspot.com", // 通常是 .appspot.com
+            storageBucket: "aigame-fb578.appspot.com", 
             messagingSenderId: "932095431807",
             appId: "1:932095431807:web:28aab493c770166102db4a"
           };
-    // --- 配置區域結束 ---
+    
+    // NEW_CONTENT: 權益宣告的詳細內容 (來自您的圖片)
+    const rightsDeclarationText = `
+        <p>依據《刑事訴訟法》第95條，你享有以下權利：</p>
+        <ul>
+            <li>一、你有權保持緘默，無須違背自己之意思陳述。</li>
+            <li>二、你有權選任辯護人，若需律師協助，可立即提出。</li>
+            <li>三、你所說的一切，包括現在與往後的陳述，均可能作為本案證據。</li>
+        </ul>
+        <p class="mt-2">請確認你是否清楚上述權利？若需進一步說明，可立即提出。</p>
+    `;
 
-    // 初始化 Firebase App 和 Auth
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // 全域變數
     let userId = null;
     let currentGameId = null;
     let gameState = {};
     let initialLoadingTipInterval = null;
     let isMusicPlaying = false;
 
-    // --- 輔助函數 ---
     function showThinkingModal(message = 'AI正在努力思考中...') {
         if (aiThinkingModal && aiThinkingMessageEl) {
             aiThinkingMessageEl.textContent = `🤖 ${message}`;
@@ -554,12 +429,10 @@
                 })
                 .catch(error => {
                     console.warn("背景音樂自動播放失敗。", error);
-                    // 可以考慮在這裡添加一個按鈕讓用戶手動播放音樂
                 });
         }
     }
 
-    // --- Firebase 認證 ---
     async function initializeFirebaseAndUser() {
         return new Promise(async (resolve, reject) => {
             try {
@@ -573,7 +446,7 @@
                 }
             } catch (error) {
                 console.error("Firebase 認證錯誤:", error);
-                if (!auth.currentUser) { // 只有在確定沒有用戶時才嘗試再次匿名登入
+                if (!auth.currentUser) { 
                     try {
                         console.warn("由於先前的認證錯誤，回退到匿名登入。");
                         await signInAnonymously(auth);
@@ -581,12 +454,10 @@
                         console.error("嚴重錯誤：匿名登入也失敗:", anonError);
                         if (userIdDisplayEl) userIdDisplayEl.textContent = "認證失敗";
                         showErrorMessage("Firebase 認證失敗，部分用戶相關功能可能無法使用。");
-                        // 即使認證失敗，也 resolve 一個本地用戶 ID，讓遊戲能繼續（如果不需要強依賴 Firebase UID）
-                        // 或者 reject("Firebase Auth failed") 如果必須要有 Firebase UID
                         userId = `local_user_${crypto.randomUUID().substring(0,8)}`;
                         if (userIdDisplayEl) userIdDisplayEl.textContent = "本機用戶";
                         console.warn("使用本地生成的用戶 ID。");
-                        return resolve(userId); // 或者 reject
+                        return resolve(userId); 
                     }
                 }
             }
@@ -597,20 +468,17 @@
                     if (userIdDisplayEl) userIdDisplayEl.textContent = userId.substring(0, 8) + "...";
                     console.log("使用者已認證。UID:", userId);
                 } else {
-                    // 如果 onAuthStateChanged 回調時 user 為 null，且之前匿名登入也失敗了，
-                    // 這裡可以再次嘗試或使用本地 ID
-                    if (!userId) { // 避免覆蓋已由 catch 塊設定的本地 ID
+                    if (!userId) { 
                         userId = `local_user_${crypto.randomUUID().substring(0,8)}`;
                         if (userIdDisplayEl) userIdDisplayEl.textContent = "本機用戶";
                         console.warn("無已認證使用者，使用本地生成的用戶 ID。");
                     }
                 }
-                resolve(userId); // 確保總是有 resolve
+                resolve(userId); 
             });
         });
     }
 
-    // --- 遊戲核心邏輯 ---
     async function loadOrCreateNewGame() {
         clearErrorMessage();
         if (initialLoadingOverlay) initialLoadingOverlay.style.display = 'flex';
@@ -624,7 +492,7 @@
             }
 
             const userAuthId = await initializeFirebaseAndUser();
-            if (!userAuthId) { // 確保我們確實拿到了 userId
+            if (!userAuthId) { 
                 throw new Error("無法獲取用戶識別碼，無法創建遊戲。");
             }
 
@@ -650,13 +518,13 @@
             currentGameId = gameState.gameId;
 
             if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "遊戲資料載入完成！準備開始...";
-            updateUI(gameState); // 確保在所有資料都準備好後才更新 UI
+            updateUI(gameState); 
 
             if (initialLoadingOverlay) initialLoadingOverlay.style.display = 'none';
             stopInitialLoadingAnimation();
             if (gameMainAreaEl) gameMainAreaEl.style.display = 'flex';
             if (introModal) introModal.classList.remove('hidden');
-            playBackgroundMusic(); // 確保在遊戲內容顯示後播放音樂
+            playBackgroundMusic(); 
 
         } catch (error) {
             console.error("創建新遊戲失敗:", error);
@@ -664,35 +532,52 @@
             if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = friendlyErrorMessage;
             showErrorMessage(friendlyErrorMessage);
             stopInitialLoadingAnimation();
-            // 這裡可以考慮是否要隱藏載入畫面，或者提供一個重試按鈕
         }
     }
+    
+    // MODIFIED_FUNCTION: processTextToKeywordLinks
+    function processTextToKeywordLinks(text, defaultKeywordClass = "keyword") {
+        if (typeof text !== 'string') return text;
+        // 處理 ##關鍵字## 或 @@關鍵字@@
+        return text.replace(/(##|@@)(.*?)\1/g, (match, p1, keywordText) => {
+            let keywordClass = defaultKeywordClass;
+            let dataType = "keyword"; // 預設為一般關鍵字
+
+            if (keywordText === "權益宣告書" && p1 === "##") {
+                keywordClass = "case-keyword rights-declaration-link"; // 可以給予特定 class
+                dataType = "rights-declaration"; // 設置特定 data-type
+            } else if (p1 === "##") {
+                 keywordClass = "case-keyword"; // 案件概要中的一般關鍵字
+            } else if (p1 === "@@") {
+                 keywordClass = "keyword"; // 對話中的一般關鍵字
+            }
+            // 確保 data-keyword 屬性被正確賦值
+            return `<span class="${keywordClass}" data-keyword="${keywordText}" data-type="${dataType}">${keywordText}</span>`;
+        }).replace(/\n/g, "<br>");
+    }
+
 
     function updateUI(state) {
         if (!state) {
             console.warn("updateUI 被調用時 state 為空。");
             return;
         }
-        gameState = state; // 更新全域遊戲狀態
+        gameState = state; 
 
-        // 設定頭像
         const suspectAvatarImg = document.getElementById('suspect-avatar-img');
         if (suspectAvatarImg) {
-            suspectAvatarImg.src = 'test00.png'; // 確保 test00.png 在正確的路徑
+            suspectAvatarImg.src = 'test00.jpg';
         }
 
-        // 更新回合數
         if (roundCountHeaderEl) roundCountHeaderEl.textContent = state.round ?? '0';
 
-        // 更新頑抗度顯示
         const meterInfo = getConfessionMeterTextAndColor(state.confessionMeter ?? 100);
         if (confessionMeterTextCardEl) {
             confessionMeterTextCardEl.textContent = meterInfo.text;
-            confessionMeterTextCardEl.className = 'confession-color-white'; // 重置 class
+            confessionMeterTextCardEl.className = 'confession-color-white'; 
             confessionMeterTextCardEl.classList.add(meterInfo.colorClass);
         }
 
-        // 更新嫌犯狀態顯示 (姓名、心率、血壓、表情、肢體、語氣)
         if (state.suspect) {
             const suspect = state.suspect;
             if(suspectStatusNameEl) suspectStatusNameEl.textContent = suspect.name ?? "讀取中...";
@@ -702,7 +587,6 @@
             if(bodyLanguageEl) bodyLanguageEl.textContent = suspect.bodyLanguage ?? "讀取中...";
             if(voiceToneEl) voiceToneEl.textContent = suspect.voiceTone ?? "讀取中...";
 
-            // 更新個人資料 Modal
             if(suspectNameModalEl) suspectNameModalEl.textContent = suspect.name ?? "N/A";
             if(ageModalEl) ageModalEl.textContent = suspect.age ?? "N/A";
             if(genderModalEl) genderModalEl.textContent = suspect.gender ?? "N/A";
@@ -717,50 +601,34 @@
             if(personalityModalEl) personalityModalEl.textContent = suspect.personality ?? "讀取中...";
         }
 
-        // 更新案件概要 Modal
         if (state.caseDetails) {
             const caseDetails = state.caseDetails;
-            // 修改 processKeywordsForModal 函式，使其能被 updateUI 內部呼叫
-            const processKeywordsForModal = (text) => {
-                if (typeof text !== 'string') return "讀取中...";
-                return text.replace(/##(.*?)##/g, '<span class="case-keyword" data-keyword="$1">$1</span>').replace(/\n/g, "<br>");
-            };
-
-            if(autopsyReportModalContentEl) autopsyReportModalContentEl.innerHTML = processKeywordsForModal(caseDetails.autopsyReport);
+            if(autopsyReportModalContentEl) {
+                autopsyReportModalContentEl.innerHTML = processTextToKeywordLinks(caseDetails.autopsyReport, "case-keyword");
+            }
             if(evidenceListModalContentEl) {
                 evidenceListModalContentEl.innerHTML = (caseDetails.evidence ?? [])
-                    .map(e => `<li data-id="${e.id || ''}">${processKeywordsForModal(e.text)}</li>`)
+                    .map(e => `<li data-id="${e.id || ''}">${processTextToKeywordLinks(e.text, "case-keyword")}</li>`)
                     .join('');
             }
             if(doubtsListModalContentEl) {
                 doubtsListModalContentEl.innerHTML = (caseDetails.doubts ?? [])
-                    .map(d => `<li data-id="${d.id || ''}">${processKeywordsForModal(d.text)}</li>`)
+                    .map(d => `<li data-id="${d.id || ''}">${processTextToKeywordLinks(d.text, "case-keyword")}</li>`)
                     .join('');
             }
         }
 
-        // 更新對話區域
-        if (dialogueAreaEl) dialogueAreaEl.innerHTML = ''; // 先清空
+        if (dialogueAreaEl) dialogueAreaEl.innerHTML = ''; 
         if (state.dialogueHistory && Array.isArray(state.dialogueHistory)) {
             state.dialogueHistory.forEach(msg => addMessageToDialogue(msg.speaker, msg.text, msg.tone));
         }
 
-        // 更新偵訊提示
         if (interrogationTipAreaEl && state.interrogationTip) {
             interrogationTipAreaEl.textContent = "※貼心提示： " + state.interrogationTip;
         }
+        
+        bindKeywordClickEvents(); 
 
-        // 為新渲染的關鍵字綁定事件 (包含案件概要中的 case-keyword 和對話中的 keyword)
-        document.querySelectorAll('.case-keyword, .keyword').forEach(el => {
-            el.onclick = () => {
-                const keyword = el.dataset.keyword;
-                if (keywordModalTitle) keywordModalTitle.textContent = `🔑 關於「${keyword}」`;
-                fetchKeywordInfo(keyword);
-                if (keywordModal) keywordModal.classList.remove('hidden');
-            };
-        });
-
-        // 處理遊戲結束狀態
         if (state.gameOver) {
             if(gameOverTitle) gameOverTitle.textContent = (state.confessionMeter != null && state.confessionMeter <= 0) ? "⚖️ 審問成功！" : "⚖️ 審問失敗！";
             if(totalRoundsEl) totalRoundsEl.textContent = state.round ?? '0';
@@ -780,7 +648,7 @@
                 } else if (achievementBannerEl) {
                     achievementBannerEl.classList.add('hidden');
                 }
-            } else if (gameAnalysisContainerEl) { // 修正此處，應使用 gameAnalysisContainerEl
+            } else if (gameAnalysisContainerEl) { 
                 gameAnalysisContainerEl.innerHTML = `<p class="analysis-section-content">${typeof state.gameAnalysis === 'string' ? state.gameAnalysis : "分析生成失敗或格式不符。"}</p>`;
                  if(achievementBannerEl) achievementBannerEl.classList.add('hidden');
             }
@@ -788,12 +656,37 @@
         } else {
             if(gameOverModal) gameOverModal.classList.add('hidden');
         }
-    } // updateUI 函式結束
+    } 
+
+    // MODIFIED_FUNCTION: bindKeywordClickEvents
+    function bindKeywordClickEvents() {
+        document.querySelectorAll('.keyword, .case-keyword').forEach(el => {
+            el.onclick = () => {
+                const keyword = el.dataset.keyword;
+                const type = el.dataset.type; // 獲取 data-type 屬性
+
+                if (type === "rights-declaration") {
+                    // 處理權益宣告書的點擊
+                    if (rightsDeclarationModalContentEl && rightsDeclarationModal) {
+                        rightsDeclarationModalContentEl.innerHTML = rightsDeclarationText;
+                        rightsDeclarationModal.classList.remove('hidden');
+                    } else {
+                        console.error("權益宣告 Modal 或其內容元素未找到。");
+                    }
+                } else {
+                    // 處理一般關鍵字的點擊
+                    if (keywordModalTitle) keywordModalTitle.textContent = `🔑 關於「${keyword}」`;
+                    fetchKeywordInfo(keyword); 
+                    if (keywordModal) keywordModal.classList.remove('hidden'); 
+                }
+            };
+        });
+    }
 
     function addMessageToDialogue(speaker, text, tone = null) {
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('dialogue-bubble');
-        let messageContent = text ?? ""; // 確保 text 不是 null 或 undefined
+        let messageContent = text ?? ""; 
 
         if (speaker === 'Player') {
             messageDiv.classList.add('player-bubble');
@@ -807,28 +700,19 @@
         } else if (speaker === '警官') {
             messageDiv.classList.add('officer-bubble');
             messageContent = `<strong>警官：</strong> ${messageContent}`;
-        } else { // AI (嫌犯)
+        } else { 
             messageDiv.classList.add('ai-bubble');
         }
 
-        // 處理關鍵字 @@keyword@@ (對話中)
-        const processedText = messageContent.replace(/@@(.*?)@@/g, '<span class="keyword" data-keyword="$1">$1</span>');
-        messageDiv.innerHTML = processedText;
+        // 對話中使用 "keyword" class 作為預設，processTextToKeywordLinks 內部會處理特殊情況
+        messageDiv.innerHTML = processTextToKeywordLinks(messageContent, "keyword"); 
 
         if (dialogueAreaEl) {
             dialogueAreaEl.appendChild(messageDiv);
-            dialogueAreaEl.scrollTop = dialogueAreaEl.scrollHeight; // 自動滾動到底部
+            dialogueAreaEl.scrollTop = dialogueAreaEl.scrollHeight; 
         }
-
-        // 為新加入的對話中的關鍵字綁定點擊事件
-        messageDiv.querySelectorAll('.keyword').forEach(el => {
-            el.onclick = () => {
-                const keyword = el.dataset.keyword;
-                if (keywordModalTitle) keywordModalTitle.textContent = `🔑 關於「${keyword}」`;
-                fetchKeywordInfo(keyword);
-                if (keywordModal) keywordModal.classList.remove('hidden');
-            };
-        });
+        
+        bindKeywordClickEvents(); 
     }
 
     async function fetchKeywordInfo(keyword) {
@@ -839,13 +723,12 @@
         }
         clearErrorMessage();
 
-        if(keywordModalText) keywordModalText.style.display = 'none'; // 先隱藏文字
-        if(keywordFolderLoaderEl) keywordFolderLoaderEl.classList.remove('hidden'); // 顯示載入動畫
+        if(keywordModalText) keywordModalText.style.display = 'none'; 
+        if(keywordFolderLoaderEl) keywordFolderLoaderEl.classList.remove('hidden'); 
 
-        // 關鍵字資料夾動畫相關
-        const totalPages = 4; // 動畫頁數
+        const totalPages = 4; 
         let currentPage = 0;
-        if(keywordFolderPagesBarEl) keywordFolderPagesBarEl.innerHTML = ''; // 清空
+        if(keywordFolderPagesBarEl) keywordFolderPagesBarEl.innerHTML = ''; 
         function renderKeywordPagesBar() {
             let html = '';
             for (let i = 0; i < totalPages; i++) {
@@ -858,11 +741,11 @@
             renderKeywordPagesBar();
             if(keywordFolderPageTextEl) keywordFolderPageTextEl.textContent = `第 ${currentPage + 1} / ${totalPages} 頁，正在呈上中…`;
         }
-        renderKeywordPagesBar(); // 初始渲染
+        renderKeywordPagesBar(); 
         if(keywordFolderPageTextEl) keywordFolderPageTextEl.textContent = `第 1 / ${totalPages} 頁，正在呈上中…`;
 
-        if (keywordPageTimer) clearInterval(keywordPageTimer); // 清除舊的計時器
-        keywordPageTimer = setInterval(updateKeywordPage, 700); // 每0.7秒更新一次頁碼
+        if (keywordPageTimer) clearInterval(keywordPageTimer); 
+        keywordPageTimer = setInterval(updateKeywordPage, 700); 
 
         try {
             const response = await fetch(`${BACKEND_URL}game/${currentGameId}/keyword?keyword=${encodeURIComponent(keyword)}`);
@@ -872,16 +755,31 @@
                 throw new Error(errorText);
             }
             const data = await response.json();
-            if(keywordModalText) keywordModalText.textContent = data.information || `關於「${keyword}」的資訊目前無法取得。`;
+            console.log(`[DEBUG] fetchKeywordInfo - Received data for "${keyword}":`, data); // 保留調試日誌
+
+            if (keywordModalText) {
+                let cleanText = data.information;
+                if (typeof cleanText === 'string') {
+                    // 步驟 1: 移除 ##關鍵字## 標記，只保留關鍵字本身
+                    cleanText = cleanText.replace(/##(.*?)##/g, '$1');
+                    // 步驟 2: 移除 @@關鍵字@@ 標記，只保留關鍵字本身
+                    cleanText = cleanText.replace(/@@(.*?)@@/g, '$1');
+                    // 步驟 3: 處理換行符
+                    cleanText = cleanText.replace(/\n/g, "<br>");
+                } else {
+                    cleanText = "無法載入有效的補充資訊。"; // 或其他適當的預設文字
+                }
+                keywordModalText.innerHTML = cleanText;
+            }
         } catch (error) {
             console.error(`獲取關鍵字 "${keyword}" 資訊失敗:`, error);
             const friendlyErrorMessage = `無法載入關於「${keyword}」的資訊：${error.message}`;
-            if(keywordModalText) keywordModalText.textContent = friendlyErrorMessage;
-            showErrorMessage(friendlyErrorMessage); // 顯示錯誤訊息給用戶
+            if (keywordModalText) keywordModalText.textContent = friendlyErrorMessage;
+            showErrorMessage(friendlyErrorMessage); 
         } finally {
-            if (keywordPageTimer) clearInterval(keywordPageTimer); // 清除計時器
-            if(keywordFolderLoaderEl) keywordFolderLoaderEl.classList.add('hidden'); // 隱藏載入動畫
-            if(keywordModalText) keywordModalText.style.display = 'block'; // 顯示文字內容
+            if (keywordPageTimer) clearInterval(keywordPageTimer); 
+            if(keywordFolderLoaderEl) keywordFolderLoaderEl.classList.add('hidden'); 
+            if(keywordModalText) keywordModalText.style.display = 'block'; 
         }
     }
 
@@ -891,12 +789,11 @@
             showErrorMessage("錯誤：遊戲未正確初始化，請重新載入。");
             return;
         }
-        clearErrorMessage(); // 清除之前的錯誤訊息
+        clearErrorMessage(); 
 
         const playerMessage = playerInputEl.value.trim();
-        if (!isDemandConfession && !playerMessage) return; // 非要求認罪時，如果沒輸入訊息則不處理
+        if (!isDemandConfession && !playerMessage) return; 
 
-        // 禁用按鈕並顯示載入狀態
         sendButton.disabled = true;
         demandConfessionButton.disabled = true;
         const originalSendButtonText = sendButton.innerHTML;
@@ -905,15 +802,15 @@
         if (isDemandConfession) {
             demandConfessionButton.innerHTML = '<div class="loading-spinner !w-4 !h-4 border-t-white mx-auto"></div>';
         } else {
-            sendButton.innerHTML = '<div class="loading-spinner !w-5 !h-5 border-t-white"></div>'; // 保持原樣
+            sendButton.innerHTML = '<div class="loading-spinner !w-5 !h-5 border-t-white"></div>'; 
         }
         showThinkingModal(isDemandConfession ? '正在要求對方認罪...' : 'AI正在分析您的輸入...');
 
 
-        const currentTone = gameState.selectedTone || "平緩"; // 確保有預設語氣
+        const currentTone = gameState.selectedTone || "平緩"; 
         const payload = {
-            message: isDemandConfession ? "" : playerMessage, // 要求認罪時 message 為空
-            tone: isDemandConfession ? "憤怒" : currentTone, // 要求認罪時固定為憤怒，否則用當前選擇的
+            message: isDemandConfession ? "" : playerMessage, 
+            tone: isDemandConfession ? "憤怒" : currentTone, 
             isDemandConfession: isDemandConfession
         };
 
@@ -929,24 +826,22 @@
                 try {
                     const errorData = await response.json();
                     errorText = errorData.error || errorText;
-                    // 如果錯誤是因為遊戲已結束，則更新UI並返回
                     if (errorData.gameState && errorData.error === "遊戲已結束") {
                         console.warn("嘗試在已結束的遊戲中執行動作。");
-                        updateUI(errorData.gameState); // 使用伺服器返回的最終狀態更新UI
-                        return; // 提前返回，不再執行 finally 中的按鈕恢復
+                        updateUI(errorData.gameState); 
+                        return; 
                     }
                 } catch (e) { /* 解析 JSON 失敗，使用原始錯誤文字 */ }
                 throw new Error(errorText);
             }
             const updatedGameState = await response.json();
             updateUI(updatedGameState);
-            if (!isDemandConfession) playerInputEl.value = ''; // 清空輸入框
+            if (!isDemandConfession) playerInputEl.value = ''; 
         } catch (error) {
             console.error("玩家回合處理失敗:", error);
             showErrorMessage(`操作失敗: ${error.message}`);
         } finally {
             hideThinkingModal();
-            // 只有在遊戲未結束時才恢復按鈕狀態
             if (!(gameState && gameState.gameOver)) {
                 sendButton.disabled = false;
                 demandConfessionButton.disabled = false;
@@ -958,11 +853,9 @@
 
     function restartGame() {
         if(gameOverModal) gameOverModal.classList.add('hidden');
-        // 可以在這裡加入一些重置UI的邏輯，如果需要的話
-        loadOrCreateNewGame(); // 重新載入或創建新遊戲
+        loadOrCreateNewGame(); 
     }
 
-    // 初始載入動畫相關
     const initialLoadingTips = [
         "警方正在布置偵訊室…", "檢查錄音與監控設備中…", "案件資料調閱中，請稍候…",
         "將嫌犯帶往偵訊室…", "準備調查證據中…", "檢查筆錄與相關卷宗…",
@@ -974,21 +867,20 @@
 
     function startInitialLoadingAnimation() {
         if (!loadingAnimationTextEl) return;
-        loadingAnimationTextEl.textContent = initialLoadingTips[0]; // 初始提示
+        loadingAnimationTextEl.textContent = initialLoadingTips[0]; 
         if (initialLoadingTipInterval) clearInterval(initialLoadingTipInterval);
         initialLoadingTipInterval = setInterval(() => {
             let idx;
             do {
                 idx = Math.floor(Math.random() * initialLoadingTips.length);
-            } while (idx === lastTipIdx && initialLoadingTips.length > 1); // 避免連續重複，除非只有一個提示
+            } while (idx === lastTipIdx && initialLoadingTips.length > 1); 
             lastTipIdx = idx;
-            // 平滑過渡文字
             loadingAnimationTextEl.style.opacity = 0;
             setTimeout(() => {
                 loadingAnimationTextEl.textContent = initialLoadingTips[idx];
                 loadingAnimationTextEl.style.opacity = 1;
-            }, 400); // 等待舊文字淡出
-        }, 3000); // 每3秒切換一次提示
+            }, 400); 
+        }, 3000); 
     }
 
     function stopInitialLoadingAnimation() {
@@ -1001,7 +893,7 @@
     if (closeIntroModalButton) {
         closeIntroModalButton.addEventListener('click', () => {
             if (introModal) introModal.classList.add('hidden');
-            playBackgroundMusic(); // 在用戶首次互動後播放音樂
+            playBackgroundMusic(); 
         });
     }
     if (sendButton) sendButton.addEventListener('click', () => handlePlayerTurn(false));
@@ -1014,7 +906,7 @@
     if (playerInputEl) {
         playerInputEl.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault(); // 防止換行
+                e.preventDefault(); 
                 handlePlayerTurn(false);
             }
         });
@@ -1023,7 +915,7 @@
         button.addEventListener('click', () => {
             toneButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            if (gameState) gameState.selectedTone = button.dataset.tone; // 更新選中的語氣
+            if (gameState) gameState.selectedTone = button.dataset.tone; 
         });
     });
     if (showPersonalDetailsButton) showPersonalDetailsButton.addEventListener('click', () => personalDetailsModal.classList.remove('hidden'));
@@ -1033,7 +925,6 @@
     // --- 頁面載入完成後執行 ---
     window.addEventListener('load', () => {
         loadOrCreateNewGame();
-        // 背景音樂的播放最好在用戶有互動後（例如點擊“開始偵訊”）再觸發，以符合瀏覽器的自動播放策略
     });
 
 </script>

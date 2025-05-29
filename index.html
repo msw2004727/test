@@ -704,7 +704,20 @@
                 throw new Error("無法獲取用戶識別碼，無法創建遊戲。");
             }
 
-            if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "開局加載很久正常!不用擔心";
+        } else if (isNicknameConfirmed && !isGameDataLoaded) {
+            console.log("[TRY_PROCEED_V3] Nickname confirmed, game data loading...");
+            if (initialLoadingOverlay && initialLoadingOverlay.classList.contains('hidden')) {
+                initialLoadingOverlay.classList.remove('hidden');
+                initialLoadingOverlay.style.display = 'flex'; 
+                startInitialLoadingAnimation();
+            }
+            // 修改此處以符合您的新訊息需求
+            if (initialLoadingMessageEl && officerNickname) {
+                initialLoadingMessageEl.innerHTML = `🫡 ${officerNickname}警官你好！<br>開局加載很久正常!不用擔心<br>已經鞭策創作者再努力優化！`;
+            } else if (initialLoadingMessageEl) {
+                // 如果 officerNickname 尚未設定，可以顯示一個通用訊息
+                initialLoadingMessageEl.innerHTML = `🫡 警官你好！<br>開局加載很久正常!不用擔心<br>已經鞭策創作者再努力優化！`;
+            }
             
             const requestBody = { userId: userAuthId };
             if (officerNickname) { 

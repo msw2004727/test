@@ -477,7 +477,55 @@
     function showErrorMessage(message) { /* ... */ }
     function clearErrorMessage() { /* ... */ }
     function playBackgroundMusic() { /* ... */ }
-    async function initializeFirebaseAndUser() { /* ... */ }
+    
+    async function initializeFirebaseAndUser() {
+        return new Promise(async (resolve) => { // 修改: 確保 resolve 總是會被調用
+            try {
+                console.log("[AUTH] Attempting Firebase persistence and sign-in...");
+                await setPersistence(auth, browserLocalPersistence);
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    console.log("[AUTH] Attempting sign-in with custom token.");
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    console.log("[AUTH] No custom token, attempting anonymous sign-in.");
+                    await signInAnonymously(auth);
+                }
+                console.log("[AUTH] Sign-in attempt completed.");
+            } catch (error) {
+                console.error("[AUTH_ERROR] Firebase authentication error during initial sign-in:", error);
+                // 即使初次登入失敗，也嘗試回退到匿名登入 (如果 auth.currentUser 仍為 null)
+                if (!auth.currentUser) { 
+                    try {
+                        console.warn("[AUTH] Fallback: Attempting anonymous sign-in again.");
+                        await signInAnonymously(auth);
+                        console.log("[AUTH] Fallback anonymous sign-in successful.");
+                    } catch (anonError) {
+                        console.error("[AUTH_ERROR] CRITICAL: Fallback anonymous sign-in also failed:", anonError);
+                        // 在這裡，即使所有登入都失敗，我們仍然需要 resolve 一個值，讓流程繼續
+                        // 但 userId 會是 null 或本地生成的
+                    }
+                }
+            }
+
+            // onAuthStateChanged 監聽器確保在狀態確定後才 resolve
+            const unsubscribe = onAuthStateChanged(auth, (user) => {
+                unsubscribe(); // 獲取到首次狀態後即取消訂閱，避免重複 resolve
+                if (user) {
+                    userId = user.uid;
+                    if (userIdDisplayEl) userIdDisplayEl.textContent = userId.substring(0, 8) + "...";
+                    console.log("[AUTH] User authenticated. UID:", userId);
+                    resolve(userId);
+                } else {
+                    // 如果 user 為 null，表示沒有成功登入的用戶
+                    userId = `local_guest_${crypto.randomUUID().substring(0,8)}`;
+                    if (userIdDisplayEl) userIdDisplayEl.textContent = "訪客";
+                    console.warn("[AUTH] No authenticated user. Using local guest ID:", userId);
+                    showErrorMessage("無法完全認證用戶，部分線上功能可能受限。");
+                    resolve(userId); // 即使是訪客ID，也要 resolve
+                }
+            });
+        });
+    }
 
     // --- 核心遊戲流程函數 --- (省略大部分，只顯示修改處)
     function showNicknameModal() {
@@ -542,9 +590,9 @@
                 startInitialLoadingAnimation();
             }
             if (initialLoadingMessageEl && officerNickname) {
-            initialLoadingMessageEl.innerHTML = `警官 ${officerNickname}，你好~<br>開局加載很久正常!不用擔心`;
+                initialLoadingMessageEl.textContent = `警官 ${officerNickname}，遊戲資料準備中，請稍候...`;
             } else if (initialLoadingMessageEl) {
-            initialLoadingMessageEl.innerHTML = "你好~<br>開局加載很久正常!不用擔心";
+                initialLoadingMessageEl.textContent = "遊戲資料準備中，請稍候...";
             }
         } else if (!isNicknameConfirmed && isGameDataLoaded) {
             console.log("[TRY_PROCEED_V3] Game data loaded, waiting for nickname confirmation...");
@@ -557,7 +605,7 @@
                 showNicknameModal();
             }
              if (initialLoadingMessageEl) { 
-                initialLoadingMessageEl.textContent = "遊戲資料已就緒，請輸入您的警官暱稱。";
+                initialLoadingMessageEl.textContent = "遊戲資料已就緒，請輸入您的警官代號。";
             }
         } else { 
             console.log("[TRY_PROCEED_V3] Nickname and game data NOT ready.");
@@ -570,16 +618,12 @@
                 showNicknameModal();
             }
             if (initialLoadingMessageEl) {
-                 initialLoadingMessageEl.textContent = "遊戲初始化中，請輸入警官暱稱...";
+                 initialLoadingMessageEl.textContent = "遊戲初始化中，請輸入警官代號...";
             }
         }
     }
     
-    // `handleConfirmNickname` 和 `loadOrCreateNewGame` 的邏輯保持與上一版本相同，
-    // 以確保暱稱傳遞和遊戲加載流程的正確性。
-    // 這裡只展示修改的部分，其餘省略。
-
-    function handleConfirmNickname() {
+    function handleConfirmNickname() { 
         const nickname = officerNicknameInput.value.trim();
         if (!nickname) {
             if (nicknameErrorEl) {
@@ -601,12 +645,12 @@
         if (leaderboardNicknameButton) leaderboardNicknameButton.disabled = true;
 
         if (!isGameDataLoaded) {
-            if (initialLoadingOverlay && initialLoadingOverlay.classList.contains('hidden')) { // 確保主載入畫面是可見的
+            if (initialLoadingOverlay && initialLoadingOverlay.classList.contains('hidden')) { 
                  initialLoadingOverlay.classList.remove('hidden');
                  initialLoadingOverlay.style.display = 'flex';
                  startInitialLoadingAnimation();
             }
-            loadOrCreateNewGame(); // 在暱稱確認後，才開始加載遊戲數據
+            loadOrCreateNewGame(); 
         } else {
             tryProceedToGame(); 
         }
@@ -629,8 +673,11 @@
                 throw new Error("後端 API 網址 (BACKEND_URL) 尚未正確設定。");
             }
 
-            const userAuthId = await initializeFirebaseAndUser();
-            if (!userAuthId) { 
+            const userAuthId = await initializeFirebaseAndUser(); // 等待 Firebase 初始化完成
+            console.log("[LOAD_GAME] initializeFirebaseAndUser completed. UserAuthId:", userAuthId);
+
+            if (!userAuthId) { // 嚴格檢查 userAuthId 是否有效
+                console.error("[LOAD_GAME_ERROR] UserAuthId is null or undefined after Firebase initialization.");
                 throw new Error("無法獲取用戶識別碼，無法創建遊戲。");
             }
 
@@ -641,30 +688,41 @@
                 requestBody.officerNickname = officerNickname; 
             } else {
                 console.warn("loadOrCreateNewGame: officerNickname 未設定，這不應該在暱稱確認流程後發生。將使用後端預設值。");
-                requestBody.officerNickname = "緊急探員"; // 提供一個更明確的備用值
+                requestBody.officerNickname = "緊急探員"; 
             }
 
+            console.log("[LOAD_GAME] Sending new game request to backend with body:", JSON.stringify(requestBody));
             const response = await fetch(`${BACKEND_URL}game/new`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody)
             });
+            console.log("[LOAD_GAME] Received response from backend for new game request.");
+
 
             if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "正在處理伺服器回應...";
             if (!response.ok) {
                 let errorText = `伺服器錯誤: ${response.status} ${response.statusText}`;
-                try { const errorData = await response.json(); errorText = errorData.error || errorText; } catch (e) { /* ignore */ }
+                try { 
+                    const errorData = await response.json(); 
+                    console.error("[LOAD_GAME_ERROR] Server error data:", errorData);
+                    errorText = errorData.error || errorText; 
+                } catch (e) { 
+                    console.error("[LOAD_GAME_ERROR] Failed to parse server error JSON:", e);
+                }
                 throw new Error(errorText);
             }
             gameState = await response.json();
             currentGameId = gameState.gameId;
+            console.log("[LOAD_GAME] New game data received and parsed:", gameState);
+
 
             if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "遊戲資料載入完成！";
             updateUI(gameState); 
             isGameDataLoaded = true;
 
         } catch (error) {
-            console.error("創建新遊戲失敗:", error);
+            console.error("[LOAD_GAME_ERROR] 創建新遊戲失敗:", error.message, error.stack);
             const friendlyErrorMessage = `創建新遊戲失敗：${error.message} 請檢查後端伺服器 (${BACKEND_URL}) 是否正在運行，並且網路連線正常。`;
             if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = friendlyErrorMessage;
             showErrorMessage(friendlyErrorMessage);
@@ -940,7 +998,7 @@
         // loadOrCreateNewGame(); // 在 restartGame 中，loadOrCreateNewGame 會在 showNicknameModal 後，由 confirmNicknameButton 的事件觸發
     }
 
-    const initialLoadingTips = ["警方正在布置偵訊室…", "檢查錄音與監控設備中…", "案件資料調閱中，請稍候…", "將嫌犯帶往偵訊室…", "準備調查證據中…", "檢查筆錄與相關卷宗…", "開啟現場攝影機與麥克風…", "安排觀察人員進入暗房…", "案發現場資料同步中…", "檢查嫌犯心理狀態…", "審核證供清單與筆錄…", "主角正在領外賣…", "警官正在匆忙穿褲子…", "準備審問策略與對策…", "案件資料加密傳輸中…"];
+    const initialLoadingTips = ["警方正在布置偵訊室…", "檢查錄音與監控設備中…", "案件資料調閱中，請稍候…", "將嫌犯帶往偵訊室…", "準備調查證據中…", "檢查筆錄與相關卷宗…", "開啟現場攝影機與麥克風…", "安排觀察人員進入暗房…", "案發現場資料同步中…", "檢查嫌犯心理狀態…", "審核證供清單與筆錄…", "偵訊專家即將進入現場…", "警官正在穿戴防護裝備…", "準備審問策略與對策…", "案件資料加密傳輸中…"];
     let lastTipIdx = 0;
 
     function startInitialLoadingAnimation() {

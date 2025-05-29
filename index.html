@@ -228,13 +228,29 @@
     <div id="intro-modal" class="modal hidden">
         <div class="modal-content">
             <h3 class="text-xl font-bold text-blue-300">🎉 歡迎來到審問挑戰 🎉</h3>
-            <ul class="list-decimal list-inside mt-4 mb-6 space-y-2 text-sm text-gray-200">
+            <ul class="list-decimal list-inside mt-4 mb-6 space-y-3 text-sm text-gray-200">
                 <li>本遊戲每次開局都是<strong class="text-yellow-300">全新劇本</strong>，挑戰無限！</li>
                 <li>開局後請先查看<strong class="text-indigo-300">【案件概要】</strong>了解偵訊重點。</li>
-                <li>偵訊時可以用<strong class="text-green-300">三種態度</strong>與嫌犯應對。</li>
+                <li>
+                    偵訊時可運用<strong class="text-green-300">三種語氣</strong>與嫌犯應對，巧妙運用能更快攻破心防：
+                    <ul class="list-disc list-inside ml-5 mt-2 space-y-2 text-xs">
+                        <li>
+                            <strong class="text-green-400">😌 平緩 (Calm)：</strong>
+                            <p class="mt-1">專業提問，穩健獲取情報的基礎。搭配詳細提問，頑抗度穩定下降。</p>
+                        </li>
+                        <li>
+                            <strong class="text-red-400">😡 憤怒 (Angry)：</strong>
+                            <p class="mt-1">施加壓力，高風險策略。有20%機率使嫌犯更頑固，但成功時可能使其崩潰。建議在掌握證據後使用。</p>
+                        </li>
+                        <li>
+                            <strong class="text-yellow-400">😏 挑釁 (Provocative)：</strong>
+                            <p class="mt-1">刺激對方，動搖心理防線。有40%機率大幅降低頑抗度。觀察反應，尋找破綻。</p>
+                        </li>
+                    </ul>
+                </li>
                 <li>本遊戲不斷<strong class="text-pink-300">優化中</strong>，歡迎給予建議！</li>
                 <li>審問成功讓嫌犯認罪，歡迎<strong class="text-teal-300">分享截圖</strong>！</li>
-                <li>全新開放<strong class="text-yellow-300">排行榜</strong>誰是挑戰偵訊大師?</li>
+                <li>全新開放<strong class="text-yellow-300">排行榜</strong>，看看誰是挑戰偵訊大師?</li>
             </ul>
             <button id="close-intro-modal-button" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md">開始偵訊</button>
         </div>
@@ -991,7 +1007,7 @@
         // loadOrCreateNewGame(); // 不再在此處立即調用，改為暱稱確認後調用
     }
 
-    const initialLoadingTips = ["警方正在布置偵訊室…", "檢查錄音與監控設備中…", "案件資料調閱中，請稍候…", "將嫌犯帶往偵訊室…", "準備調查證據中…", "檢查筆錄與相關卷宗…", "開啟現場攝影機與麥克風…", "安排觀察人員進入暗房…", "案發現場資料同步中…", "檢查嫌犯心理狀態…", "審核證供清單與筆錄…", "偵訊專家即將進入現場…", "警官正在穿戴防護裝備…", "準備審問策略與對策…", "案件資料加密傳輸中…"];
+    const initialLoadingTips = ["警方正在拿外送…", "檢查錄音與監控設備中…", "案件資料調閱中，請稍候…", "將嫌犯帶往偵訊室…", "準備調查證據中…", "檢查筆錄與相關卷宗…", "開啟現場攝影機與麥克風…", "安排觀察人員進入暗房…", "案發現場資料同步中…", "嫌犯大便還沒回來…", "審核證供清單與筆錄…", "局長被反鎖在廚房…", "警官正在穿褲子…", "準備審問策略與對策…", "案件資料加密傳輸中…"];
     let lastTipIdx = 0;
 
     function startInitialLoadingAnimation() {

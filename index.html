@@ -1,0 +1,504 @@
+<script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // Firestore specific imports are removed as game state is handled by backend
+        // import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, serverTimestamp, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const heartRateEl = document.getElementById('heart-rate');
+        const bloodPressureEl = document.getElementById('blood-pressure');
+        const facialExpressionEl = document.getElementById('facial-expression');
+        const bodyLanguageEl = document.getElementById('body-language');
+        const voiceToneEl = document.getElementById('voice-tone');
+        const suspectStatusNameEl = document.getElementById('suspect-status-name');
+        const suspectNameModalEl = document.getElementById('suspect-name-modal');
+        const dobModalEl = document.getElementById('dob-modal');
+        const zodiacModalEl = document.getElementById('zodiac-modal');
+        const bloodTypeModalEl = document.getElementById('blood-type-modal');
+        const ageModalEl = document.getElementById('age-modal');
+        const genderModalEl = document.getElementById('gender-modal');
+        const educationModalEl = document.getElementById('education-modal');
+        const birthplaceModalEl = document.getElementById('birthplace-modal');
+        const occupationModalEl = document.getElementById('occupation-modal');
+        const healthStatusModalEl = document.getElementById('health-status-modal');
+        const mannerismModalEl = document.getElementById('mannerism-modal');
+        const personalityModalEl = document.getElementById('personality-modal');
+        const autopsyReportModalContentEl = document.getElementById('autopsy-report-modal-content');
+        const evidenceListModalContentEl = document.getElementById('evidence-list-modal-content');
+        const doubtsListModalContentEl = document.getElementById('doubts-list-modal-content');
+        const showPersonalDetailsButton = document.getElementById('show-personal-details-button');
+        const showStorySummaryButton = document.getElementById('show-story-summary-button');
+        const personalDetailsModal = document.getElementById('personal-details-modal');
+        const storySummaryModal = document.getElementById('story-summary-modal');
+        const dialogueAreaEl = document.getElementById('dialogue-area');
+        const playerInputEl = document.getElementById('player-input');
+        const sendButton = document.getElementById('send-button');
+        const demandConfessionButton = document.getElementById('demand-confession-button');
+        const toneButtons = document.querySelectorAll('.tone-button');
+        const userIdDisplayEl = document.getElementById('user-id-display');
+        const keywordModal = document.getElementById('keyword-modal');
+        const keywordModalTitle = document.getElementById('keyword-modal-title');
+        const keywordModalText = document.getElementById('keyword-modal-text');
+        const keywordFolderLoaderEl = document.getElementById('keyword-folder-loader');
+        const keywordFolderPagesBarEl = document.getElementById('keyword-folder-pages-bar');
+        const keywordFolderPageTextEl = document.getElementById('keyword-folder-page-text');
+        let keywordPageTimer = null;
+
+        const gameOverModal = document.getElementById('game-over-modal');
+        const gameOverTitle = document.getElementById('game-over-title');
+        const totalRoundsEl = document.getElementById('total-rounds');
+        const gameAnalysisContainerEl = document.getElementById('game-analysis-container');
+        const gameAnalysisTextEl = document.getElementById('game-analysis-text'); // Kept for fallback
+        const achievementBannerEl = document.getElementById('achievement-banner');
+        const achievementTitleEl = document.getElementById('achievement-title');
+        const restartGameButton = document.getElementById('restart-game-button');
+        const closeGameOverModalButton = document.getElementById('close-game-over-modal-button');
+        const aiThinkingModal = document.getElementById('ai-thinking-modal'); // For API call loading
+        const interrogationTipAreaEl = document.getElementById('interrogation-tip-area');
+        const roundCountHeaderEl = document.getElementById('round-count-header');
+        const confessionMeterTextCardEl = document.getElementById('confession-meter-text-card');
+        const introModal = document.getElementById('intro-modal');
+        const closeIntroModalButton = document.getElementById('close-intro-modal-button');
+        const initialLoadingOverlay = document.getElementById('initial-loading-overlay');
+        const initialLoadingMessageEl = document.getElementById('initial-loading-message'); // For initial game load
+        const gameMainAreaEl = document.querySelector('.game-main-area');
+        const backgroundMusicEl = document.getElementById('background-music');
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined'
+            ? JSON.parse(__firebase_config)
+            : {
+                apiKey: "YOUR_OWN_FIREBASE_API_KEY",
+                authDomain: "YOUR_OWN_FIREBASE_AUTH_DOMAIN",
+                projectId: "YOUR_OWN_FIREBASE_PROJECT_ID",
+                storageBucket: "YOUR_OWN_FIREBASE_STORAGE_BUCKET",
+                messagingSenderId: "YOUR_OWN_FIREBASE_MESSAGING_SENDER_ID",
+                appId: "YOUR_OWN_FIREBASE_APP_ID"
+              };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        // setLogLevel('error'); // Firestore specific, can be removed or kept if other Firebase services are used.
+
+        const BACKEND_URL = 'http://127.0.0.1:5001'; // Your Python backend URL
+
+        let userId = null; // Firebase Auth User ID
+        let currentGameId = null; // ID of the current game, obtained from backend
+        let gameState = {}; // This will hold the game state received from the backend
+
+        // Function to show a generic loading modal for API calls
+        function showThinkingModal(message = 'AI正在努力思考中...') {
+            if(aiThinkingModal) {
+                const thinkingText = aiThinkingModal.querySelector('p.text-lg');
+                if(thinkingText) thinkingText.textContent = `🤖 ${message}`;
+                aiThinkingModal.classList.remove('hidden');
+            }
+        }
+
+        function hideThinkingModal() {
+            if(aiThinkingModal) aiThinkingModal.classList.add('hidden');
+        }
+        
+        function getConfessionMeterTextAndColor(percentage) {
+            if (percentage > 80) return { text: "態度強硬", colorClass: "confession-color-white" };
+            if (percentage > 60) return { text: "故作鎮定", colorClass: "confession-color-green" };
+            if (percentage > 40) return { text: "略顯動搖", colorClass: "confession-color-blue" };
+            if (percentage > 20) return { text: "心虛慌亂", colorClass: "confession-color-pink" };
+            if (percentage > 0) return { text: "瀕臨崩潰", colorClass: "confession-color-red" };
+            return { text: "已然認罪", colorClass: "confession-color-purple" };
+        }
+
+
+        async function initializeFirebaseAndUser() {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    await setPersistence(auth, browserLocalPersistence);
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        console.log("嘗試使用自訂令牌登入 (Canvas 環境)。");
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        console.log("無自訂令牌，嘗試匿名登入 (GitHub Pages / 獨立執行)。");
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("初始化期間的認證錯誤:", error);
+                    if (!auth.currentUser) {
+                        try {
+                            console.warn("由於先前的認證錯誤，回退到匿名登入。");
+                            await signInAnonymously(auth);
+                        } catch (anonError) {
+                            console.error("嚴重錯誤：匿名登入也失敗:", anonError);
+                            if(userIdDisplayEl) userIdDisplayEl.textContent = "認證失敗";
+                            return reject("Firebase Auth failed");
+                        }
+                    }
+                }
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        if(userIdDisplayEl) userIdDisplayEl.textContent = userId.substring(0,8) + "...";
+                        console.log("使用者已認證/會話已開始。UID:", userId);
+                    } else {
+                        // Fallback for local user if auth fails completely, though less likely now
+                        userId = `local_user_${crypto.randomUUID().substring(0,8)}`;
+                        if(userIdDisplayEl) userIdDisplayEl.textContent = "本機用戶";
+                        console.warn("無已認證使用者，遊戲將以本機用戶ID運行。");
+                    }
+                    resolve(userId);
+                });
+            });
+        }
+
+
+        async function loadOrCreateNewGame() {
+            if(initialLoadingOverlay) initialLoadingOverlay.style.display = 'flex';
+            if(gameMainAreaEl) gameMainAreaEl.style.display = 'none';
+            if(initialLoadingMessageEl) initialLoadingMessageEl.textContent = "正在連接伺服器並創建新遊戲...";
+
+            try {
+                const userAuthId = await initializeFirebaseAndUser(); // Ensure user ID is available
+
+                const response = await fetch(`${BACKEND_URL}/game/new`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userAuthId }) // Send Firebase UID to backend
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `伺服器錯誤: ${response.status}`);
+                }
+                gameState = await response.json();
+                currentGameId = gameState.gameId; // Store the game ID from backend
+
+                if(initialLoadingMessageEl) initialLoadingMessageEl.textContent = "遊戲資料載入完成！";
+                updateUI(gameState);
+
+                if(initialLoadingOverlay) initialLoadingOverlay.style.display = 'none';
+                if(gameMainAreaEl) gameMainAreaEl.style.display = 'flex';
+                if(introModal) introModal.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("創建新遊戲失敗:", error);
+                if(initialLoadingMessageEl) initialLoadingMessageEl.textContent = `錯誤: ${error.message}. 請稍後再試。`;
+                // Optionally, disable game interactions or show a retry button
+            }
+        }
+
+        function updateUI(state) {
+            if (!state) {
+                console.warn("updateUI called with null or undefined state.");
+                return;
+            }
+            gameState = state; // Update global frontend state
+
+            if(roundCountHeaderEl) roundCountHeaderEl.textContent = state.round ?? '0';
+
+            const meterInfo = getConfessionMeterTextAndColor(state.confessionMeter ?? 100);
+            if(confessionMeterTextCardEl) {
+                confessionMeterTextCardEl.textContent = meterInfo.text;
+                confessionMeterTextCardEl.className = 'confession-color-white'; // Reset classes
+                confessionMeterTextCardEl.classList.add(meterInfo.colorClass);
+            }
+
+            if (state.suspect) {
+                const suspect = state.suspect;
+                if(suspectStatusNameEl) suspectStatusNameEl.textContent = suspect.name ?? "讀取中...";
+                if(heartRateEl) heartRateEl.textContent = suspect.heartRate ?? "N/A";
+                if(bloodPressureEl) bloodPressureEl.textContent = suspect.bloodPressure ?? "N/A";
+                if(facialExpressionEl) facialExpressionEl.textContent = suspect.facialExpression ?? "讀取中...";
+                if(bodyLanguageEl) bodyLanguageEl.textContent = suspect.bodyLanguage ?? "讀取中...";
+                if(voiceToneEl) voiceToneEl.textContent = suspect.voiceTone ?? "讀取中...";
+
+                if(suspectNameModalEl) suspectNameModalEl.textContent = suspect.name ?? "N/A";
+                if(ageModalEl) ageModalEl.textContent = suspect.age ?? "N/A";
+                if(genderModalEl) genderModalEl.textContent = suspect.gender ?? "N/A";
+                if(dobModalEl) dobModalEl.textContent = suspect.dob ?? "N/A";
+                if(zodiacModalEl) zodiacModalEl.textContent = suspect.zodiac ?? "N/A";
+                if(bloodTypeModalEl) bloodTypeModalEl.textContent = suspect.bloodType ?? "N/A";
+                if(educationModalEl) educationModalEl.textContent = suspect.education ?? "N/A";
+                if(birthplaceModalEl) birthplaceModalEl.textContent = suspect.birthplace ?? "N/A";
+                if(occupationModalEl) occupationModalEl.textContent = suspect.occupation ?? "N/A";
+                if(healthStatusModalEl) healthStatusModalEl.textContent = suspect.healthStatus ?? "N/A";
+                if(mannerismModalEl) mannerismModalEl.textContent = suspect.mannerism ?? "無";
+                if(personalityModalEl) personalityModalEl.textContent = suspect.personality ?? "讀取中...";
+            }
+
+            if (state.caseDetails) {
+                const caseDetails = state.caseDetails;
+                if(autopsyReportModalContentEl) autopsyReportModalContentEl.innerHTML = (caseDetails.autopsyReport ?? "讀取中...").replace(/##(.*?)##/g, '<span class="case-keyword" data-keyword="$1">$1</span>').replace(/\n/g, "<br>");
+                if(evidenceListModalContentEl) evidenceListModalContentEl.innerHTML = (caseDetails.evidence ?? []).map(e => `<li data-id="${e.id}">${(e.text ?? "讀取中...").replace(/##(.*?)##/g, '<span class="case-keyword" data-keyword="$1">$1</span>')}</li>`).join('');
+                if(doubtsListModalContentEl) doubtsListModalContentEl.innerHTML = (caseDetails.doubts ?? []).map(d => `<li data-id="${d.id}">${(d.text ?? "讀取中...").replace(/##(.*?)##/g, '<span class="case-keyword" data-keyword="$1">$1</span>')}</li>`).join('');
+            }
+
+            if(dialogueAreaEl) dialogueAreaEl.innerHTML = '';
+            if (state.dialogueHistory && Array.isArray(state.dialogueHistory)) {
+                state.dialogueHistory.forEach(msg => addMessageToDialogue(msg.speaker, msg.text, msg.tone));
+            }
+
+            // Update interrogation tip
+            if(interrogationTipAreaEl && state.interrogationTip) {
+                interrogationTipAreaEl.textContent = "※貼心提示： " + state.interrogationTip;
+            }
+
+
+            document.querySelectorAll('.case-keyword').forEach(el => {
+                el.onclick = () => {
+                    const keyword = el.dataset.keyword;
+                    if(keywordModalTitle) keywordModalTitle.textContent = `🔑 關於「${keyword}」`;
+                    fetchKeywordInfo(keyword); // Renamed from getKeywordInfo to avoid conflict if any global exists
+                    if(keywordModal) keywordModal.classList.remove('hidden');
+                };
+            });
+
+            if (state.gameOver) {
+                if(gameOverTitle) gameOverTitle.textContent = (state.confessionMeter <= 0) ? "⚖️ 審問成功！" : "⚖️ 審問失敗！";
+                if(totalRoundsEl) totalRoundsEl.textContent = state.round ?? '0';
+
+                if(gameAnalysisContainerEl && typeof state.gameAnalysis === 'object' && state.gameAnalysis.interrogationStyle) {
+                    gameAnalysisContainerEl.innerHTML = `
+                        <p class="analysis-section-title">1. 偵訊員審問風格分析:</p>
+                        <p class="analysis-section-content">${state.gameAnalysis.interrogationStyle}</p>
+                        <p class="analysis-section-title">2. 與嫌犯鬥智過程技巧分析:</p>
+                        <p class="analysis-section-content">${state.gameAnalysis.techniqueAnalysis}</p>
+                        <p class="analysis-section-title">3. 分析玩家在現實世界潛在人格特質:</p>
+                        <p class="analysis-section-content">${state.gameAnalysis.playerPersonalityTrait}</p>
+                    `;
+                    if(achievementBannerEl && achievementTitleEl && state.gameAnalysis.achievementTitle){
+                        achievementTitleEl.textContent = state.gameAnalysis.achievementTitle;
+                        achievementBannerEl.classList.remove('hidden');
+                    } else if (achievementBannerEl) {
+                        achievementBannerEl.classList.add('hidden');
+                    }
+                } else if (gameAnalysisTextEl) { // Fallback for string analysis
+                    gameAnalysisTextEl.textContent = typeof state.gameAnalysis === 'string' ? state.gameAnalysis : "分析生成失敗或格式不符。";
+                     if(achievementBannerEl) achievementBannerEl.classList.add('hidden');
+                }
+
+                if(gameOverModal) gameOverModal.classList.remove('hidden');
+            } else {
+                if(gameOverModal) gameOverModal.classList.add('hidden');
+            }
+        }
+
+        function addMessageToDialogue(speaker, text, tone = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('dialogue-bubble');
+            let messageContent = text;
+
+            if (speaker === 'Player') {
+                messageDiv.classList.add('player-bubble');
+                // Backend now stores tone with player message, so we can use gameState.selectedTone if needed, or rely on history
+                const displayTone = tone || gameState.selectedTone || "未知";
+                messageContent = `(語氣：${displayTone}) ${text}`;
+                switch (displayTone) {
+                    case '平緩': messageDiv.classList.add('player-bubble-calm'); break;
+                    case '憤怒': messageDiv.classList.add('player-bubble-angry'); break;
+                    case '挑釁': messageDiv.classList.add('player-bubble-provocative'); break;
+                }
+            } else if (speaker === '警官') {
+                messageDiv.classList.add('officer-bubble');
+                messageContent = `<strong>警官：</strong> ${text}`;
+            } else { // AI/Suspect
+                messageDiv.classList.add('ai-bubble');
+            }
+
+            const processedText = messageContent.replace(/@@(.*?)@@/g, '<span class="keyword" data-keyword="$1">$1</span>');
+            messageDiv.innerHTML = processedText;
+
+            if(dialogueAreaEl) {
+                dialogueAreaEl.appendChild(messageDiv);
+                dialogueAreaEl.scrollTop = dialogueAreaEl.scrollHeight;
+            }
+
+            messageDiv.querySelectorAll('.keyword').forEach(el => {
+                el.onclick = () => {
+                    const keyword = el.dataset.keyword;
+                    if(keywordModalTitle) keywordModalTitle.textContent = `🔑 關於「${keyword}」`;
+                    fetchKeywordInfo(keyword);
+                    if(keywordModal) keywordModal.classList.remove('hidden');
+                };
+            });
+        }
+        
+        async function fetchKeywordInfo(keyword) {
+            if (!currentGameId) {
+                console.error("遊戲 ID 未設定，無法獲取關鍵字資訊。");
+                if(keywordModalText) keywordModalText.textContent = "錯誤：遊戲未初始化。";
+                return;
+            }
+
+            if(keywordModalText) keywordModalText.style.display = 'none';
+            if(keywordFolderLoaderEl) keywordFolderLoaderEl.classList.remove('hidden');
+
+            // --- Loader Animation Logic (copied from original) ---
+            const totalPages = 4;
+            let currentPage = 0;
+            if(keywordFolderPagesBarEl) keywordFolderPagesBarEl.innerHTML = '';
+            function renderKeywordPagesBar() {
+              let html = '';
+              for (let i = 0; i < totalPages; i++) {
+                html += `<div class="page-dot${i === currentPage ? ' active' : ''}"></div>`;
+              }
+              if(keywordFolderPagesBarEl) keywordFolderPagesBarEl.innerHTML = html;
+            }
+            function updateKeywordPage() {
+              currentPage = (currentPage + 1) % totalPages;
+              renderKeywordPagesBar();
+              if(keywordFolderPageTextEl) keywordFolderPageTextEl.textContent = `第 ${currentPage + 1} / ${totalPages} 頁，正在呈上中…`;
+            }
+            renderKeywordPagesBar();
+            if(keywordFolderPageTextEl) keywordFolderPageTextEl.textContent = `第 1 / ${totalPages} 頁，正在呈上中…`;
+            if (keywordPageTimer) clearInterval(keywordPageTimer);
+            keywordPageTimer = setInterval(updateKeywordPage, 700);
+            // --- End Loader Animation Logic ---
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/game/${currentGameId}/keyword?keyword=${encodeURIComponent(keyword)}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `伺服器錯誤: ${response.status}`);
+                }
+                const data = await response.json();
+                if(keywordModalText) keywordModalText.textContent = data.information || `關於「${keyword}」的資訊目前無法取得。`;
+
+            } catch (error) {
+                console.error(`獲取關鍵字 "${keyword}" 資訊失敗:`, error);
+                if(keywordModalText) keywordModalText.textContent = `無法載入關於「${keyword}」的資訊：${error.message}`;
+            } finally {
+                if (keywordPageTimer) clearInterval(keywordPageTimer);
+                if(keywordFolderLoaderEl) keywordFolderLoaderEl.classList.add('hidden');
+                if(keywordModalText) keywordModalText.style.display = 'block';
+            }
+        }
+
+        async function handlePlayerTurn(isDemandConfession = false) {
+            if (!currentGameId) {
+                console.error("遊戲 ID 未設定，無法執行玩家動作。");
+                alert("錯誤：遊戲未正確初始化，請重新載入。");
+                return;
+            }
+
+            const playerMessage = playerInputEl.value.trim();
+            if (!isDemandConfession && !playerMessage) return; // No message for non-confession demand
+
+             // Special cheat code, now it will just send a specific message that backend might interpret
+            if (!isDemandConfession && playerMessage === "88888888") {
+                // We can either handle this purely frontend for testing, or send a special command
+                // For now, let's assume backend handles it if it receives this specific message.
+                // Or, if it was a frontend-only cheat:
+                // gameState.confessionMeter = 0;
+                // updateUI(gameState); // This would show meter at 0
+                // await handleBackendConfession(); // A new function to tell backend player forced confession
+                // return;
+                // For now, let it pass to backend as a normal message, backend can have a cheat handler
+            }
+
+
+            sendButton.disabled = true;
+            demandConfessionButton.disabled = true;
+            if (isDemandConfession) {
+                demandConfessionButton.innerHTML = '<div class="loading-spinner !w-4 !h-4 border-t-white mx-auto"></div>';
+            } else {
+                sendButton.innerHTML = '<div class="loading-spinner !w-5 !h-5 border-t-white"></div>';
+            }
+            showThinkingModal(isDemandConfession ? '正在要求對方認罪...' : 'AI正在分析您的輸入...');
+
+            const currentTone = gameState.selectedTone || "平緩"; // Get current tone from gameState
+
+            const payload = {
+                message: isDemandConfession ? "" : playerMessage, // No message needed if demanding confession from backend logic
+                tone: isDemandConfession ? "憤怒" : currentTone, // Demanding confession is usually angry
+                isDemandConfession: isDemandConfession
+            };
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/game/${currentGameId}/action`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                     // If game already over, backend might return 400 with current game state
+                    if (errorData.gameState && errorData.error === "遊戲已結束") {
+                        console.warn("嘗試在已結束的遊戲中執行動作。");
+                        updateUI(errorData.gameState); // Update UI to reflect it's over
+                    } else {
+                        throw new Error(errorData.error || `伺服器錯誤: ${response.status}`);
+                    }
+                } else {
+                    const updatedGameState = await response.json();
+                    updateUI(updatedGameState); // This will update global gameState and render UI
+                }
+                
+                if (!isDemandConfession) playerInputEl.value = '';
+
+            } catch (error) {
+                console.error("玩家回合處理失敗:", error);
+                alert(`操作失敗: ${error.message}`);
+                // Restore UI elements if error
+            } finally {
+                hideThinkingModal();
+                sendButton.disabled = false;
+                demandConfessionButton.disabled = false;
+                sendButton.innerHTML = '發送';
+                demandConfessionButton.textContent = '要求認罪';
+            }
+        }
+        
+        function restartGame() {
+            // Re-initialize by calling the main loading function
+            loadOrCreateNewGame();
+            if(gameOverModal) gameOverModal.classList.add('hidden');
+        }
+
+        // Event Listeners
+        if(closeIntroModalButton) {
+            closeIntroModalButton.addEventListener('click', () => {
+                if(introModal) introModal.classList.add('hidden');
+                if (backgroundMusicEl && backgroundMusicEl.paused) {
+                    backgroundMusicEl.play().catch(e => console.error("Error playing music:", e));
+                }
+            });
+        }
+        if(sendButton) sendButton.addEventListener('click', () => handlePlayerTurn(false));
+        if(demandConfessionButton) demandConfessionButton.addEventListener('click', () => handlePlayerTurn(true));
+        
+        if(closeGameOverModalButton) {
+            closeGameOverModalButton.addEventListener('click', () => {
+                if(gameOverModal) gameOverModal.classList.add('hidden');
+            });
+        }
+
+        if(playerInputEl) playerInputEl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handlePlayerTurn(false);
+            }
+        });
+
+        toneButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                toneButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                if(gameState) gameState.selectedTone = button.dataset.tone; // Update selectedTone in frontend state
+            });
+        });
+        if(showPersonalDetailsButton) showPersonalDetailsButton.addEventListener('click', () => personalDetailsModal.classList.remove('hidden'));
+        if(showStorySummaryButton) showStorySummaryButton.addEventListener('click', () => storySummaryModal.classList.remove('hidden'));
+        if(restartGameButton) restartGameButton.addEventListener('click', restartGame);
+
+        // Initial load
+        window.addEventListener('load', () => {
+            loadOrCreateNewGame(); // This now handles Firebase auth and then fetches from backend
+            if (backgroundMusicEl) {
+                backgroundMusicEl.play().catch(e => {
+                    console.log("Background music autoplay was blocked. Will attempt after user interaction.", e);
+                });
+            }
+        });
+
+    </script>
+</body>
+</html>

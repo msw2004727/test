@@ -542,9 +542,9 @@
                 startInitialLoadingAnimation();
             }
             if (initialLoadingMessageEl && officerNickname) {
-                initialLoadingMessageEl.textContent = `警官 ${officerNickname}，開局加載很久正常!不用擔心`;
+            initialLoadingMessageEl.innerHTML = `警官 ${officerNickname}，你好~<br>開局加載很久正常!不用擔心`;
             } else if (initialLoadingMessageEl) {
-                initialLoadingMessageEl.textContent = "開局加載很久正常!不用擔心";
+            initialLoadingMessageEl.innerHTML = "你好~<br>開局加載很久正常!不用擔心";
             }
         } else if (!isNicknameConfirmed && isGameDataLoaded) {
             console.log("[TRY_PROCEED_V3] Game data loaded, waiting for nickname confirmation...");

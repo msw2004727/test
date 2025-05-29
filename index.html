@@ -660,11 +660,26 @@
     }
 
     function updateUI(state) {
-        if (!state) {
-            console.warn("updateUI 被調用時 state 為空。");
-            showErrorMessage("無法更新遊戲界面：無效的遊戲狀態。");
-            return;
-        }
+    if (!state) {
+        console.warn("updateUI 被調用時 state 為空。");
+        return;
+    }
+    gameState = state; // 更新全域遊戲狀態
+
+    // --- 新增或修改以下程式碼來設定頭像 ---
+    const suspectAvatarImg = document.getElementById('suspect-avatar-img');
+    if (suspectAvatarImg) {
+        // 假設 test00.png 在專案根目錄
+        // 如果在子資料夾，例如 'images/test00.png'，請修改路徑
+        suspectAvatarImg.src = 'test00.png';
+    }
+    // --- 頭像設定結束 ---
+
+    // 更新回合數
+    if (roundCountHeaderEl) roundCountHeaderEl.textContent = state.round ?? '0';
+
+    // ... (updateUI 函式中其餘的程式碼保持不變) ...
+}
         gameState = state;
 
         if (roundCountHeaderEl) roundCountHeaderEl.textContent = state.round ?? '0';

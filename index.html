@@ -107,11 +107,13 @@
       </div>
     </div>
 
-    <div id="nickname-modal" class="modal hidden"> <div class="modal-content">
+    <div id="nickname-modal" class="modal hidden">
+        <div class="modal-content">
             <h3 class="text-xl font-bold text-blue-300">輸入警官代號</h3>
             <input type="text" id="officer-nickname-input" class="w-full p-2 mt-4 border border-gray-500 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="請輸入您的警官代號（例如：飛鷹隊長）">
             <p id="nickname-error" class="text-red-400 text-sm mt-1 hidden">警官代號不能為空。</p>
-            <button id="confirm-nickname-button" class="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md">確認進入偵訊室</button>
+            <div class="mt-6 flex items-center gap-2"> <button id="confirm-nickname-button" class="flex-grow bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md">確認進入偵訊室</button>
+                <button id="leaderboard-nickname-button" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-3 rounded-md text-sm">🏆</button> </div>
         </div>
     </div>
 
@@ -371,8 +373,8 @@
     const confirmNicknameButton = document.getElementById('confirm-nickname-button');
     const nicknameErrorEl = document.getElementById('nickname-error');
     const officerDisplayNameEl = document.getElementById('officer-display-name');
-    const leaderboardButton = document.getElementById('leaderboard-button');
-    // const gameLoadingMessageNicknameModalEl = document.getElementById('game-loading-message-nickname-modal'); // 已移除
+    const leaderboardButton = document.getElementById('leaderboard-button'); // 遊戲結束畫面的排行榜按鈕
+    const leaderboardNicknameButton = document.getElementById('leaderboard-nickname-button'); // 暱稱輸入畫面的排行榜按鈕
 
 
     // --- 配置區域 ---
@@ -490,10 +492,11 @@
     function showNicknameModal() {
         if (nicknameModal) nicknameModal.classList.remove('hidden');
         if (officerNicknameInput) {
-            officerNicknameInput.disabled = false; // 確保輸入框可用
+            officerNicknameInput.disabled = false; 
             officerNicknameInput.focus();
         }
-        if (confirmNicknameButton) confirmNicknameButton.disabled = false; // 確保按鈕可用
+        if (confirmNicknameButton) confirmNicknameButton.disabled = false; 
+        if (leaderboardNicknameButton) leaderboardNicknameButton.disabled = false;
     }
 
     function hideNicknameModal() {
@@ -501,46 +504,53 @@
     }
     
     function tryProceedToGame() {
+        console.log(`tryProceedToGame: isNicknameConfirmed=${isNicknameConfirmed}, isGameDataLoaded=${isGameDataLoaded}`);
         if (isNicknameConfirmed && isGameDataLoaded) {
-            // 兩個條件都滿足，進入遊戲
+            console.log("條件滿足，準備進入遊戲主畫面。");
             if (initialLoadingOverlay) initialLoadingOverlay.classList.add('hidden');
             stopInitialLoadingAnimation();
-            // 暱稱 Modal 理論上已由 handleConfirmNickname 關閉，此處為保險
-            hideNicknameModal(); 
+            // 暱稱 Modal 應該已經由 handleConfirmNickname 關閉，此處再次確認
+            if (!nicknameModal.classList.contains('hidden')) {
+                hideNicknameModal();
+            }
 
             if (gameMainAreaEl) gameMainAreaEl.style.display = 'flex';
             if (introModal) introModal.classList.remove('hidden');
             playBackgroundMusic();
         } else if (isNicknameConfirmed && !isGameDataLoaded) {
-            // 暱稱已確認，但遊戲數據仍在加載
-            // 暱稱 Modal 已由 handleConfirmNickname 關閉
-            // 主加載畫面 initialLoadingOverlay 應保持可見
+            console.log("暱稱已確認，遊戲數據加載中...");
+            // 確保主加載畫面是可見的
             if (initialLoadingOverlay && initialLoadingOverlay.classList.contains('hidden')) {
                 initialLoadingOverlay.classList.remove('hidden');
-                startInitialLoadingAnimation(); // 如果被意外隱藏，重新顯示並啟動動畫
+                startInitialLoadingAnimation();
             }
-            // 可以在 initialLoadingMessageEl 更新提示，例如 "警官 [暱稱]，遊戲資料準備中..."
             if (initialLoadingMessageEl && officerNickname) {
                 initialLoadingMessageEl.textContent = `警官 ${officerNickname}，遊戲資料準備中，請稍候...`;
             } else if (initialLoadingMessageEl) {
                 initialLoadingMessageEl.textContent = "遊戲資料準備中，請稍候...";
             }
         } else if (!isNicknameConfirmed && isGameDataLoaded) {
-            // 遊戲數據已加載，但暱稱未確認 (此情況理論上較少，因為暱稱輸入優先)
-            // 暱稱 Modal 應保持可見
-            // 主加載畫面 initialLoadingOverlay 可作為暱稱 Modal 的背景
+            console.log("遊戲數據已加載，等待暱稱確認...");
+            // 確保主加載畫面和暱稱 Modal 都可見
             if (initialLoadingOverlay && initialLoadingOverlay.classList.contains('hidden')) {
                  initialLoadingOverlay.classList.remove('hidden');
                  startInitialLoadingAnimation();
             }
-             if (initialLoadingMessageEl) { // 更新主加載畫面提示
+            if (nicknameModal && nicknameModal.classList.contains('hidden')) { // 如果暱稱 Modal 被意外隱藏，重新顯示
+                showNicknameModal();
+            }
+             if (initialLoadingMessageEl) { 
                 initialLoadingMessageEl.textContent = "遊戲資料已就緒，請輸入您的警官代號。";
             }
         } else { // !isNicknameConfirmed && !isGameDataLoaded
-            // 雙方都未就緒，暱稱 Modal 和主加載畫面都應可見
+            console.log("暱稱和遊戲數據均未就緒。");
+            // 確保主加載畫面和暱稱 Modal 都可見
             if (initialLoadingOverlay && initialLoadingOverlay.classList.contains('hidden')) {
                  initialLoadingOverlay.classList.remove('hidden');
                  startInitialLoadingAnimation();
+            }
+            if (nicknameModal && nicknameModal.classList.contains('hidden')) {
+                showNicknameModal();
             }
             if (initialLoadingMessageEl) {
                  initialLoadingMessageEl.textContent = "遊戲初始化中，請輸入警官代號...";
@@ -562,12 +572,12 @@
         officerNickname = nickname;
         if (officerDisplayNameEl) officerDisplayNameEl.textContent = `(${officerNickname})`;
         
-        hideNicknameModal(); // 立刻隱藏暱稱 Modal
+        hideNicknameModal(); 
         isNicknameConfirmed = true;
         
-        // 禁用暱稱輸入相關元素，因為已確認
         if (officerNicknameInput) officerNicknameInput.disabled = true;
         if (confirmNicknameButton) confirmNicknameButton.disabled = true;
+        if (leaderboardNicknameButton) leaderboardNicknameButton.disabled = true;
 
         tryProceedToGame(); 
     }
@@ -615,6 +625,8 @@
             showErrorMessage(friendlyErrorMessage);
             isGameDataLoaded = false; 
         } finally {
+            // 確保在數據加載完成後（無論成功或失敗）都調用 tryProceedToGame
+            // 這樣如果暱稱已經確認，就可以根據 isGameDataLoaded 的狀態決定下一步
             tryProceedToGame();
         }
     }
@@ -860,16 +872,18 @@
         isGameDataLoaded = false; 
         
         if (officerNicknameInput) {
-            officerNicknameInput.value = '';
+            officerNicknameInput.value = ''; 
             officerNicknameInput.disabled = false;
         }
         if (confirmNicknameButton) {
             confirmNicknameButton.disabled = false;
         }
+        if (leaderboardNicknameButton) { 
+            leaderboardNicknameButton.disabled = false;
+        }
         if (nicknameErrorEl) {
             nicknameErrorEl.classList.add('hidden');
         }
-        // 移除 gameLoadingMessageNicknameModalEl 的相關邏輯，因為它已被刪除
 
         if (initialLoadingOverlay) initialLoadingOverlay.classList.remove('hidden');
         startInitialLoadingAnimation();
@@ -912,7 +926,19 @@
     if (restartGameButton) restartGameButton.addEventListener('click', restartGame);
     if (confirmNicknameButton) confirmNicknameButton.addEventListener('click', handleConfirmNickname);
     if (officerNicknameInput) officerNicknameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { handleConfirmNickname(); }});
-    if (leaderboardButton) leaderboardButton.addEventListener('click', () => { alert("排行榜功能開發中，敬請期待！"); console.log("排行榜按鈕被點擊。警官暱稱:", officerNickname, "回合數:", gameState.round); });
+    
+    // 遊戲結束畫面的排行榜按鈕
+    if (leaderboardButton) leaderboardButton.addEventListener('click', () => { 
+        alert("排行榜功能開發中，敬請期待！"); 
+        console.log("遊戲結束 - 排行榜按鈕被點擊。警官暱稱:", officerNickname, "回合數:", gameState.round); 
+    });
+
+    // 暱稱輸入畫面的排行榜按鈕
+    if (leaderboardNicknameButton) leaderboardNicknameButton.addEventListener('click', () => {
+        alert("排行榜功能開發中！請先完成本局遊戲以查看您的成績。");
+        console.log("暱稱輸入 - 排行榜按鈕被點擊。");
+    });
+
 
     // --- 頁面載入完成後執行 ---
     window.addEventListener('load', () => {

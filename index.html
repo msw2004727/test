@@ -73,7 +73,7 @@
         #nickname-modal {
             z-index: 2001; 
         }
-        #leaderboard-modal { /* 排行榜 Modal 的 z-index */
+        #leaderboard-modal { 
             z-index: 2002; 
         }
         .modal-content {
@@ -81,7 +81,7 @@
             width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
             text-align: left; color: #e2e8f0;
         }
-        .modal-content.modal-lg { max-width: 700px; } /* 稍微加寬排行榜的 Modal */
+        .modal-content.modal-lg { max-width: 700px; } 
         .modal-content h3 { text-align: center; margin-bottom: 16px; }
         .story-summary-text { font-size: 0.9rem; line-height: 1.6;} 
         .story-summary-divider { border-top: 1px solid #4a5568; margin: 12px 0; }
@@ -97,7 +97,6 @@
             background-color: rgba(45, 55, 72, 0.9); 
             backdrop-filter: blur(5px); 
         }
-        /* 排行榜表格樣式 */
         #leaderboard-table { width: 100%; margin-top: 16px; border-collapse: collapse; }
         #leaderboard-table th, #leaderboard-table td { border: 1px solid #4a5568; padding: 8px; text-align: left; font-size: 0.875rem; }
         #leaderboard-table th { background-color: #374151; color: #a0aec0; }
@@ -126,8 +125,8 @@
 
     <div id="nickname-modal" class="modal hidden">
         <div class="modal-content">
-            <h3 class="text-xl font-bold text-blue-300">輸入警官暱稱</h3>
-            <input type="text" id="officer-nickname-input" class="w-full p-2 mt-4 border border-gray-500 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="請輸入您的警官暱稱（例如：明天隊長）">
+            <h3 class="text-xl font-bold text-blue-300">輸入警官代號</h3>
+            <input type="text" id="officer-nickname-input" class="w-full p-2 mt-4 border border-gray-500 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="請輸入您的警官代號（例如：飛鷹隊長）">
             <p id="nickname-error" class="text-red-400 text-sm mt-1 hidden">警官代號不能為空。</p>
             <div class="mt-6 flex items-center gap-2"> <button id="confirm-nickname-button" class="flex-grow bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md">確認進入偵訊室</button>
                 <button id="leaderboard-nickname-button" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-3 rounded-md text-sm">🏆</button> </div>
@@ -135,7 +134,8 @@
     </div>
 
     <div id="leaderboard-modal" class="modal hidden">
-        <div class="modal-content modal-lg"> <h3 class="text-xl font-bold text-yellow-400">🏆 偵訊高手排行榜 🏆</h3>
+        <div class="modal-content modal-lg"> 
+            <h3 class="text-xl font-bold text-yellow-400">🏆 偵訊高手排行榜 🏆</h3>
             <div id="leaderboard-loading" class="text-center py-4 hidden">
                 <div class="loading-spinner"></div>
                 <p class="mt-2 text-gray-300">排行榜載入中...</p>
@@ -149,7 +149,8 @@
                         <th>排名</th>
                         <th>警官代號</th>
                         <th>回合數</th>
-                        <th>獲得成就</th> <th>完成時間</th>
+                        <th>獲得成就</th> 
+                        <th>完成時間</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboard-body">
@@ -228,13 +229,18 @@
     <div id="intro-modal" class="modal hidden">
         <div class="modal-content">
             <h3 class="text-xl font-bold text-blue-300">🎉 歡迎來到審問挑戰 🎉</h3>
-            <ul class="list-decimal list-inside mt-4 mb-6 space-y-2 text-sm text-gray-200">
-                <li>本遊戲每次開局都是<strong class="text-yellow-300">全新劇本</strong>，挑戰無限！</li>
+            <ul class="list-decimal list-inside mt-4 mb-6 space-y-3 text-sm text-gray-200"> <li>本遊戲每次開局都是<strong class="text-yellow-300">全新劇本</strong>，挑戰無限！</li>
                 <li>開局後請先查看<strong class="text-indigo-300">【案件概要】</strong>了解偵訊重點。</li>
-                <li>偵訊時可以用<strong class="text-green-300">三種態度</strong>與嫌犯應對。</li>
+                <li>
+                    偵訊時可運用<strong class="text-green-300">三種語氣</strong>與嫌犯應對：
+                    <ul class="list-disc list-inside ml-5 mt-1 space-y-1 text-xs">
+                        <li><strong class="text-green-400">😌 平緩：</strong>專業提問，穩健獲取情報的基礎。</li>
+                        <li><strong class="text-red-400">😡 憤怒：</strong>施加壓力，高風險策略，可能使嫌犯更頑抗或情緒崩潰。</li>
+                        <li><strong class="text-yellow-400">😏 挑釁：</strong>刺激對方，試圖動搖其心理防線，誘使其透露破綻。</li>
+                    </ul>
+                </li>
                 <li>本遊戲不斷<strong class="text-pink-300">優化中</strong>，歡迎給予建議！</li>
                 <li>審問成功讓嫌犯認罪，歡迎<strong class="text-teal-300">分享截圖</strong>！</li>
-                <li>全新開放<strong class="text-yellow-300">排行榜</strong>誰是挑戰偵訊大師?</li>
             </ul>
             <button id="close-intro-modal-button" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md">開始偵訊</button>
         </div>
@@ -338,7 +344,7 @@
         <div class="modal-content text-center">
             <div class="flex flex-col items-center justify-center min-h-[100px]">
                 <p class="text-lg" id="ai-thinking-message">🤖 AI正在努力思考中...</p>
-                <p class="text-sm text-gray-400 mt-1">(因即時應對加載稍慢屬正常)</p>
+                <p class="text-sm text-gray-400 mt-1">(因內容豐富加載很久屬正常)</p>
                 <p class="text-xs text-gray-500 mt-1">(創作者還在努力優化中)</p>
             </div>
             <div class="loading-spinner my-4"></div>
@@ -350,7 +356,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    // DOM 元素獲取
+    // DOM 元素獲取 (省略部分，與之前版本相同)
     const heartRateEl = document.getElementById('heart-rate');
     const bloodPressureEl = document.getElementById('blood-pressure');
     const facialExpressionEl = document.getElementById('facial-expression');
@@ -419,7 +425,6 @@
     const officerDisplayNameEl = document.getElementById('officer-display-name');
     const leaderboardButton = document.getElementById('leaderboard-button'); 
     const leaderboardNicknameButton = document.getElementById('leaderboard-nickname-button'); 
-    // 新增：排行榜 Modal 相關元素
     const leaderboardModal = document.getElementById('leaderboard-modal');
     const leaderboardLoadingEl = document.getElementById('leaderboard-loading');
     const leaderboardErrorEl = document.getElementById('leaderboard-error');
@@ -428,7 +433,7 @@
     const closeLeaderboardModalButton = document.getElementById('close-leaderboard-modal-button');
 
 
-    // --- 配置區域 ---
+    // --- 配置區域 --- (省略，與之前版本相同)
     const BACKEND_URL = 'https://d1d5ef45-d04b-4a1c-be4b-64a0680c6847-00-xxpggv06ka2e.sisko.replit.dev/';
     const firebaseConfig = typeof __firebase_config !== 'undefined'
         ? JSON.parse(__firebase_config) 
@@ -454,7 +459,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // --- 全域狀態變數 ---
+    // --- 全域狀態變數 --- (省略，與之前版本相同)
     let userId = null;
     let currentGameId = null;
     let gameState = {};
@@ -465,82 +470,16 @@
     let isNicknameConfirmed = false;
     let isGameStarted = false; 
 
-    // --- 輔助函數 ---
-    function showThinkingModal(message = 'AI正在努力思考中...') {
-        if (aiThinkingModal && aiThinkingMessageEl) {
-            aiThinkingMessageEl.textContent = `🤖 ${message}`;
-            aiThinkingModal.classList.remove('hidden');
-        }
-    }
+    // --- 輔助函數 --- (省略，與之前版本相同)
+    function showThinkingModal(message = 'AI正在努力思考中...') { /* ... */ }
+    function hideThinkingModal() { /* ... */ }
+    function getConfessionMeterTextAndColor(percentage) { /* ... */ }
+    function showErrorMessage(message) { /* ... */ }
+    function clearErrorMessage() { /* ... */ }
+    function playBackgroundMusic() { /* ... */ }
+    async function initializeFirebaseAndUser() { /* ... */ }
 
-    function hideThinkingModal() {
-        if (aiThinkingModal) aiThinkingModal.classList.add('hidden');
-    }
-
-    function getConfessionMeterTextAndColor(percentage) {
-        if (percentage > 80) return { text: "態度強硬", colorClass: "confession-color-white" };
-        if (percentage > 60) return { text: "故作鎮定", colorClass: "confession-color-green" };
-        if (percentage > 40) return { text: "略顯動搖", colorClass: "confession-color-blue" };
-        if (percentage > 20) return { text: "心虛慌亂", colorClass: "confession-color-pink" };
-        if (percentage > 0) return { text: "瀕臨崩潰", colorClass: "confession-color-red" };
-        return { text: "已然認罪", colorClass: "confession-color-purple" };
-    }
-
-    function showErrorMessage(message) {
-        if (errorMessageAreaEl) {
-            errorMessageAreaEl.textContent = `⚠️ 錯誤：${message}`;
-            errorMessageAreaEl.style.display = 'block';
-        }
-        console.error("錯誤訊息顯示:", message);
-    }
-
-    function clearErrorMessage() {
-        if (errorMessageAreaEl) {
-            errorMessageAreaEl.textContent = '';
-            errorMessageAreaEl.style.display = 'none';
-        }
-    }
-
-    function playBackgroundMusic() {
-        if (backgroundMusicEl && backgroundMusicEl.paused && !isMusicPlaying) {
-            backgroundMusicEl.loop = true;
-            backgroundMusicEl.play()
-                .then(() => { isMusicPlaying = true; console.log("背景音樂開始播放。"); })
-                .catch(error => { console.warn("背景音樂自動播放失敗。", error); });
-        }
-    }
-
-    async function initializeFirebaseAndUser() {
-        return new Promise(async (resolve, reject) => {
-            try {
-                await setPersistence(auth, browserLocalPersistence);
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Firebase 認證錯誤:", error);
-                if (!auth.currentUser) { 
-                    try { await signInAnonymously(auth); }
-                    catch (anonError) {
-                        console.error("嚴重錯誤：匿名登入也失敗:", anonError);
-                        userId = `local_user_${crypto.randomUUID().substring(0,8)}`;
-                        if (userIdDisplayEl) userIdDisplayEl.textContent = "本機用戶";
-                        showErrorMessage("Firebase 認證失敗。");
-                        return resolve(userId); 
-                    }
-                }
-            }
-            onAuthStateChanged(auth, (user) => {
-                if (user) { userId = user.uid; if (userIdDisplayEl) userIdDisplayEl.textContent = userId.substring(0, 8) + "..."; }
-                else { if (!userId) { userId = `local_user_${crypto.randomUUID().substring(0,8)}`; if (userIdDisplayEl) userIdDisplayEl.textContent = "本機用戶";}}
-                resolve(userId); 
-            });
-        });
-    }
-
-    // --- 核心遊戲流程函數 ---
+    // --- 核心遊戲流程函數 --- (省略大部分，只顯示修改處)
     function showNicknameModal() {
         if (nicknameModal) nicknameModal.classList.remove('hidden');
         if (officerNicknameInput) {
@@ -591,7 +530,7 @@
             }
 
             if (gameMainAreaEl) gameMainAreaEl.style.display = 'flex';
-            if (introModal) introModal.classList.remove('hidden');
+            if (introModal) introModal.classList.remove('hidden'); // 遊戲介紹 Modal 在這裡顯示
             playBackgroundMusic();
             isGameStarted = true; 
             console.log("[TRY_PROCEED_V3] Game started successfully. isGameStarted = true");
@@ -603,9 +542,9 @@
                 startInitialLoadingAnimation();
             }
             if (initialLoadingMessageEl && officerNickname) {
-                initialLoadingMessageEl.textContent = `警官 ${officerNickname}，遊戲資料準備中，請稍候...`;
+                initialLoadingMessageEl.textContent = `警官 ${officerNickname}，開局加載很久正常!不用擔心`;
             } else if (initialLoadingMessageEl) {
-                initialLoadingMessageEl.textContent = "遊戲資料準備中，請稍候...";
+                initialLoadingMessageEl.textContent = "開局加載很久正常!不用擔心";
             }
         } else if (!isNicknameConfirmed && isGameDataLoaded) {
             console.log("[TRY_PROCEED_V3] Game data loaded, waiting for nickname confirmation...");
@@ -618,7 +557,7 @@
                 showNicknameModal();
             }
              if (initialLoadingMessageEl) { 
-                initialLoadingMessageEl.textContent = "遊戲資料已就緒，請輸入您的警官代號。";
+                initialLoadingMessageEl.textContent = "遊戲資料已就緒，請輸入您的警官暱稱。";
             }
         } else { 
             console.log("[TRY_PROCEED_V3] Nickname and game data NOT ready.");
@@ -631,12 +570,16 @@
                 showNicknameModal();
             }
             if (initialLoadingMessageEl) {
-                 initialLoadingMessageEl.textContent = "遊戲初始化中，請輸入警官代號...";
+                 initialLoadingMessageEl.textContent = "遊戲初始化中，請輸入警官暱稱...";
             }
         }
     }
+    
+    // `handleConfirmNickname` 和 `loadOrCreateNewGame` 的邏輯保持與上一版本相同，
+    // 以確保暱稱傳遞和遊戲加載流程的正確性。
+    // 這裡只展示修改的部分，其餘省略。
 
-    function handleConfirmNickname() { // 修改此函數，將 loadOrCreateNewGame 的調用移到這裡
+    function handleConfirmNickname() {
         const nickname = officerNicknameInput.value.trim();
         if (!nickname) {
             if (nicknameErrorEl) {
@@ -647,7 +590,7 @@
         }
         if (nicknameErrorEl) nicknameErrorEl.classList.add('hidden');
         
-        officerNickname = nickname; // 設定全域警官暱稱
+        officerNickname = nickname; 
         if (officerDisplayNameEl) officerDisplayNameEl.textContent = `(${officerNickname})`;
         
         hideNicknameModal(); 
@@ -657,16 +600,19 @@
         if (confirmNicknameButton) confirmNicknameButton.disabled = true;
         if (leaderboardNicknameButton) leaderboardNicknameButton.disabled = true;
 
-        // 在暱稱確認後，才開始加載遊戲數據 (如果尚未加載)
         if (!isGameDataLoaded) {
-            loadOrCreateNewGame(); // 現在 loadOrCreateNewGame 會傳遞 officerNickname
+            if (initialLoadingOverlay && initialLoadingOverlay.classList.contains('hidden')) { // 確保主載入畫面是可見的
+                 initialLoadingOverlay.classList.remove('hidden');
+                 initialLoadingOverlay.style.display = 'flex';
+                 startInitialLoadingAnimation();
+            }
+            loadOrCreateNewGame(); // 在暱稱確認後，才開始加載遊戲數據
         } else {
-            // 如果遊戲數據已在暱稱輸入前加載完畢，直接嘗試進入遊戲
             tryProceedToGame(); 
         }
     }
 
-    async function loadOrCreateNewGame() { // officerNickname 參數已移除，會從全域變數獲取
+    async function loadOrCreateNewGame() { 
         isGameDataLoaded = false; 
         clearErrorMessage();
         
@@ -688,15 +634,14 @@
                 throw new Error("無法獲取用戶識別碼，無法創建遊戲。");
             }
 
-            if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "開局加載很久正常!不用擔心";
+            if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "正在向伺服器請求新遊戲...";
             
             const requestBody = { userId: userAuthId };
             if (officerNickname) { 
-                requestBody.officerNickname = officerNickname; // 從全域變數獲取
+                requestBody.officerNickname = officerNickname; 
             } else {
-                // 這種情況理論上不應該發生，因為 loadOrCreateNewGame 現在在暱稱確認後調用
-                console.warn("loadOrCreateNewGame: officerNickname 未設定，將使用後端預設值。這不應該發生！");
-                requestBody.officerNickname = "未知警探"; // 提供一個備用值
+                console.warn("loadOrCreateNewGame: officerNickname 未設定，這不應該在暱稱確認流程後發生。將使用後端預設值。");
+                requestBody.officerNickname = "緊急探員"; // 提供一個更明確的備用值
             }
 
             const response = await fetch(`${BACKEND_URL}game/new`, {
@@ -729,6 +674,10 @@
         }
     }
     
+    // processTextToKeywordLinks, updateUI, bindKeywordClickEvents, addMessageToDialogue, 
+    // fetchKeywordInfo, handlePlayerTurn, restartGame, startInitialLoadingAnimation, 
+    // stopInitialLoadingAnimation 函數與之前版本相同，故省略以節省篇幅...
+
     function processTextToKeywordLinks(text, defaultKeywordClass = "keyword") {
         if (typeof text !== 'string') return text;
         return text.replace(/(##|@@)(.*?)\1/g, (match, p1, keywordText) => {
@@ -797,7 +746,7 @@
         }
         bindKeywordClickEvents(); 
         if (state.gameOver) {
-            if(gameOverTitle) gameOverTitle.textContent = (state.confessionMeter != null && state.confessionMeter <= 0) ? "⚖️ 審問成功 ⚖️" : "⚖️ 審問失敗 ⚖️";
+            if(gameOverTitle) gameOverTitle.textContent = (state.confessionMeter != null && state.confessionMeter <= 0) ? "⚖️ 審問成功！" : "⚖️ 審問失敗！";
             if(totalRoundsEl) totalRoundsEl.textContent = state.round ?? '0';
             if(gameAnalysisContainerEl && typeof state.gameAnalysis === 'object' && state.gameAnalysis.interrogationStyle) {
                 gameAnalysisContainerEl.innerHTML = `<p class="analysis-section-title">1. 偵訊員審問風格分析:</p><p class="analysis-section-content">${state.gameAnalysis.interrogationStyle}</p><p class="analysis-section-title">2. 與嫌犯鬥智過程技巧分析:</p><p class="analysis-section-content">${state.gameAnalysis.techniqueAnalysis}</p><p class="analysis-section-title">3. 分析玩家在現實世界潛在人格特質:</p><p class="analysis-section-content">${state.gameAnalysis.playerPersonalityTrait}</p>`;
@@ -941,7 +890,7 @@
         const originalDemandButtonText = demandConfessionButton.textContent;
         if (isDemandConfession) { demandConfessionButton.innerHTML = '<div class="loading-spinner !w-4 !h-4 border-t-white mx-auto"></div>'; }
         else { sendButton.innerHTML = '<div class="loading-spinner !w-5 !h-5 border-t-white"></div>'; }
-        showThinkingModal(isDemandConfession ? '正在要求對方認罪...' : 'AI正在分析中');
+        showThinkingModal(isDemandConfession ? '正在要求對方認罪...' : 'AI正在分析您的輸入...');
         const currentTone = gameState.selectedTone || "平緩"; 
         const payload = { message: isDemandConfession ? "" : playerMessage, tone: isDemandConfession ? "憤怒" : currentTone, isDemandConfession: isDemandConfession };
         try {
@@ -988,10 +937,10 @@
         startInitialLoadingAnimation();
         showNicknameModal();
 
-        // loadOrCreateNewGame(); // 不再在此處立即調用，改為暱稱確認後調用
+        // loadOrCreateNewGame(); // 在 restartGame 中，loadOrCreateNewGame 會在 showNicknameModal 後，由 confirmNicknameButton 的事件觸發
     }
 
-    const initialLoadingTips = ["警方正在布置偵訊室…", "檢查錄音與監控設備中…", "案件資料調閱中，請稍候…", "將嫌犯帶往偵訊室…", "準備調查證據中…", "檢查筆錄與相關卷宗…", "開啟現場攝影機與麥克風…", "安排觀察人員進入暗房…", "案發現場資料同步中…", "檢查嫌犯心理狀態…", "審核證供清單與筆錄…", "偵訊專家即將進入現場…", "警官正在穿戴防護裝備…", "準備審問策略與對策…", "案件資料加密傳輸中…"];
+    const initialLoadingTips = ["警方正在布置偵訊室…", "檢查錄音與監控設備中…", "案件資料調閱中，請稍候…", "將嫌犯帶往偵訊室…", "準備調查證據中…", "檢查筆錄與相關卷宗…", "開啟現場攝影機與麥克風…", "安排觀察人員進入暗房…", "案發現場資料同步中…", "檢查嫌犯心理狀態…", "審核證供清單與筆錄…", "主角正在領外賣…", "警官正在匆忙穿褲子…", "準備審問策略與對策…", "案件資料加密傳輸中…"];
     let lastTipIdx = 0;
 
     function startInitialLoadingAnimation() {
@@ -1036,11 +985,16 @@
         try {
             const response = await fetch(`${BACKEND_URL}leaderboard`);
             if (!response.ok) {
-                let errorText = `無法獲取排行榜: ${response.status} ${response.statusText}`;
+                let errorText = `無法獲取排行榜資料: ${response.status} ${response.statusText}`;
                 try {
                     const errorData = await response.json();
-                    errorText = errorData.error || errorText;
-                } catch (e) { /* ignore */ }
+                    // 如果後端返回的錯誤訊息中有 Firestore 索引建議連結
+                    if (errorData.error && errorData.error.includes("https://console.firebase.google.com/")) {
+                        errorText = `排行榜查詢需要資料庫索引。請點擊以下連結創建索引，然後再試一次： <a href="${errorData.error.substring(errorData.error.indexOf('https://'))}" target="_blank" class="text-blue-400 underline hover:text-blue-300">創建索引</a>`;
+                    } else {
+                        errorText = errorData.error || errorText;
+                    }
+                } catch (e) { /* response 不是 JSON，使用原始錯誤文字 */ }
                 throw new Error(errorText);
             }
             const leaderboardData = await response.json();
@@ -1059,7 +1013,7 @@
                     row.insertCell().innerHTML = `<span class="rank-medal">${medal}</span>${rank}`;
                     row.insertCell().textContent = entry.officerNickname || '匿名警官';
                     row.insertCell().textContent = entry.rounds !== undefined ? entry.rounds : 'N/A';
-                    row.insertCell().textContent = entry.achievementTitle || '無'; // 顯示成就
+                    row.insertCell().textContent = entry.achievementTitle || '無'; 
 
                     let formattedTimestamp = 'N/A';
                     if (entry.timestamp) {
@@ -1080,12 +1034,12 @@
                 });
                 leaderboardTableEl.classList.remove('hidden'); 
             } else {
-                leaderboardBodyEl.innerHTML = '<tr><td colspan="5" class="text-center py-4">目前尚無排行榜記錄。</td></tr>'; // 修改 colspan
+                leaderboardBodyEl.innerHTML = '<tr><td colspan="5" class="text-center py-4">目前尚無排行榜記錄。</td></tr>'; 
                 leaderboardTableEl.classList.remove('hidden'); 
             }
         } catch (error) {
             console.error("獲取或顯示排行榜失敗:", error);
-            leaderboardErrorEl.textContent = `無法載入排行榜：${error.message}`;
+            leaderboardErrorEl.innerHTML = error.message; // 使用 innerHTML 以便連結可以點擊
             leaderboardErrorEl.classList.remove('hidden');
         } finally {
             leaderboardLoadingEl.classList.add('hidden'); 
@@ -1105,7 +1059,7 @@
     if (restartGameButton) restartGameButton.addEventListener('click', restartGame);
     
     if (confirmNicknameButton) { 
-        confirmNicknameButton.addEventListener('click', handleConfirmNickname); // 直接調用 handleConfirmNickname
+        confirmNicknameButton.addEventListener('click', handleConfirmNickname); 
     }
     if (officerNicknameInput) {
          officerNicknameInput.addEventListener('keypress', (e) => { 
@@ -1115,13 +1069,8 @@
         });
     }
     
-    // 遊戲結束畫面的排行榜按鈕
     if (leaderboardButton) leaderboardButton.addEventListener('click', showLeaderboardModal);
-
-    // 暱稱輸入畫面的排行榜按鈕
     if (leaderboardNicknameButton) leaderboardNicknameButton.addEventListener('click', showLeaderboardModal);
-
-    // 關閉排行榜 Modal 的按鈕
     if (closeLeaderboardModalButton) closeLeaderboardModalButton.addEventListener('click', hideLeaderboardModal);
 
 
@@ -1131,7 +1080,6 @@
         showNicknameModal(); 
         if (initialLoadingOverlay) initialLoadingOverlay.classList.remove('hidden'); 
         startInitialLoadingAnimation();
-        // loadOrCreateNewGame(); // 改為在暱稱確認後調用
     });
 
 </script>

@@ -53,10 +53,10 @@
         }
         .loading-fill {
           height: 100%;
-          width: 0%;
+          width: 0%; /* 將由 JS 控制 */
           background: linear-gradient(90deg,#3ec6e0,#5e89ee 60%,#ffe57f 100%);
           border-radius: 8px;
-          animation: loadBarAnim 2.2s cubic-bezier(.65,.05,.36,1) infinite;
+          animation: loadBarAnim 2.2s cubic-bezier(.65,.05,.36,1) infinite; /* 保留動畫以提供視覺回饋 */
         }
         @keyframes loadBarAnim {
           0% { width: 0%; opacity: .7; }
@@ -75,7 +75,7 @@
           min-height: 1.5em;
           transition: opacity 0.5s;
         }
-        @keyframes textAnim {
+         @keyframes textAnim {
           from { opacity: 0.6; letter-spacing: 1px; }
           to   { opacity: 1; letter-spacing: 3px; }
         }
@@ -235,8 +235,7 @@
           <span class="badge-text">POLICE</span>
         </div>
         <div class="loading-bar">
-          <div class="loading-fill"></div>
-        </div>
+          <div id="loading-fill-bar" class="loading-fill"></div> </div>
         <div class="interrogation-text" id="loading-animation-text">警方正在布置偵訊室…</div>
         <p class="text-sm text-gray-400 mt-1" id="initial-loading-message">遊戲初始化中...</p>
       </div>
@@ -554,6 +553,7 @@
                 })
                 .catch(error => {
                     console.warn("背景音樂自動播放失敗。", error);
+                    // 可以考慮在這裡添加一個按鈕讓用戶手動播放音樂
                 });
         }
     }
@@ -572,7 +572,7 @@
                 }
             } catch (error) {
                 console.error("Firebase 認證錯誤:", error);
-                if (!auth.currentUser) {
+                if (!auth.currentUser) { // 只有在確定沒有用戶時才嘗試再次匿名登入
                     try {
                         console.warn("由於先前的認證錯誤，回退到匿名登入。");
                         await signInAnonymously(auth);
@@ -580,7 +580,12 @@
                         console.error("嚴重錯誤：匿名登入也失敗:", anonError);
                         if (userIdDisplayEl) userIdDisplayEl.textContent = "認證失敗";
                         showErrorMessage("Firebase 認證失敗，部分用戶相關功能可能無法使用。");
-                        return reject("Firebase Auth failed");
+                        // 即使認證失敗，也 resolve 一個本地用戶 ID，讓遊戲能繼續（如果不需要強依賴 Firebase UID）
+                        // 或者 reject("Firebase Auth failed") 如果必須要有 Firebase UID
+                        userId = `local_user_${crypto.randomUUID().substring(0,8)}`;
+                        if (userIdDisplayEl) userIdDisplayEl.textContent = "本機用戶";
+                        console.warn("使用本地生成的用戶 ID。");
+                        return resolve(userId); // 或者 reject
                     }
                 }
             }
@@ -591,11 +596,15 @@
                     if (userIdDisplayEl) userIdDisplayEl.textContent = userId.substring(0, 8) + "...";
                     console.log("使用者已認證。UID:", userId);
                 } else {
-                    userId = `local_user_${crypto.randomUUID().substring(0,8)}`;
-                    if (userIdDisplayEl) userIdDisplayEl.textContent = "本機用戶";
-                    console.warn("無已認證使用者 (可能匿名登入失敗或未執行)。");
+                    // 如果 onAuthStateChanged 回調時 user 為 null，且之前匿名登入也失敗了，
+                    // 這裡可以再次嘗試或使用本地 ID
+                    if (!userId) { // 避免覆蓋已由 catch 塊設定的本地 ID
+                        userId = `local_user_${crypto.randomUUID().substring(0,8)}`;
+                        if (userIdDisplayEl) userIdDisplayEl.textContent = "本機用戶";
+                        console.warn("無已認證使用者，使用本地生成的用戶 ID。");
+                    }
                 }
-                resolve(userId);
+                resolve(userId); // 確保總是有 resolve
             });
         });
     }
@@ -605,30 +614,28 @@
         clearErrorMessage();
         if (initialLoadingOverlay) initialLoadingOverlay.style.display = 'flex';
         if (gameMainAreaEl) gameMainAreaEl.style.display = 'none';
-        if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "連接伺服器並創建新遊戲";
+        if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "連接伺服器並創建新遊戲...";
         startInitialLoadingAnimation();
 
         try {
-            // 檢查 BACKEND_URL 是否為預設佔位符或格式不正確
             if (BACKEND_URL === 'YOUR_REPLIT_BACKEND_URL' || !BACKEND_URL.startsWith('https://')) {
-                 // 此處的 BACKEND_URL 已被替換，所以這個檢查理論上不會觸發，但保留以防萬一
                 throw new Error("後端 API 網址 (BACKEND_URL) 尚未正確設定。");
             }
-             // 檢查 Firebase 設定是否仍為佔位符 (可選，因為用戶已提供)
-            if (firebaseConfig.apiKey === "AIzaSyCACjjC1S-9gj6hKCyfAedzH9kTf_JZwDE" && firebaseConfig.projectId === "aigame-fb578") {
-                 console.log("Firebase 設定已更新。");
-            } else if (firebaseConfig.apiKey.startsWith("YOUR_REAL_FIREBASE")) {
-                 console.warn("Firebase 設定似乎仍為佔位符，請確認已填入真實金鑰。");
-            }
-
 
             const userAuthId = await initializeFirebaseAndUser();
+            if (!userAuthId) { // 確保我們確實拿到了 userId
+                throw new Error("無法獲取用戶識別碼，無法創建遊戲。");
+            }
+
+            if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "正在向伺服器請求新遊戲...";
 
             const response = await fetch(`${BACKEND_URL}game/new`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: userAuthId })
             });
+
+            if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "正在處理伺服器回應...";
 
             if (!response.ok) {
                 let errorText = `伺服器錯誤: ${response.status} ${response.statusText}`;
@@ -641,14 +648,14 @@
             gameState = await response.json();
             currentGameId = gameState.gameId;
 
-            if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "遊戲資料載入完成！";
-            updateUI(gameState);
+            if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = "遊戲資料載入完成！準備開始...";
+            updateUI(gameState); // 確保在所有資料都準備好後才更新 UI
 
             if (initialLoadingOverlay) initialLoadingOverlay.style.display = 'none';
             stopInitialLoadingAnimation();
             if (gameMainAreaEl) gameMainAreaEl.style.display = 'flex';
             if (introModal) introModal.classList.remove('hidden');
-            playBackgroundMusic();
+            playBackgroundMusic(); // 確保在遊戲內容顯示後播放音樂
 
         } catch (error) {
             console.error("創建新遊戲失敗:", error);
@@ -656,41 +663,35 @@
             if (initialLoadingMessageEl) initialLoadingMessageEl.textContent = friendlyErrorMessage;
             showErrorMessage(friendlyErrorMessage);
             stopInitialLoadingAnimation();
+            // 這裡可以考慮是否要隱藏載入畫面，或者提供一個重試按鈕
         }
     }
 
     function updateUI(state) {
-    if (!state) {
-        console.warn("updateUI 被調用時 state 為空。");
-        return;
-    }
-    gameState = state; // 更新全域遊戲狀態
+        if (!state) {
+            console.warn("updateUI 被調用時 state 為空。");
+            return;
+        }
+        gameState = state; // 更新全域遊戲狀態
 
-    // --- 新增或修改以下程式碼來設定頭像 ---
-    const suspectAvatarImg = document.getElementById('suspect-avatar-img');
-    if (suspectAvatarImg) {
-        // 假設 test00.png 在專案根目錄
-        // 如果在子資料夾，例如 'images/test00.png'，請修改路徑
-        suspectAvatarImg.src = 'test00.png';
-    }
-    // --- 頭像設定結束 ---
+        // 設定頭像
+        const suspectAvatarImg = document.getElementById('suspect-avatar-img');
+        if (suspectAvatarImg) {
+            suspectAvatarImg.src = 'test00.png'; // 確保 test00.png 在正確的路徑
+        }
 
-    // 更新回合數
-    if (roundCountHeaderEl) roundCountHeaderEl.textContent = state.round ?? '0';
-
-    // ... (updateUI 函式中其餘的程式碼保持不變) ...
-}
-        gameState = state;
-
+        // 更新回合數
         if (roundCountHeaderEl) roundCountHeaderEl.textContent = state.round ?? '0';
 
+        // 更新頑抗度顯示
         const meterInfo = getConfessionMeterTextAndColor(state.confessionMeter ?? 100);
         if (confessionMeterTextCardEl) {
             confessionMeterTextCardEl.textContent = meterInfo.text;
-            confessionMeterTextCardEl.className = 'confession-color-white';
+            confessionMeterTextCardEl.className = 'confession-color-white'; // 重置 class
             confessionMeterTextCardEl.classList.add(meterInfo.colorClass);
         }
 
+        // 更新嫌犯狀態顯示 (姓名、心率、血壓、表情、肢體、語氣)
         if (state.suspect) {
             const suspect = state.suspect;
             if(suspectStatusNameEl) suspectStatusNameEl.textContent = suspect.name ?? "讀取中...";
@@ -700,6 +701,7 @@
             if(bodyLanguageEl) bodyLanguageEl.textContent = suspect.bodyLanguage ?? "讀取中...";
             if(voiceToneEl) voiceToneEl.textContent = suspect.voiceTone ?? "讀取中...";
 
+            // 更新個人資料 Modal
             if(suspectNameModalEl) suspectNameModalEl.textContent = suspect.name ?? "N/A";
             if(ageModalEl) ageModalEl.textContent = suspect.age ?? "N/A";
             if(genderModalEl) genderModalEl.textContent = suspect.gender ?? "N/A";
@@ -714,24 +716,36 @@
             if(personalityModalEl) personalityModalEl.textContent = suspect.personality ?? "讀取中...";
         }
 
+        // 更新案件概要 Modal
         if (state.caseDetails) {
             const caseDetails = state.caseDetails;
             const processKeywords = (text) => (text ?? "讀取中...").replace(/##(.*?)##/g, '<span class="case-keyword" data-keyword="$1">$1</span>').replace(/\n/g, "<br>");
 
             if(autopsyReportModalContentEl) autopsyReportModalContentEl.innerHTML = processKeywords(caseDetails.autopsyReport);
-            if(evidenceListModalContentEl) evidenceListModalContentEl.innerHTML = (caseDetails.evidence ?? []).map(e => `<li data-id="${e.id}">${processKeywords(e.text)}</li>`).join('');
-            if(doubtsListModalContentEl) doubtsListModalContentEl.innerHTML = (caseDetails.doubts ?? []).map(d => `<li data-id="${d.id}">${processKeywords(d.text)}</li>`).join('');
+            if(evidenceListModalContentEl) {
+                evidenceListModalContentEl.innerHTML = (caseDetails.evidence ?? [])
+                    .map(e => `<li data-id="${e.id || ''}">${processKeywords(e.text)}</li>`)
+                    .join('');
+            }
+            if(doubtsListModalContentEl) {
+                doubtsListModalContentEl.innerHTML = (caseDetails.doubts ?? [])
+                    .map(d => `<li data-id="${d.id || ''}">${processKeywords(d.text)}</li>`)
+                    .join('');
+            }
         }
 
-        if (dialogueAreaEl) dialogueAreaEl.innerHTML = '';
+        // 更新對話區域
+        if (dialogueAreaEl) dialogueAreaEl.innerHTML = ''; // 先清空
         if (state.dialogueHistory && Array.isArray(state.dialogueHistory)) {
             state.dialogueHistory.forEach(msg => addMessageToDialogue(msg.speaker, msg.text, msg.tone));
         }
 
+        // 更新偵訊提示
         if (interrogationTipAreaEl && state.interrogationTip) {
             interrogationTipAreaEl.textContent = "※貼心提示： " + state.interrogationTip;
         }
 
+        // 為新渲染的關鍵字綁定事件 (如果關鍵字是動態加入的)
         document.querySelectorAll('.case-keyword, .keyword').forEach(el => {
             el.onclick = () => {
                 const keyword = el.dataset.keyword;
@@ -741,6 +755,7 @@
             };
         });
 
+        // 處理遊戲結束狀態
         if (state.gameOver) {
             if(gameOverTitle) gameOverTitle.textContent = (state.confessionMeter != null && state.confessionMeter <= 0) ? "⚖️ 審問成功！" : "⚖️ 審問失敗！";
             if(totalRoundsEl) totalRoundsEl.textContent = state.round ?? '0';
@@ -760,20 +775,20 @@
                 } else if (achievementBannerEl) {
                     achievementBannerEl.classList.add('hidden');
                 }
-            } else if (gameAnalysisTextEl) {
-                gameAnalysisTextEl.textContent = typeof state.gameAnalysis === 'string' ? state.gameAnalysis : "分析生成失敗或格式不符。";
+            } else if (gameAnalysisTextEl) { // 修正此處，應使用 gameAnalysisContainerEl
+                gameAnalysisContainerEl.innerHTML = `<p class="analysis-section-content">${typeof state.gameAnalysis === 'string' ? state.gameAnalysis : "分析生成失敗或格式不符。"}</p>`;
                  if(achievementBannerEl) achievementBannerEl.classList.add('hidden');
             }
             if(gameOverModal) gameOverModal.classList.remove('hidden');
         } else {
             if(gameOverModal) gameOverModal.classList.add('hidden');
         }
-    
+    } // updateUI 函式結束
 
     function addMessageToDialogue(speaker, text, tone = null) {
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('dialogue-bubble');
-        let messageContent = text ?? "";
+        let messageContent = text ?? ""; // 確保 text 不是 null 或 undefined
 
         if (speaker === 'Player') {
             messageDiv.classList.add('player-bubble');
@@ -787,18 +802,20 @@
         } else if (speaker === '警官') {
             messageDiv.classList.add('officer-bubble');
             messageContent = `<strong>警官：</strong> ${messageContent}`;
-        } else {
+        } else { // AI (嫌犯)
             messageDiv.classList.add('ai-bubble');
         }
 
+        // 處理關鍵字 @@keyword@@
         const processedText = messageContent.replace(/@@(.*?)@@/g, '<span class="keyword" data-keyword="$1">$1</span>');
         messageDiv.innerHTML = processedText;
 
         if (dialogueAreaEl) {
             dialogueAreaEl.appendChild(messageDiv);
-            dialogueAreaEl.scrollTop = dialogueAreaEl.scrollHeight;
+            dialogueAreaEl.scrollTop = dialogueAreaEl.scrollHeight; // 自動滾動到底部
         }
 
+        // 為新加入的關鍵字綁定點擊事件
         messageDiv.querySelectorAll('.keyword').forEach(el => {
             el.onclick = () => {
                 const keyword = el.dataset.keyword;
@@ -808,6 +825,7 @@
             };
         });
     }
+    // 移除了多餘的 '}'
 
     async function fetchKeywordInfo(keyword) {
         if (!currentGameId) {
@@ -817,16 +835,30 @@
         }
         clearErrorMessage();
 
-        if(keywordModalText) keywordModalText.style.display = 'none';
-        if(keywordFolderLoaderEl) keywordFolderLoaderEl.classList.remove('hidden');
+        if(keywordModalText) keywordModalText.style.display = 'none'; // 先隱藏文字
+        if(keywordFolderLoaderEl) keywordFolderLoaderEl.classList.remove('hidden'); // 顯示載入動畫
 
-        const totalPages = 4; let currentPage = 0;
-        if(keywordFolderPagesBarEl) keywordFolderPagesBarEl.innerHTML = '';
-        function renderKeywordPagesBar() { let html = ''; for (let i = 0; i < totalPages; i++) { html += `<div class="page-dot${i === currentPage ? ' active' : ''}"></div>`; } if(keywordFolderPagesBarEl) keywordFolderPagesBarEl.innerHTML = html; }
-        function updateKeywordPage() { currentPage = (currentPage + 1) % totalPages; renderKeywordPagesBar(); if(keywordFolderPageTextEl) keywordFolderPageTextEl.textContent = `第 ${currentPage + 1} / ${totalPages} 頁，正在呈上中…`; }
-        renderKeywordPagesBar(); if(keywordFolderPageTextEl) keywordFolderPageTextEl.textContent = `第 1 / ${totalPages} 頁，正在呈上中…`;
-        if (keywordPageTimer) clearInterval(keywordPageTimer);
-        keywordPageTimer = setInterval(updateKeywordPage, 700);
+        // 關鍵字資料夾動畫相關
+        const totalPages = 4; // 動畫頁數
+        let currentPage = 0;
+        if(keywordFolderPagesBarEl) keywordFolderPagesBarEl.innerHTML = ''; // 清空
+        function renderKeywordPagesBar() {
+            let html = '';
+            for (let i = 0; i < totalPages; i++) {
+                html += `<div class="page-dot${i === currentPage ? ' active' : ''}"></div>`;
+            }
+            if(keywordFolderPagesBarEl) keywordFolderPagesBarEl.innerHTML = html;
+        }
+        function updateKeywordPage() {
+            currentPage = (currentPage + 1) % totalPages;
+            renderKeywordPagesBar();
+            if(keywordFolderPageTextEl) keywordFolderPageTextEl.textContent = `第 ${currentPage + 1} / ${totalPages} 頁，正在呈上中…`;
+        }
+        renderKeywordPagesBar(); // 初始渲染
+        if(keywordFolderPageTextEl) keywordFolderPageTextEl.textContent = `第 1 / ${totalPages} 頁，正在呈上中…`;
+
+        if (keywordPageTimer) clearInterval(keywordPageTimer); // 清除舊的計時器
+        keywordPageTimer = setInterval(updateKeywordPage, 700); // 每0.7秒更新一次頁碼
 
         try {
             const response = await fetch(`${BACKEND_URL}game/${currentGameId}/keyword?keyword=${encodeURIComponent(keyword)}`);
@@ -841,11 +873,11 @@
             console.error(`獲取關鍵字 "${keyword}" 資訊失敗:`, error);
             const friendlyErrorMessage = `無法載入關於「${keyword}」的資訊：${error.message}`;
             if(keywordModalText) keywordModalText.textContent = friendlyErrorMessage;
-            showErrorMessage(friendlyErrorMessage);
+            showErrorMessage(friendlyErrorMessage); // 顯示錯誤訊息給用戶
         } finally {
-            if (keywordPageTimer) clearInterval(keywordPageTimer);
-            if(keywordFolderLoaderEl) keywordFolderLoaderEl.classList.add('hidden');
-            if(keywordModalText) keywordModalText.style.display = 'block';
+            if (keywordPageTimer) clearInterval(keywordPageTimer); // 清除計時器
+            if(keywordFolderLoaderEl) keywordFolderLoaderEl.classList.add('hidden'); // 隱藏載入動畫
+            if(keywordModalText) keywordModalText.style.display = 'block'; // 顯示文字內容
         }
     }
 
@@ -855,11 +887,12 @@
             showErrorMessage("錯誤：遊戲未正確初始化，請重新載入。");
             return;
         }
-        clearErrorMessage();
+        clearErrorMessage(); // 清除之前的錯誤訊息
 
         const playerMessage = playerInputEl.value.trim();
-        if (!isDemandConfession && !playerMessage) return;
+        if (!isDemandConfession && !playerMessage) return; // 非要求認罪時，如果沒輸入訊息則不處理
 
+        // 禁用按鈕並顯示載入狀態
         sendButton.disabled = true;
         demandConfessionButton.disabled = true;
         const originalSendButtonText = sendButton.innerHTML;
@@ -868,14 +901,15 @@
         if (isDemandConfession) {
             demandConfessionButton.innerHTML = '<div class="loading-spinner !w-4 !h-4 border-t-white mx-auto"></div>';
         } else {
-            sendButton.innerHTML = '<div class="loading-spinner !w-5 !h-5 border-t-white"></div>';
+            sendButton.innerHTML = '<div class="loading-spinner !w-5 !h-5 border-t-white"></div>'; // 保持原樣
         }
         showThinkingModal(isDemandConfession ? '正在要求對方認罪...' : 'AI正在分析您的輸入...');
 
-        const currentTone = gameState.selectedTone || "平緩";
+
+        const currentTone = gameState.selectedTone || "平緩"; // 確保有預設語氣
         const payload = {
-            message: isDemandConfession ? "" : playerMessage,
-            tone: isDemandConfession ? "憤怒" : currentTone,
+            message: isDemandConfession ? "" : playerMessage, // 要求認罪時 message 為空
+            tone: isDemandConfession ? "憤怒" : currentTone, // 要求認罪時固定為憤怒，否則用當前選擇的
             isDemandConfession: isDemandConfession
         };
 
@@ -891,34 +925,40 @@
                 try {
                     const errorData = await response.json();
                     errorText = errorData.error || errorText;
+                    // 如果錯誤是因為遊戲已結束，則更新UI並返回
                     if (errorData.gameState && errorData.error === "遊戲已結束") {
                         console.warn("嘗試在已結束的遊戲中執行動作。");
-                        updateUI(errorData.gameState);
-                        return;
+                        updateUI(errorData.gameState); // 使用伺服器返回的最終狀態更新UI
+                        return; // 提前返回，不再執行 finally 中的按鈕恢復
                     }
-                } catch (e) { /* ignore */ }
+                } catch (e) { /* 解析 JSON 失敗，使用原始錯誤文字 */ }
                 throw new Error(errorText);
             }
             const updatedGameState = await response.json();
             updateUI(updatedGameState);
-            if (!isDemandConfession) playerInputEl.value = '';
+            if (!isDemandConfession) playerInputEl.value = ''; // 清空輸入框
         } catch (error) {
             console.error("玩家回合處理失敗:", error);
             showErrorMessage(`操作失敗: ${error.message}`);
         } finally {
             hideThinkingModal();
-            sendButton.disabled = false;
-            demandConfessionButton.disabled = false;
-            sendButton.innerHTML = originalSendButtonText;
-            demandConfessionButton.textContent = originalDemandButtonText;
+            // 只有在遊戲未結束時才恢復按鈕狀態
+            if (!(gameState && gameState.gameOver)) {
+                sendButton.disabled = false;
+                demandConfessionButton.disabled = false;
+                sendButton.innerHTML = originalSendButtonText;
+                demandConfessionButton.textContent = originalDemandButtonText;
+            }
         }
     }
 
     function restartGame() {
         if(gameOverModal) gameOverModal.classList.add('hidden');
-        loadOrCreateNewGame();
+        // 可以在這裡加入一些重置UI的邏輯，如果需要的話
+        loadOrCreateNewGame(); // 重新載入或創建新遊戲
     }
 
+    // 初始載入動畫相關
     const initialLoadingTips = [
         "警方正在布置偵訊室…", "檢查錄音與監控設備中…", "案件資料調閱中，請稍候…",
         "將嫌犯帶往偵訊室…", "準備調查證據中…", "檢查筆錄與相關卷宗…",
@@ -930,18 +970,21 @@
 
     function startInitialLoadingAnimation() {
         if (!loadingAnimationTextEl) return;
-        loadingAnimationTextEl.textContent = initialLoadingTips[0];
+        loadingAnimationTextEl.textContent = initialLoadingTips[0]; // 初始提示
         if (initialLoadingTipInterval) clearInterval(initialLoadingTipInterval);
         initialLoadingTipInterval = setInterval(() => {
             let idx;
-            do { idx = Math.floor(Math.random() * initialLoadingTips.length); } while (idx === lastTipIdx);
+            do {
+                idx = Math.floor(Math.random() * initialLoadingTips.length);
+            } while (idx === lastTipIdx && initialLoadingTips.length > 1); // 避免連續重複，除非只有一個提示
             lastTipIdx = idx;
+            // 平滑過渡文字
             loadingAnimationTextEl.style.opacity = 0;
             setTimeout(() => {
                 loadingAnimationTextEl.textContent = initialLoadingTips[idx];
                 loadingAnimationTextEl.style.opacity = 1;
-            }, 400);
-        }, 3000);
+            }, 400); // 等待舊文字淡出
+        }, 3000); // 每3秒切換一次提示
     }
 
     function stopInitialLoadingAnimation() {
@@ -949,11 +992,12 @@
         initialLoadingTipInterval = null;
     }
 
+
     // --- 事件監聽器 ---
     if (closeIntroModalButton) {
         closeIntroModalButton.addEventListener('click', () => {
             if (introModal) introModal.classList.add('hidden');
-            playBackgroundMusic();
+            playBackgroundMusic(); // 在用戶首次互動後播放音樂
         });
     }
     if (sendButton) sendButton.addEventListener('click', () => handlePlayerTurn(false));
@@ -966,7 +1010,7 @@
     if (playerInputEl) {
         playerInputEl.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
+                e.preventDefault(); // 防止換行
                 handlePlayerTurn(false);
             }
         });
@@ -975,7 +1019,7 @@
         button.addEventListener('click', () => {
             toneButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            if (gameState) gameState.selectedTone = button.dataset.tone;
+            if (gameState) gameState.selectedTone = button.dataset.tone; // 更新選中的語氣
         });
     });
     if (showPersonalDetailsButton) showPersonalDetailsButton.addEventListener('click', () => personalDetailsModal.classList.remove('hidden'));
@@ -985,6 +1029,7 @@
     // --- 頁面載入完成後執行 ---
     window.addEventListener('load', () => {
         loadOrCreateNewGame();
+        // 背景音樂的播放最好在用戶有互動後（例如點擊“開始偵訊”）再觸發，以符合瀏覽器的自動播放策略
     });
 
 </script>

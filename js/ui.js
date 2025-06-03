@@ -272,10 +272,10 @@ export function populateTemporaryBackpack() {
 }
 
 export function updateCombinationSlotUI(comboSlotId, dnaItem) {
-    const { dnaCombinationSlots } = GameState.elements;
-    if (!dnaCombinationSlots) { console.error("UI: dnaCombinationSlots not found!"); return; }
+    const { dnaCombinationSlotsContainer } = GameState.elements; // 使用 dnaCombinationSlotsContainer
+    if (!dnaCombinationSlotsContainer) { console.error("UI: dnaCombinationSlotsContainer not found!"); return; }
 
-    const slotElement = dnaCombinationSlots.querySelector(`[data-slot-id="${comboSlotId}"]`);
+    const slotElement = dnaCombinationSlotsContainer.querySelector(`[data-slot-id="${comboSlotId}"]`);
     if (slotElement) {
         if (dnaItem) {
             const elementStyle = getElementStyling(dnaItem.elements && dnaItem.elements.length > 0 ? dnaItem.elements[0] : '無');
@@ -321,9 +321,9 @@ export function createCombinationSlots() {
 
 // --- 怪獸相關 UI ---
 export function updateMonsterSnapshotDisplay(monster) {
-    const { monsterImageElement, snapshotAchievementTitle, snapshotNickname, snapshotWinLoss, snapshotEvaluation, monsterInfoButton } = GameState.elements;
+    const { monsterImageElement, snapshotAchievementTitle, snapshotNickname, snapshotWinLoss, snapshotEvaluation, monsterInfoButton, snapshotMainContent } = GameState.elements;
 
-    if (!monsterImageElement || !snapshotAchievementTitle || !snapshotNickname || !snapshotWinLoss || !snapshotEvaluation || !monsterInfoButton) {
+    if (!monsterImageElement || !snapshotAchievementTitle || !snapshotNickname || !snapshotWinLoss || !snapshotEvaluation || !monsterInfoButton || !snapshotMainContent) {
         console.error("UI: Monster snapshot elements not found in GameState.elements.");
         return;
     }
@@ -337,16 +337,13 @@ export function updateMonsterSnapshotDisplay(monster) {
         snapshotEvaluation.textContent = `總評價: ${monster.totalEvaluation || 0}`;
 
         // 更新快照中的基本屬性顯示
-        const snapshotMainContent = GameState.elements.snapshotMainContent;
-        if (snapshotMainContent) {
-            const elementStyle = getElementStyling(monster.elements && monster.elements.length > 0 ? monster.elements[0] : '無');
-            snapshotMainContent.innerHTML = `
-                <p class="text-sm">屬性: <span class="font-bold" style="color:${elementStyle.text};">${monster.elements ? monster.elements.join('/') : '無'}</span></p>
-                <p class="text-sm">等級: <span class="font-bold">${monster.level || 1}</span></p>
-                <p class="text-sm">戰力: <span class="font-bold">${monster.combatPower || 0}</span></p>
-                <p class="text-sm">技能: <span class="font-bold">${monster.skills && monster.skills.length > 0 ? monster.skills[0].name : '無'}</span></p>
-            `;
-        }
+        const elementStyle = getElementStyling(monster.elements && monster.elements.length > 0 ? monster.elements[0] : '無');
+        snapshotMainContent.innerHTML = `
+            <p class="text-sm">屬性: <span class="font-bold" style="color:${elementStyle.text};">${monster.elements ? monster.elements.join('/') : '無'}</span></p>
+            <p class="text-sm">等級: <span class="font-bold">${monster.level || 1}</span></p>
+            <p class="text-sm">戰力: <span class="font-bold">${monster.combatPower || 0}</span></p>
+            <p class="text-sm">技能: <span class="font-bold">${monster.skills && monster.skills.length > 0 ? monster.skills[0].name : '無'}</span></p>
+        `;
         monsterInfoButton.disabled = false; // 有怪獸時啟用按鈕
     } else {
         // 沒有怪獸時顯示預設狀態
@@ -356,15 +353,12 @@ export function updateMonsterSnapshotDisplay(monster) {
         snapshotNickname.textContent = '-';
         snapshotWinLoss.innerHTML = `<span>勝: 0</span><span>敗: 0</span>`;
         snapshotEvaluation.textContent = `總評價: 0`;
-        const snapshotMainContent = GameState.elements.snapshotMainContent;
-        if (snapshotMainContent) {
-            snapshotMainContent.innerHTML = `
-                <p class="text-sm">屬性: <span class="font-bold">?</span></p>
-                <p class="text-sm">等級: <span class="font-bold">?</span></p>
-                <p class="text-sm">戰力: <span class="font-bold">?</span></p>
-                <p class="text-sm">技能: <span class="font-bold">?</span></p>
-            `;
-        }
+        snapshotMainContent.innerHTML = `
+            <p class="text-sm">屬性: <span class="font-bold">?</span></p>
+            <p class="text-sm">等級: <span class="font-bold">?</span></p>
+            <p class="text-sm">戰力: <span class="font-bold">?</span></p>
+            <p class="text-sm">技能: <span class="font-bold">?</span></p>
+        `;
         monsterInfoButton.disabled = true; // 沒有怪獸時禁用按鈕
     }
     console.log("UI: Monster snapshot updated for", monster ? monster.nickname : "no monster");
@@ -900,10 +894,10 @@ export function updateActionButtonsStateUI() {
 
 // --- 拖放相關 UI 設置 ---
 export function setupDropZones() {
-    const { inventoryItemsContainer, temporaryBackpackItemsContainer, dnaCombinationSlots, inventoryDeleteSlot, drawDnaBtn } = GameState.elements;
+    const { inventoryItemsContainer, temporaryBackpackItemsContainer, dnaCombinationSlotsContainer, inventoryDeleteSlot, drawDnaBtn } = GameState.elements; // Changed to dnaCombinationSlotsContainer
 
     // 確保這些元素存在
-    if (!inventoryItemsContainer || !temporaryBackpackItemsContainer || !dnaCombinationSlots || !inventoryDeleteSlot || !drawDnaBtn) {
+    if (!inventoryItemsContainer || !temporaryBackpackItemsContainer || !dnaCombinationSlotsContainer || !inventoryDeleteSlot || !drawDnaBtn) {
         console.error("UI: One or more drop zone elements not found in GameState.elements.");
         return;
     }
@@ -924,9 +918,9 @@ export function setupDropZones() {
     temporaryBackpackItemsContainer.addEventListener('drop', GameLogic.handleDrop); // 處理拖放到臨時背包區
 
     // DNA 組合槽 (用於拖入物品)
-    dnaCombinationSlots.addEventListener('dragover', GameLogic.handleDragOver);
-    dnaCombinationSlots.addEventListener('dragleave', GameLogic.handleDragLeave);
-    dnaCombinationSlots.addEventListener('drop', GameLogic.handleDrop);
+    dnaCombinationSlotsContainer.addEventListener('dragover', GameLogic.handleDragOver); // Changed to dnaCombinationSlotsContainer
+    dnaCombinationSlotsContainer.addEventListener('dragleave', GameLogic.handleDragLeave); // Changed to dnaCombinationSlotsContainer
+    dnaCombinationSlotsContainer.addEventListener('drop', GameLogic.handleDrop); // Changed to dnaCombinationSlotsContainer
 
     // 刪除區 (用於拖入物品)
     inventoryDeleteSlot.addEventListener('dragover', GameLogic.handleDragOver);

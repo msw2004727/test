@@ -1,20 +1,12 @@
 // api-client.js
 
+import { auth, db, firebase } from './firebase-config.js';
 import { loadDeepSeekApiKey } from './loadApiKey.js';
 
 // --- API Configuration ---
 const API_BASE_URL = 'https://d1d5ef45-d04b-4a1c-be4b-64a0680c6847-00-xxpggv06ka2e.sisko.replit.dev/api/MD';
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 const DEFAULT_MODEL = 'chat';
-
-// --- Firebase Auth Helper ---
-let auth;
-if (typeof firebase !== 'undefined' && firebase.auth) {
-    auth = firebase.auth();
-} else {
-    auth = { currentUser: null };
-    console.warn("Firebase auth 未初始化，auth 模擬中");
-}
 
 async function getAuthHeaders(includeContentType = true) {
     const headers = {};

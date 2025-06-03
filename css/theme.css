@@ -144,12 +144,13 @@
     --button-danger-text: var(--button-danger-text-dark);
 
     --button-success-bg: var(--button-success-bg-dark);
-    --button-success-hover-bg: var(--button-success-hover-bg-dark);
-    --button-success-text: var(--button-success-text-dark);
+    --button-success-hover-bg: color-mix(in srgb, var(--success-color-dark) 85%, black);
+    --button-success-text: #ffffff;
 
     --button-warning-bg: var(--button-warning-bg-dark);
-    --button-warning-hover-bg: var(--button-warning-hover-bg-dark);
-    --button-warning-text: var(--button-warning-text-dark);
+    --button-warning-hover-bg: color-mix(in srgb, var(--warning-color-dark) 85%, black);
+    --button-warning-text: #ffffff;
+
 
     /* Applied Element Colors */
     --element-fire-text: var(--element-fire-text-dark);       --element-fire-bg: var(--element-fire-bg-dark);
@@ -201,11 +202,11 @@ body.light-theme {
     --button-danger-text: var(--button-danger-text-light);
 
     --button-success-bg: var(--button-success-bg-light);
-    --button-success-hover-bg: var(--button-success-hover-bg-light);
+    --button-success-hover-bg: color-mix(in srgb, var(--success-color-light) 85%, black);
     --button-success-text: var(--button-success-text-light);
 
     --button-warning-bg: var(--button-warning-bg-light);
-    --button-warning-hover-bg: var(--button-warning-hover-bg-light);
+    --button-warning-hover-bg: color-mix(in srgb, var(--warning-color-light) 85%, black);
     --button-warning-text: var(--button-warning-text-light);
 
     /* Applied Element Colors - Light Theme */

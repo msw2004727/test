@@ -7,7 +7,7 @@ import * as GameLogic from './game-logic.js'; // 如果 UI 操作需要觸發遊
 // --- 通用 UI 輔助函式 ---
 
 export function openModal(modalId) {
-    const modal = document.getElementById(modalId); // 獲取 DOM 元素
+    const modal = document.getElementById(modalId); // 獲取 DOM 元素 
     if (modal) {
         modal.style.display = 'flex';
         console.log(`UI: Modal ${modalId} opened.`);
@@ -54,7 +54,8 @@ export function showFeedbackModal(title, messageOrContent, showSpinner, showClos
             feedbackMonsterDetailsDiv: !!feedbackMonsterDetailsDiv, feedbackModalMessage: !!feedbackModalMessage
         });
         // 作為最終備援，使用瀏覽器原生的 alert
-        alert(`錯誤提示: ${title}\n${typeof messageOrContent === 'string' ? messageOrContent : '無法顯示詳細訊息。'}\n\n(UI元素未完全載入，請檢查控制台錯誤)`);
+        // alert(`錯誤提示: ${title}\n${typeof messageOrContent === 'string' ? messageOrContent : '無法顯示詳細訊息。'}\n\n(UI元素未完全載入，請檢查控制台錯誤)`);
+        console.error(`Fallback: ${title} - ${typeof messageOrContent === 'string' ? messageOrContent : '無法顯示詳細訊息。'}`);
         return;
     }
 
@@ -78,7 +79,7 @@ export function showFeedbackModal(title, messageOrContent, showSpinner, showClos
             skillsHTML = monsterForDetails.skills.map(skill => `
                 <div class="feedback-skill-entry">
                     <span class="feedback-skill-name">${skill.name}</span>
-                    <span class="feedback-skill-description">${skill.description}</span>
+                    <span class="feedback-skill-description">${skill.description || skill.story || ''}</span>
                 </div>
             `).join('');
         } else {
@@ -88,7 +89,7 @@ export function showFeedbackModal(title, messageOrContent, showSpinner, showClos
         feedbackMonsterDetailsDiv.innerHTML = `
             <p class="text-sm font-bold">怪獸名稱: <span class="text-[var(--accent-color)]">${monsterForDetails.nickname}</span></p>
             <p class="text-sm">等級: ${monsterForDetails.level || 1}</p>
-            <p class="text-sm">總評價: ${monsterForDetails.totalEvaluation || 0}</p>
+            <p class="text-sm">總評價: ${monsterForDetails.score || 0}</p>
             <p class="text-sm">屬性組成: ${elementCompHTML}</p>
             <h6 class="font-bold mt-2">技能:</h6>
             <div>${skillsHTML}</div>
@@ -173,8 +174,8 @@ export function getRarityStyling(rarityName) {
     switch(rarityName) {
         case "普通": return { text: 'var(--rarity-common-text)'};
         case "稀有": return { text: 'var(--rarity-rare-text)'};
-        case "精英": return { text: 'var(--rarity-elite-text)'};
-        case "傳說": return { text: 'var(--rarity-legendary-text)'};
+        case "菁英": return { text: 'var(--rarity-elite-text)'};
+        case "傳奇": return { text: 'var(--rarity-legendary-text)'};
         case "神話": return { text: 'var(--rarity-mythical-text)'};
         default: return { text: 'var(--rarity-common-text)'};
     }
@@ -352,15 +353,15 @@ export function updateMonsterSnapshotDisplay(monster) {
         monsterImageElement.alt = `${monster.nickname}圖片`;
         snapshotAchievementTitle.textContent = monster.title || '初出茅廬';
         snapshotNickname.textContent = monster.nickname || '-';
-        snapshotWinLoss.innerHTML = `<span>勝: ${monster.wins || 0}</span><span>敗: ${monster.losses || 0}</span>`;
-        snapshotEvaluation.textContent = `總評價: ${monster.totalEvaluation || 0}`;
+        snapshotWinLoss.innerHTML = `<span>勝: ${monster.resume?.wins || 0}</span><span>敗: ${monster.resume?.losses || 0}</span>`;
+        snapshotEvaluation.textContent = `總評價: ${monster.score || 0}`;
 
         // 更新快照中的基本屬性顯示
         const elementStyle = getElementStyling(monster.elements && monster.elements.length > 0 ? monster.elements[0] : '無');
         snapshotMainContent.innerHTML = `
             <p class="text-sm">屬性: <span class="font-bold" style="color:${elementStyle.text};">${monster.elements ? monster.elements.join('/') : '無'}</span></p>
             <p class="text-sm">等級: <span class="font-bold">${monster.level || 1}</span></p>
-            <p class="text-sm">戰力: <span class="font-bold">${monster.combatPower || 0}</span></p>
+            <p class="text-sm">戰力: <span class="font-bold">${monster.attack + monster.defense + monster.speed || 0}</span></p>
             <p class="text-sm">技能: <span class="font-bold">${monster.skills && monster.skills.length > 0 ? monster.skills[0].name : '無'}</span></p>
         `;
         monsterInfoButton.disabled = false; // 有怪獸時啟用按鈕
@@ -409,13 +410,13 @@ export function renderMonsterInfoModalContent(monster) {
         <img src="${monster.imageUrl || 'https://placehold.co/80x80/161b22/8b949e?text=怪獸'}" alt="${monster.nickname}頭像" class="rounded-full mr-4">
         <div>
             <h4 class="text-xl font-bold monster-info-name-styled">${monster.nickname} (Lv. ${monster.level || 1})</h4>
-            <p class="text-sm text-[var(--text-secondary)]">訓獸師: <span class="player-nickname-link cursor-pointer text-[var(--accent-color)]" data-player-uid="${monster.ownerUid || ''}">${monster.ownerNickname || '未知'}</span></p>
+            <p class="text-sm text-[var(--text-secondary)]">訓獸師: <span class="player-nickname-link cursor-pointer text-[var(--accent-color)]" data-player-uid="${monster.owner_id || ''}">${monster.owner_nickname || '未知'}</span></p>
         </div>
     `;
 
     // 渲染詳細資訊頁籤
     // 這裡直接使用 monster.aiPersonality?.text 等，因為這些是動態生成的內容
-    const personalityText = monster.aiPersonality?.text || '一段關於怪獸個性的詳細描述。';
+    const personalityText = monster.aiPersonality || '一段關於怪獸個性的詳細描述。';
     const introductionText = monster.aiIntroduction || '一段關於怪獸的背景故事或趣味介紹，包含其數值如何融入敘述。';
     const evaluationText = monster.aiEvaluation || '一段針對怪獸的綜合評價與培養建議，指出優勢劣勢及戰術定位。';
 
@@ -423,8 +424,8 @@ export function renderMonsterInfoModalContent(monster) {
     if (monster.skills && monster.skills.length > 0) {
         skillsListHtml = monster.skills.map(skill => `
             <div class="skill-entry">
-                <span class="skill-name">${skill.name}</span>
-                <span class="skill-details">${skill.description}</span>
+                <span class="skill-name">${skill.name} (Lv.${skill.level || 1})</span>
+                <span class="skill-details">${skill.description || skill.story || ''}</span>
             </div>
         `).join('');
     } else {
@@ -436,13 +437,13 @@ export function renderMonsterInfoModalContent(monster) {
         <div class="details-grid">
             <div class="details-item"><span class="details-label">類型:</span> <span class="details-value">${monster.type || '未知'}</span></div>
             <div class="details-item"><span class="details-label">元素:</span> <span class="details-value" style="color:${getElementStyling(monster.elements && monster.elements.length > 0 ? monster.elements[0] : '無').text};">${monster.elements ? monster.elements.join('/') : '無'}</span></div>
-            <div class="details-item"><span class="details-label">生命值(HP):</span> <span class="details-value">${monster.hp || 0}</span></div>
-            <div class="details-item"><span class="details-label">魔力值(MP):</span> <span class="details-value">${monster.mp || 0}</span></div>
+            <div class="details-item"><span class="details-label">生命值(HP):</span> <span class="details-value">${monster.hp || 0} / ${monster.initial_max_hp || monster.hp || 0}</span></div>
+            <div class="details-item"><span class="details-label">魔力值(MP):</span> <span class="details-value">${monster.mp || 0} / ${monster.initial_max_mp || monster.mp || 0}</span></div>
             <div class="details-item"><span class="details-label">攻擊力:</span> <span class="details-value">${monster.attack || 0}</span></div>
             <div class="details-item"><span class="details-label">防禦力:</span> <span class="details-value">${monster.defense || 0}</span></div>
             <div class="details-item"><span class="details-label">速度:</span> <span class="details-value">${monster.speed || 0}</span></div>
-            <div class="details-item"><span class="details-label">爆擊率:</span> <span class="details-value">${(monster.critRate || 0) * 100}%</span></div>
-            <div class="details-item"><span class="details-label">個性:</span> <span class="details-value" style="color:${monster.aiPersonality?.color || 'var(--accent-color)'};">${monster.personality || '無'}</span></div>
+            <div class="details-item"><span class="details-label">爆擊率:</span> <span class="details-value">${(monster.crit || 0)}%</span></div>
+            <div class="details-item"><span class="details-label">個性:</span> <span class="details-value" style="color:${monster.personality?.colorDark || 'var(--accent-color)'};">${monster.personality?.name || '無'}</span></div>
         </div>
         <p class="personality-text mt-2">${personalityText}</p>
 
@@ -454,7 +455,7 @@ export function renderMonsterInfoModalContent(monster) {
 
         <h5 class="font-bold mb-2 mt-4">綜合評價與培養建議</h5>
         <p class="ai-generated-text">${evaluationText}</p>
-        <p class="creation-time-centered">創建時間: ${monster.creationTime ? new Date(monster.creationTime).toLocaleString() : '未知'}</p>
+        <p class="creation-time-centered">創建時間: ${monster.creationTime ? new Date(monster.creationTime * 1000).toLocaleString() : '未知'}</p>
     `;
 
     // 更新活動紀錄頁籤
@@ -498,11 +499,11 @@ export function updateMonsterActivityLog(monster) {
     const { monsterActivityLogs } = GameState.elements;
     if (!monsterActivityLogs) { console.error("UI: monsterActivityLogs not found!"); return; }
 
-    if (monster && monster.activityLogs && monster.activityLogs.length > 0) {
+    if (monster && monster.activityLog && monster.activityLog.length > 0) {
         monsterActivityLogs.innerHTML = `
             <ul class="list-disc list-inside text-sm">
-                ${monster.activityLogs.map(log => `
-                    <li><span class="log-time">[${new Date(log.timestamp).toLocaleString()}]</span> <span class="log-message">${log.message}</span></li>
+                ${monster.activityLog.map(log => `
+                    <li><span class="log-time">[${log.time}]</span> <span class="log-message">${log.message}</span></li>
                 `).join('')}
             </ul>
         `;
@@ -537,7 +538,7 @@ export function populateFarmList() {
 
             const isTraining = monster.farmStatus && monster.farmStatus.isTraining; // 修正為 isTraining
             const isBattling = monster.farmStatus && monster.farmStatus.isBattling;
-            const statusText = isTraining ? `修煉中 (${monster.farmStatus.remainingTime}s)` : (isBattling ? '出戰中' : '活躍');
+            const statusText = isTraining ? `修煉中 (${monster.farmStatus.remainingTime || 0}s)` : (isBattling ? '出戰中' : '活躍');
             const statusClass = isTraining ? 'text-yellow-400' : (isBattling ? 'text-red-400' : 'text-green-400');
 
             monsterItemDiv.innerHTML = `
@@ -550,9 +551,9 @@ export function populateFarmList() {
                     <span class="farm-monster-name">${monster.nickname}</span>
                 </div>
                 <div class="${statusClass} farm-monster-status">${statusText}</div>
-                <div class="hidden sm:block farm-monster-score">${monster.totalEvaluation || 0}</div>
+                <div class="hidden sm:block farm-monster-score">${monster.score || 0}</div>
                 <div class="farm-monster-actions-group">
-                    <button class="text-xs secondary p-1 farm-monster-cultivate-btn" data-action="cultivate" data-monster-id="${monster.id}" ${isTraining ? 'disabled' : ''}>養成</button>
+                    <button class="text-xs warning p-1 farm-monster-cultivate-btn" data-action="cultivate" data-monster-id="${monster.id}" ${isTraining ? 'disabled' : ''}>養成</button>
                     <button class="text-xs danger p-1 farm-monster-release-btn" data-action="release" data-monster-id="${monster.id}" ${isTraining || isBattling ? 'disabled' : ''}>放生</button>
                 </div>
             `;
@@ -567,7 +568,7 @@ export function updateFarmMonsterStatusDisplay(monster, statusDivElement) {
 
     const isTraining = monster.farmStatus && monster.farmStatus.isTraining; // 修正為 isTraining
     const isBattling = monster.farmStatus && monster.farmStatus.isBattling;
-    const statusText = isTraining ? `修煉中 (${monster.farmStatus.remainingTime}s)` : (isBattling ? '出戰中' : '活躍');
+    const statusText = isTraining ? `修煉中 (${monster.farmStatus.remainingTime || 0}s)` : (isBattling ? '出戰中' : '活躍');
     const statusClass = isTraining ? 'text-yellow-400' : (isBattling ? 'text-red-400' : 'text-green-400');
 
     statusDivElement.className = `${statusClass} farm-monster-status`; // 更新 class
@@ -600,7 +601,7 @@ export function renderTrainingItems() {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'item-card bg-gray-700 p-2 rounded-md text-center text-xs flex justify-between items-center';
             itemDiv.innerHTML = `
-                <span>${item.name} x${item.quantity}</span>
+                <span>${item.name} x${item.quantity || 1}</span>
                 <button class="text-xs secondary p-1 add-one-to-temp-backpack-btn" data-item-index="${index}" ${item.addedToBackpack ? 'disabled' : ''}>
                     ${item.addedToBackpack ? '已加入' : '加入背包'}
                 </button>
@@ -673,12 +674,12 @@ export function populateMonsterLeaderboard(filterElement = 'all') {
         filteredMonsters.forEach((monster, index) => {
             const row = document.createElement('tr');
             row.dataset.monsterId = monster.id;
-            row.dataset.playerUid = monster.ownerUid;
+            row.dataset.playerUid = monster.owner_id; // 使用 owner_id
             row.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${monster.nickname}</td>
-                <td><span class="player-nickname-link cursor-pointer text-[var(--accent-color)]" data-player-uid="${monster.ownerUid}">${monster.ownerNickname || '未知'}</span></td>
-                <td>${monster.totalEvaluation || 0}</td>
+                <td><span class="player-nickname-link cursor-pointer text-[var(--accent-color)]" data-player-uid="${monster.owner_id}">${monster.owner_nickname || '未知'}</span></td>
+                <td>${monster.score || 0}</td>
                 <td><button class="text-xs primary p-1" data-action="challenge" data-monster-id="${monster.id}">挑戰</button></td>
             `;
             tbody.appendChild(row);
@@ -723,6 +724,8 @@ export function populatePlayerLeaderboard() {
 export function populateNewbieGuide(searchTerm = "") {
     const { newbieGuideContentArea } = GameState.elements;
     if (!newbieGuideContentArea) { console.error("UI: newbieGuideContentArea not found!"); return; }
+
+    newbieGuideContentArea.innerHTML = ''; // 清空現有內容
 
     // **修正：確保 GameState.gameSettings.newbie_guide 存在**
     const guideEntries = GameState.gameSettings.newbie_guide || [];
@@ -780,7 +783,7 @@ export function updateFriendsListContainerWithMessage(message, isError = false) 
 }
 
 
-export function openAndPopulatePlayerInfoModal(playerUid) { // 這裡只接收 UID
+export function openAndPopulatePlayerInfoModal(playerData) { // 這裡直接接收玩家數據物件
     const { playerInfoNickname, playerInfoUid, playerInfoWins, playerInfoLosses, playerInfoGold, playerInfoDiamond, playerInfoAchievements, playerInfoAchievementsEmptyMessage, playerInfoOwnedMonsters, playerInfoOwnedMonstersEmptyMessage } = GameState.elements;
 
     if (!playerInfoNickname || !playerInfoUid || !playerInfoWins || !playerInfoLosses || !playerInfoGold || !playerInfoDiamond || !playerInfoAchievements || !playerInfoAchievementsEmptyMessage || !playerInfoOwnedMonsters || !playerInfoOwnedMonstersEmptyMessage) {
@@ -788,27 +791,24 @@ export function openAndPopulatePlayerInfoModal(playerUid) { // 這裡只接收 U
         return;
     }
 
-    // 從 GameState.allPublicPlayers 中查找對應的玩家數據
-    const player = GameState.allPublicPlayers.find(p => p.uid === playerUid) || GameState.playerData; // 如果是查看自己，則使用 playerData
-
-    if (!player) {
-        console.error(`UI: Player data not found for UID: ${playerUid}`);
+    if (!playerData) {
+        console.error(`UI: Player data not found for modal display.`);
         showFeedbackModal("錯誤", "找不到該玩家的資料。", false, true);
         return;
     }
 
-    playerInfoNickname.textContent = player.nickname || '未知玩家';
-    playerInfoUid.textContent = player.uid || '未知ID';
-    playerInfoWins.textContent = player.wins || 0;
-    playerInfoLosses.textContent = player.losses || 0;
-    playerInfoGold.textContent = player.gold || 0;
-    playerInfoDiamond.textContent = player.diamond || 0;
+    playerInfoNickname.textContent = playerData.nickname || '未知玩家';
+    playerInfoUid.textContent = playerData.uid || '未知ID';
+    playerInfoWins.textContent = playerData.playerStats?.wins || 0;
+    playerInfoLosses.textContent = playerData.playerStats?.losses || 0;
+    playerInfoGold.textContent = playerData.gold || 0; // 假設 gold 和 diamond 在 playerData 頂層
+    playerInfoDiamond.textContent = playerData.diamond || 0;
 
     // 成就列表
     // **修正：確保 player.achievements 存在且為陣列**
-    const playerAchievements = player.achievements || [];
+    const playerAchievements = playerData.playerStats?.achievements || [];
     if (playerAchievements.length > 0) {
-        playerInfoAchievements.innerHTML = playerAchievements.map(ach => `<li>${ach.title}: ${ach.description}</li>`).join('');
+        playerInfoAchievements.innerHTML = playerAchievements.map(ach => `<li>${ach}</li>`).join(''); // 假設成就直接是字串
         playerInfoAchievementsEmptyMessage.style.display = 'none';
     } else {
         playerInfoAchievements.innerHTML = '';
@@ -817,11 +817,11 @@ export function openAndPopulatePlayerInfoModal(playerUid) { // 這裡只接收 U
 
     // 擁有怪獸列表
     // 這裡需要判斷是自己的怪獸還是其他玩家的怪獸
-    const monstersToDisplay = (player.uid === GameState.playerData.uid) ? GameState.farmedMonsters : (player.ownedMonsters || []);
+    const monstersToDisplay = (playerData.uid === GameState.playerData.uid) ? GameState.farmedMonsters : (playerData.farmedMonsters || []);
 
     if (monstersToDisplay && monstersToDisplay.length > 0) {
         playerInfoOwnedMonsters.innerHTML = monstersToDisplay.map(monster => `
-            <li><span class="monster-name">${monster.nickname}</span> <span class="monster-score">總評價: ${monster.totalEvaluation || 0}</span></li>
+            <li><span class="monster-name">${monster.nickname}</span> <span class="monster-score">總評價: ${monster.score || 0}</span></li>
         `).join('');
         playerInfoOwnedMonstersEmptyMessage.style.display = 'none';
     } else {
@@ -830,7 +830,7 @@ export function openAndPopulatePlayerInfoModal(playerUid) { // 這裡只接收 U
     }
 
     openModal('player-info-modal');
-    console.log(`UI: Player info modal populated and opened for UID: ${playerUid}.`);
+    console.log(`UI: Player info modal populated and opened for UID: ${playerData.uid}.`);
 }
 
 export function displayBattleLog(logEntries) {
@@ -845,7 +845,7 @@ export function displayBattleLog(logEntries) {
             // 這裡可以根據 logEntry 的類型應用不同的樣式，例如：
             // if (entry.type === 'turn-divider') p.className = 'turn-divider';
             // if (entry.type === 'crit-hit') p.className = 'crit-hit';
-            p.innerHTML = entry.message; // 假設 message 已經包含 HTML 標籤
+            p.innerHTML = entry; // 假設 message 已經包含 HTML 標籤
             battleLogArea.appendChild(p);
         });
         battleLogEmptyMessage.style.display = 'none';

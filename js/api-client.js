@@ -24,9 +24,13 @@ async function getAuthHeaders(includeContentType = true) {
 
 // --- 遊戲後端 API ---
 export async function fetchGameConfigsAPI() {
-    const res = await fetch(`${API_BASE_URL}/game-configs`);
-    if (!res.ok) throw new Error(`遊戲設定載入失敗：${res.status}`);
-    return res.json();
+    const response = await fetch("https://test-1-jnro.onrender.com/api/MD/game-configs");
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: `獲取遊戲設定失敗，狀態碼: ${response.status}` }));
+        console.error("fetchGameConfigsAPI error:", errorData.error);
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    return response.json();
 }
 
 export async function getPlayerAPI(userId) {

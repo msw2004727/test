@@ -3,41 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>怪獸養成對戰 Demo - 前後端整合 (Production Fixed)</title>
-
-  <!-- ✅ 字體 -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-
-  <!-- ✅ Tailwind CSS（由 CLI 編譯後的版本） -->
-  <link rel="stylesheet" href="css/theme.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/components.css">
-
-  <!-- ✅ Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <title>怪獸異世界</title>
+  <link rel="stylesheet" href="./css/layout.css">
+  <link rel="stylesheet" href="./css/theme.css">
+  <link rel="stylesheet" href="./css/components.css">
 </head>
 <body>
-    <div id="auth-screen">
-        <div class="auth-container">
-            <h1 class="auth-title">怪獸異世界</h1>
-            <button id="show-login-form-btn" class="auth-button primary">使用暱稱/密碼登入</button>
-            <button id="show-register-form-btn" class="auth-button secondary highlighted-register">重新開始遊戲 (創建帳號)</button>
+<div id="auth-screen">
+    <h1>怪獸異世界</h1>
+    <button id="show-login-form-btn">使用暱稱/密碼登入</button>
+    <button id="show-register-form-btn">重新轉生註冊（創建帳號）</button>
         </div>
     </div>
 
-    <div id="register-modal" class="modal">
-        <div class="modal-content" style="max-width: 420px;">
-            <span class="modal-close" data-modal-id="register-modal">&times;</span> <h3 class="modal-header">創建您的訓獸師帳號</h3>
-            <div class="modal-body">
-                <input type="text" id="register-nickname" class="auth-input" placeholder="請輸入您的暱稱" required>
-                <input type="password" id="register-password" class="auth-input" placeholder="請設定您的密碼" required>
-                <div id="register-error" class="auth-error-message"></div>
-                <button id="register-submit-btn" class="auth-button success">創建並進入異世界</button>
-            </div>
-        </div>
+    <!-- 登入 Modal -->
+  <div id="login-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h2>訓獸師登入</h2>
+      <input type="text" id="login-username" placeholder="您的暱稱" />
+      <input type="password" id="login-password" placeholder="您的密碼" />
+      <button id="login-submit-btn">登入異世界</button>
+      <button class="close-modal" data-target="login-modal">×</button>
     </div>
+  </div>
 
     <div id="login-modal" class="modal">
         <div class="modal-content" style="max-width: 420px;">
@@ -368,3 +356,4 @@
   <script type="module" src="js/main.js"></script>
 </body>
 </html>
+

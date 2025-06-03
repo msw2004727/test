@@ -1,15 +1,16 @@
-// firebase-config.js - Firebase 初始化與配置模組
+// firebase-config.js - 修正版
 
-// Firebase SDK 已在 index.html 中透過 CDN 引入:
-// <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-// <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-// <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+// ✅ 確保這些 CDN 已在 index.html 載入：
+// firebase-app.js、firebase-auth.js、firebase-firestore.js
 
-// --- Firebase 配置物件 ---
-// 請確保這些值是正確的，並且與您 Firebase 專案的設定一致。
-// 這些值通常是公開的，用於前端初始化。
+// ✅ 檢查 firebase 是否已載入
+if (typeof firebase === 'undefined') {
+    throw new Error("❌ Firebase SDK 未載入。請確認 index.html 已正確引入 CDN。")
+}
+
+// ✅ 初始化設定
 const firebaseConfig = {
-    apiKey: "AIzaSyCACjjC1S-9gj6hKCyfAedzH9kTf_JZwDE", // 這是您在 index.html 中提供的金鑰
+    apiKey: "AIzaSyCACjjC1S-9gj6hKCyfAedzH9kTf_JZwDE",
     authDomain: "aigame-fb578.firebaseapp.com",
     projectId: "aigame-fb578",
     storageBucket: "aigame-fb578.appspot.com",
@@ -17,26 +18,16 @@ const firebaseConfig = {
     appId: "1:932095431807:web:28aab493c770166102db4a"
 };
 
-// --- 初始化 Firebase 應用 ---
-// 檢查 firebase 物件是否存在，以確保 SDK 已載入
-if (typeof firebase !== 'undefined') {
+// ✅ 初始化 Firebase App（只執行一次）
+if (!firebase.apps || !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
-    console.log("Firebase app initialized from firebase-config.js");
+    console.log("✅ Firebase 初始化完成");
 } else {
-    console.error("Firebase SDK not loaded. Ensure firebase-app.js is included in your HTML before this script.");
+    console.log("ℹ️ Firebase 已初始化，略過重複初始化");
 }
 
-// --- 導出 Firebase 服務實例 ---
-// 再次檢查 firebase 物件是否存在，以避免在 SDK 未載入時出錯
-const auth = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth() : null;
-const db = (typeof firebase !== 'undefined' && firebase.firestore) ? firebase.firestore() : null;
+// ✅ 匯出 auth 與 db（避免使用 export firebase 造成 module 衝突）
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-if (!auth) {
-    console.error("Firebase Authentication service (auth) could not be initialized. Ensure firebase-auth.js is loaded.");
-}
-if (!db) {
-    console.error("Firebase Firestore service (db) could not be initialized. Ensure firebase-firestore.js is loaded.");
-}
-
-// 導出 auth, db 和 firebase 命名空間 (用於 FieldValue 等)
-export { auth, db, firebase };
+export { auth, db };

@@ -2,6 +2,7 @@
 // 全域狀態集中管理，給所有模組匯入用
 
 import { __app_id } from './firebase-config.js'; 
+import { getFirestore, doc, getDoc, setDoc, collection } from 'https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js';
 
 const GameState = {
     // --- DOM 元素引用 ---
@@ -71,7 +72,7 @@ const GameState = {
     // 模態框相關狀態
     itemToDeleteInfo: null, 
 
-    // Firebase 實例
+    // Firebase 實例 (將在 main.js 中設置)
     auth: null,
     db: null,   
     firebaseApp: null,
@@ -95,10 +96,12 @@ const GameState = {
                 return;
             }
 
-            const playerDocRef = GameState.db.collection('artifacts').doc(__app_id).collection('users').doc(uid).collection('data').doc('profile');
-            const playerDoc = await playerDocRef.get();
-            if (playerDoc.exists) {
-                GameState.playerData = { uid: uid, ...playerDoc.data() };
+            // 使用 Firestore v8 語法
+            const userDocRef = collection(GameState.db, 'artifacts', __app_id, 'users', uid, 'data');
+
+            const playerProfileDoc = await getDoc(doc(userDocRef, 'profile'));
+            if (playerProfileDoc.exists()) {
+                GameState.playerData = { uid: uid, ...playerProfileDoc.data() };
             } else {
                 console.warn(`GameState: 找不到使用者 ${uid} 的個人資料，將使用預設值。`);
                 GameState.playerData = {
@@ -114,36 +117,32 @@ const GameState = {
                     temporaryBackpackSlots: new Array(GameState.NUM_TEMP_BACKPACK_SLOTS).fill(null),
                     combinationSlotsData: new Array(GameState.NUM_COMBINATION_SLOTS).fill(null),
                 };
-                await playerDocRef.set(GameState.playerData);
+                await setDoc(doc(userDocRef, 'profile'), GameState.playerData);
             }
 
-            const monstersCollectionRef = GameState.db.collection('artifacts').doc(__app_id).collection('users').doc(uid).collection('data').doc('monsters');
-            const monstersDoc = await monstersCollectionRef.get();
-            if (monstersDoc.exists && monstersDoc.data().list) {
+            const monstersDoc = await getDoc(doc(userDocRef, 'monsters'));
+            if (monstersDoc.exists() && monstersDoc.data().list) {
                 GameState.farmedMonsters = monstersDoc.data().list;
             } else {
                 GameState.farmedMonsters = [];
             }
 
-            const dnaCollectionRef = GameState.db.collection('artifacts').doc(__app_id).collection('users').doc(uid).collection('data').doc('dna');
-            const dnaDoc = await dnaCollectionRef.get();
-            if (dnaDoc.exists && dnaDoc.data().list) {
+            const dnaDoc = await getDoc(doc(userDocRef, 'dna'));
+            if (dnaDoc.exists() && dnaDoc.data().list) {
                 GameState.playerOwnedDNA = dnaDoc.data().list;
             } else {
                 GameState.playerOwnedDNA = [];
             }
 
-            const tempBackpackRef = GameState.db.collection('artifacts').doc(__app_id).collection('users').doc(uid).collection('data').doc('tempBackpack');
-            const tempBackpackDoc = await tempBackpackRef.get();
-            if (tempBackpackDoc.exists && tempBackpackDoc.data().list) {
+            const tempBackpackDoc = await getDoc(doc(userDocRef, 'tempBackpack'));
+            if (tempBackpackDoc.exists() && tempBackpackDoc.data().list) {
                 GameState.temporaryBackpackSlots = tempBackpackDoc.data().list;
             } else {
                 GameState.temporaryBackpackSlots = new Array(GameState.NUM_TEMP_BACKPACK_SLOTS).fill(null);
             }
 
-            const comboSlotsRef = GameState.db.collection('artifacts').doc(__app_id).collection('users').doc(uid).collection('data').doc('combinationSlots');
-            const comboSlotsDoc = await comboSlotsRef.get();
-            if (comboSlotsDoc.exists && comboSlotsDoc.data().list) {
+            const comboSlotsDoc = await getDoc(doc(userDocRef, 'combinationSlots'));
+            if (comboSlotsDoc.exists() && comboSlotsDoc.data().list) {
                 GameState.combinationSlotsData = comboSlotsDoc.data().list;
             } else {
                 GameState.combinationSlotsData = new Array(GameState.NUM_COMBINATION_SLOTS).fill(null);
@@ -165,13 +164,14 @@ const GameState = {
         const uid = GameState.auth.currentUser.uid;
         console.log(`GameState: 保存使用者數據 for UID: ${uid}`);
         try {
-            const userDocRef = GameState.db.collection('artifacts').doc(__app_id).collection('users').doc(uid).collection('data');
+            // 使用 Firestore v8 語法
+            const userDocRef = collection(GameState.db, 'artifacts', __app_id, 'users', uid, 'data');
 
-            await userDocRef.doc('profile').set(GameState.playerData, { merge: true });
-            await userDocRef.doc('monsters').set({ list: GameState.farmedMonsters }, { merge: true });
-            await userDocRef.doc('dna').set({ list: GameState.playerOwnedDNA }, { merge: true });
-            await userDocRef.doc('tempBackpack').set({ list: GameState.temporaryBackpackSlots }, { merge: true });
-            await userDocRef.doc('combinationSlots').set({ list: GameState.combinationSlotsData }, { merge: true });
+            await setDoc(doc(userDocRef, 'profile'), GameState.playerData, { merge: true });
+            await setDoc(doc(userDocRef, 'monsters'), { list: GameState.farmedMonsters }, { merge: true });
+            await setDoc(doc(userDocRef, 'dna'), { list: GameState.playerOwnedDNA }, { merge: true });
+            await setDoc(doc(userDocRef, 'tempBackpack'), { list: GameState.temporaryBackpackSlots }, { merge: true });
+            await setDoc(doc(userDocRef, 'combinationSlots'), { list: GameState.combinationSlotsData }, { merge: true });
 
             console.log("GameState: 使用者數據保存成功。");
         } catch (error) {

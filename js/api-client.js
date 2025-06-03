@@ -1,6 +1,6 @@
 // api-client.js
 
-import { auth, db, firebase } from './firebase-config.js';
+import { auth, db } from './firebase-config.js';
 import { loadDeepSeekApiKey } from './loadApiKey.js';
 
 // --- API Configuration ---

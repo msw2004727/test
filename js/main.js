@@ -1,7 +1,7 @@
 // main.js - 正式模組整合版
 
+import { GameState } from './game-state.js';
 import * as ApiClient from './api-client.js';
-import * as GameState from './game-state.js';
 import * as UI from './ui.js';
 import * as Auth from './auth.js';
 import * as EventHandlers from './event-handlers.js';

@@ -1,9 +1,15 @@
 // firebase-config.js - 修正版
 
-// 導入 Firebase 模組化 SDK 的必要函式
-import { initializeApp } from "https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js";
+// 在 Firebase v8 中，這些 SDK 會在全局範圍內創建 'firebase' 物件
+// 確保這些 CDN 已在 index.html 載入：
+// firebase-app.js
+// firebase-auth.js
+// firebase-firestore.js
+
+// 檢查全局的 firebase 物件是否已載入
+if (typeof firebase === 'undefined') {
+    throw new Error("❌ Firebase SDK 未載入。請確認 index.html 已正確引入 CDN。");
+}
 
 // 初始化設定
 const firebaseConfig = {
@@ -16,19 +22,20 @@ const firebaseConfig = {
 };
 
 // 初始化 Firebase App（只執行一次）
-// 這裡使用一個全局變數來檢查是否已初始化，以防止在某些環境下重複初始化
-let firebaseApp;
-if (!window._firebaseAppInstance) { // 使用一個全局變數來儲存實例
-    firebaseApp = initializeApp(firebaseConfig);
-    window._firebaseAppInstance = firebaseApp; // 儲存實例
+// 使用一個全局變數來檢查是否已初始化，以防止在某些環境下重複初始化
+let firebaseAppInstance;
+if (!window._firebaseAppInstance) {
+    firebaseAppInstance = firebase.initializeApp(firebaseConfig);
+    window._firebaseAppInstance = firebaseAppInstance; // 儲存實例
     console.log("✅ Firebase 初始化完成");
 } else {
-    firebaseApp = window._firebaseAppInstance;
+    firebaseAppInstance = window._firebaseAppInstance;
     console.log("ℹ️ Firebase 已初始化，略過重複初始化");
 }
 
-// 獲取並匯出 auth 與 db 實例
-const auth = getAuth(firebaseApp);
-const db = getFirestore(firebaseApp);
+// 獲取並匯出 auth 與 db 實例，以及 firebaseApp 實例
+const auth = firebase.auth();
+const db = firebase.firestore();
+const firebaseApp = firebaseAppInstance; // 導出初始化後的 app 實例
 
 export { firebaseApp, auth, db };

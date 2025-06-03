@@ -97,22 +97,6 @@ if (document.readyState === 'loading') {
     initializeApp();
 }
 
-
-// --- 偽導入和偽 GameState (用於此檔案的獨立概念展示) ---
-// 在實際應用中，這些會被真實的 import 和模組所取代
-
-const GameState = {
-    elements: { /* DOM 元素引用將在此處 */
-        themeSwitcherBtn: null, authScreen: null, gameContainer: null,
-        dnaCombinationSlotsContainer: null, firstDnaFarmTab: null,
-        // ... 其他元素
-    },
-    gameSettings: {}, // 將由 fetchGameConfigsAPI 填充
-    // ... 其他需要的 game state 屬性
-    auth: null, // 將由 firebase-config.js 導入的 auth 實例賦值
-    db: null,   // 將由 firebase-config.js 導入的 db 實例賦值
-};
-
 const ApiClient = {
     fetchGameConfigsAPI: async () => {
         console.log("ApiClient.fetchGameConfigsAPI (mock) called");

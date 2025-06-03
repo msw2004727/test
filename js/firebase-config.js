@@ -1,10 +1,10 @@
-// firebase-config.js - 修正版
+// firebase-config.js - 最終修正版
 
 // 在 Firebase v8 中，這些 SDK 會在全局範圍內創建 'firebase' 物件
 // 確保這些 CDN 已在 index.html 載入：
-// firebase-app.js
-// firebase-auth.js
-// firebase-firestore.js
+// <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+// <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+// <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
 // 檢查全局的 firebase 物件是否已載入
 if (typeof firebase === 'undefined') {
@@ -34,6 +34,7 @@ if (!window._firebaseAppInstance) {
 }
 
 // 獲取並匯出 auth 與 db 實例，以及 firebaseApp 實例
+// 在 Firebase v8 中，是通過全局的 firebase 物件來訪問這些服務
 const auth = firebase.auth();
 const db = firebase.firestore();
 const firebaseApp = firebaseAppInstance; // 導出初始化後的 app 實例

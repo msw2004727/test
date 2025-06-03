@@ -81,7 +81,23 @@ export async function generateAIDescriptionsAPI(monsterData) {
     const apiKey = await loadDeepSeekApiKey();
     if (!apiKey) throw new Error("DeepSeek API Key 載入失敗");
 
-    const prompt = `請為「${monsterData.nickname}」撰寫以下描述：\n1. 個性（${monsterData.personality_name}）\n2. 背景介紹（數值：HP=${monsterData.hp}, 攻擊=${monsterData.attack}, 防禦=${monsterData.defense}, 屬性=${monsterData.elements.join(', ')}）\n3. 綜合評價與建議。\n請用 JSON 格式回傳：personality_text, introduction_text, evaluation_text。`;
+    const prompt = `
+請為一隻名為「${monsterData.nickname}」的怪獸，生成詳細的中文描述性文字。它的基本資料如下：
+- 屬性：${monsterData.elements.join('、')}
+- 稀有度：${monsterData.rarity}
+- 生命值(HP)：約 ${monsterData.hp}
+- 魔力值(MP)：約 ${monsterData.mp}
+- 攻擊力：約 ${monsterData.attack}
+- 防禦力：約 ${monsterData.defense}
+- 速度：約 ${monsterData.speed}
+- 爆擊率：約 ${monsterData.crit}%
+- 個性名稱：${monsterData.personality_name}
+
+請依據上述內容，以 JSON 格式回傳三段文字欄位：
+1. personality_text：個性描述（至少 100 字）
+2. introduction_text：背景介紹與能力描寫（至少 150 字）
+3. evaluation_text：綜合評價與養成建議（至少 200 字）
+`;
 
     const payload = {
         model: DEFAULT_MODEL,

@@ -1,14 +1,11 @@
 // firebase-config.js - 修正版
 
-// ✅ 確保這些 CDN 已在 index.html 載入：
-// firebase-app.js、firebase-auth.js、firebase-firestore.js
+// 導入 Firebase 模組化 SDK 的必要函式
+import { initializeApp } from "https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js";
 
-// ✅ 檢查 firebase 是否已載入
-if (typeof firebase === 'undefined') {
-    throw new Error("❌ Firebase SDK 未載入。請確認 index.html 已正確引入 CDN。")
-}
-
-// ✅ 初始化設定
+// 初始化設定
 const firebaseConfig = {
     apiKey: "AIzaSyCACjjC1S-9gj6hKCyfAedzH9kTf_JZwDE",
     authDomain: "aigame-fb578.firebaseapp.com",
@@ -18,16 +15,20 @@ const firebaseConfig = {
     appId: "1:932095431807:web:28aab493c770166102db4a"
 };
 
-// ✅ 初始化 Firebase App（只執行一次）
-if (!firebase.apps || !firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+// 初始化 Firebase App（只執行一次）
+// 這裡使用一個全局變數來檢查是否已初始化，以防止在某些環境下重複初始化
+let firebaseApp;
+if (!window._firebaseAppInstance) { // 使用一個全局變數來儲存實例
+    firebaseApp = initializeApp(firebaseConfig);
+    window._firebaseAppInstance = firebaseApp; // 儲存實例
     console.log("✅ Firebase 初始化完成");
 } else {
+    firebaseApp = window._firebaseAppInstance;
     console.log("ℹ️ Firebase 已初始化，略過重複初始化");
 }
 
-// ✅ 匯出 auth 與 db（避免使用 export firebase 造成 module 衝突）
-const auth = firebase.auth();
-const db = firebase.firestore();
+// 獲取並匯出 auth 與 db 實例
+const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
 
-export { auth, db };
+export { firebaseApp, auth, db };

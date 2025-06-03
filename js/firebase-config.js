@@ -13,17 +13,17 @@ if (typeof firebase === 'undefined') {
 
 // 初始化設定
 const firebaseConfig = {
-    apiKey: "AIzaSyCACjjC1S-9gj6hKCyfAedzH9kTf_JZwDE",
+    apiKey: "AIzaSyCACjjC1S-9gj6hKCyfAedzH9kTf_JZwDE", // 您的 Firebase API Key
     authDomain: "aigame-fb578.firebaseapp.com",
     projectId: "aigame-fb578",
     storageBucket: "aigame-fb578.appspot.com",
     messagingSenderId: "932095431807",
-    appId: "1:932095431807:web:28aab493c770166102db4a"
+    appId: "1:932095431807:web:28aab493c770166102db4a" // 您的 Firebase App ID
 };
 
 // 定義應用程式 ID，用於 Firestore 路徑
-// **請將 'YOUR_APP_ID_HERE' 替換為您實際的應用程式 ID**
-const __app_id = "1:932095431807:web:28aab493c770166102db4a"; // 已更新為您的實際 appId
+// 這個值應與您的 Firebase Project ID 相關聯，或者您在 Firestore 中定義的 app ID
+const __app_id = "aigame-fb578"; // 使用您的 Firebase Project ID 作為 app_id
 
 // 初始化 Firebase App（只執行一次）
 // 使用一個全局變數來檢查是否已初始化，以防止在某些環境下重複初始化

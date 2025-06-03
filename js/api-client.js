@@ -4,8 +4,8 @@ import { auth } from './firebase-config.js';
 import { loadDeepSeekApiKey } from './loadApiKey.js';
 
 // --- API Configuration ---
-const API_BASE_URL = 'https://md-server-5wre.onrender.com/api/MD'; // 確保這是你後端服務的正確 URL
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+const API_BASE_URL = 'https://md-server-5wre.onrender.com/api/MD'; // 您的後端服務 URL
+const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'; // DeepSeek API URL
 const DEFAULT_MODEL = 'deepseek-chat';
 
 async function getAuthHeaders(includeContentType = true) {

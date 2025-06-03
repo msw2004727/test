@@ -33,13 +33,14 @@ export async function handleRegister() {
         GameState.currentPlayerNickname = nickname;
 
         // 在 Firestore 中創建使用者設定檔 (artifacts/__app_id/users/{uid}/data/profile)
+        // 使用 Firestore v8 語法
         const userProfileDocRef = db.collection('artifacts').doc(__app_id).collection('users').doc(GameState.currentLoggedInUser.uid).collection('data').doc('profile');
         await userProfileDocRef.set({
             uid: GameState.currentLoggedInUser.uid,
             nickname: nickname,
             email: GameState.currentLoggedInUser.email,
-            createdAt: db.FieldValue.serverTimestamp(), // 改為 db.FieldValue.serverTimestamp()
-            lastLogin: db.FieldValue.serverTimestamp()  // 改為 db.FieldValue.serverTimestamp()
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(), // 改為 firebase.firestore.FieldValue.serverTimestamp()
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()  // 改為 firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
 
         // 初始化玩家遊戲資料 (users/{uid}/gameData/main)
@@ -79,12 +80,13 @@ export async function handleLogin() {
         GameState.currentLoggedInUser = userCredential.user;
 
         // 從 Firestore 獲取或確認暱稱，並更新 lastLogin
+        // 使用 Firestore v8 語法
         const userProfileDocRef = db.collection('artifacts').doc(__app_id).collection('users').doc(GameState.currentLoggedInUser.uid).collection('data').doc('profile');
         const userDocSnap = await userProfileDocRef.get();
 
         if (userDocSnap.exists) {
             GameState.currentPlayerNickname = userDocSnap.data().nickname || nickname; // 優先使用DB中的暱稱
-            await userProfileDocRef.update({ lastLogin: db.FieldValue.serverTimestamp() }); // 改為 db.FieldValue.serverTimestamp()
+            await userProfileDocRef.update({ lastLogin: firebase.firestore.FieldValue.serverTimestamp() }); // 改為 firebase.firestore.FieldValue.serverTimestamp()
         } else {
             // 理論上，如果能登入成功，users 文件應該存在。這是一個備援。
             GameState.currentPlayerNickname = nickname;
@@ -92,8 +94,8 @@ export async function handleLogin() {
                 uid: GameState.currentLoggedInUser.uid,
                 nickname: nickname,
                 email: GameState.currentLoggedInUser.email,
-                createdAt: db.FieldValue.serverTimestamp(), // 改為 db.FieldValue.serverTimestamp()
-                lastLogin: db.FieldValue.serverTimestamp()  // 改為 db.FieldValue.serverTimestamp()
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(), // 改為 firebase.firestore.FieldValue.serverTimestamp()
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp()  // 改為 firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
             // 為防意外，也為這種情況初始化遊戲資料
             await GameLogic.saveInitialPlayerDataToBackendLogic(GameState.currentLoggedInUser.uid, nickname, GameState.gameSettings);
@@ -141,6 +143,7 @@ export function initializeAuthListener() {
         const { feedbackModal, feedbackModalTitle } = GameState.elements;
         if (user) {
             GameState.currentLoggedInUser = user;
+            // 使用 Firestore v8 語法
             const userProfileDocRef = db.collection('artifacts').doc(__app_id).collection('users').doc(user.uid).collection('data').doc('profile');
             const userDocSnap = await userProfileDocRef.get();
 
@@ -155,8 +158,8 @@ export function initializeAuthListener() {
                     uid: user.uid,
                     nickname: GameState.currentPlayerNickname,
                     email: user.email,
-                    createdAt: db.FieldValue.serverTimestamp(),
-                    lastLogin: db.FieldValue.serverTimestamp()
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
                 // 為此使用者初始化遊戲資料
                 await GameLogic.saveInitialPlayerDataToBackendLogic(user.uid, GameState.currentPlayerNickname, GameState.gameSettings);

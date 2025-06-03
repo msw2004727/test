@@ -1,31 +1,39 @@
-# main.py - Flask 後端主程式
+// main.js - 正式模組版本
 
-from flask import Flask, jsonify
-from flask_cors import CORS
+import * as ApiClient from './api-client.js';
+import * as GameState from './game-state.js';
+import * as UI from './ui.js';
+import * as Auth from './auth.js';
+import * as EventHandlers from './event-handlers.js';
 
-app = Flask(__name__)
-CORS(app)  # ✅ 允許前端跨域請求
+function initializeDOMReferences() {
+    GameState.elements = {
+        themeSwitcherBtn: document.getElementById('theme-switcher-btn'),
+        authScreen: document.getElementById('auth-screen'),
+        gameContainer: document.getElementById('game-container'),
+        dnaCombinationSlotsContainer: document.getElementById('dna-combination-slots'),
+        firstDnaFarmTab: document.getElementById('dna-farm-tab-1'),
+        // ... 可依照 UI 結構擴充
+    };
+    console.log("main.js: DOM 元素引用已初始化到 GameState.elements");
+}
 
-@app.route("/api/MD/game-configs")
-def get_game_configs():
-    # ✅ 回傳一個測試用的遊戲設定範本，可後續改為讀資料庫或 JSON 檔
-    return jsonify({
-        "dna_fragments": [],
-        "rarities": {},
-        "skills": {},
-        "personalities": [],
-        "titles": ["新手"],
-        "health_conditions": [],
-        "newbie_guide": [
-            {"title": "歡迎", "content": "這是預設的新手指南內容。"}
-        ],
-        "value_settings": {
-            "max_farm_slots": 10,
-            "max_monster_skills": 3,
-            "max_battle_turns": 30
-        },
-        "npc_monsters": []
-    })
+async function initializeApp() {
+    console.log("main.js: Initializing application...");
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    initializeDOMReferences();
+
+    try {
+        const gameConfigs = await ApiClient.fetchGameConfigsAPI();
+        GameState.gameSettings = gameConfigs;
+        console.log("main.js: Game configs fetched and stored in GameState.", gameConfigs);
+
+        UI.renderUIBasedOnConfigs(gameConfigs);
+        EventHandlers.bindAllEventListeners();
+    } catch (error) {
+        console.error("main.js: 初始化失敗", error);
+        UI.showError("初始化失敗，請稍後再試。");
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initializeApp);

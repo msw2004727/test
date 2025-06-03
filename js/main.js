@@ -12,10 +12,17 @@ import { initializeStaticEventListeners } from './event-handlers.js'; // 事件�
 // --- DOM 元素獲取與初始化 (通常在應用程式啟動早期執行) ---
 // 這個函式負責獲取所有在 index.html 中定義的 DOM 元素，並將它們儲存到 GameState.elements 中。
 function initializeDOMReferences() {
-    // 確保 GameState.elements 物件存在
-    if (!GameState.elements) {
-        GameState.elements = {};
+    // 確保 GameState.elements 物件存在且可擴展
+    // 如果它在 GameState.js 中被定義為 const elements = {};
+    // 並且在某處被 Object.freeze(elements); 了，這裡會出問題。
+    // 但如果只是普通的物件字面量，這行是防禦性的。
+    // 如果 GameState.elements 已經是 Object.freeze() 的結果，這行不會改變它。
+    if (!GameState.elements || Object.isFrozen(GameState.elements)) {
+        // 如果 GameState.elements 不存在或已被凍結，重新初始化為一個新的空物件
+        // 這通常表示 GameState.js 中的定義方式有問題，或者有其他程式碼凍結了它
+        GameState.elements = {}; // 重新賦值為一個新的可擴展物件
     }
+
 
     // 主題切換
     GameState.elements.themeSwitcherBtn = document.getElementById('theme-switcher');
@@ -104,7 +111,7 @@ function initializeDOMReferences() {
     GameState.elements.newbieGuideSearchInput = document.getElementById('newbie-guide-search-input');
     GameState.elements.newbieGuideContentArea = document.getElementById('newbie-guide-content-area');
 
-    // 提醒模態框
+    // 提醒模態框 (修煉拾獲物品未領取)
     GameState.elements.reminderModal = document.getElementById('reminder-modal');
     GameState.elements.reminderModalTitle = document.getElementById('reminder-modal-title');
     GameState.elements.reminderModalBody = document.getElementById('reminder-modal-body');
@@ -140,11 +147,6 @@ function initializeDOMReferences() {
     GameState.elements.monsterInfoTabs = document.getElementById('monster-info-tabs');
     GameState.elements.monsterDetailsTab = document.getElementById('monster-details-tab');
     GameState.elements.monsterActivityLogs = document.getElementById('monster-activity-logs');
-    // 注意：以下三個元素在 UI.js 的 renderMonsterInfoModalContent 中被動態生成，不直接獲取
-    // GameState.elements.monsterPersonalityText = document.getElementById('monster-personality-text');
-    // GameState.elements.monsterIntroductionText = document.getElementById('monster-introduction-text');
-    // GameState.elements.monsterEvaluationText = document.getElementById('monster-evaluation-text');
-
 
     // 玩家資訊模態框
     GameState.elements.playerInfoModal = document.getElementById('player-info-modal');
@@ -183,7 +185,7 @@ async function initializeApp() {
 
     // 2. 獲取遊戲核心設定
     try {
-        const configs = await ApiClient.fetchGameConfigsAPI(); // 來自 api-client.js
+        const configs = await ApiClient.fetchGameConfigs(); // 來自 api-client.js (已改名)
         GameState.gameSettings = configs; // 更新全域遊戲設定
         GameLogic.initializeNpcMonsters(); // 如果 NPC 初始化依賴 gameSettings，則在此呼叫
         console.log("main.js: 遊戲設定已獲取並存儲到 GameState。");

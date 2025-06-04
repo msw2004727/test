@@ -113,7 +113,8 @@ export function initializeStaticEventListeners() {
         elements.playerInfoButton.addEventListener('click', () => {
             // 確保 auth.currentUser 存在才傳遞 uid
             if (GameState.auth.currentUser) {
-                openAndPopulatePlayerInfoModal(GameState.auth.currentUser.uid);
+                // 傳遞 GameState.playerData 而不是僅僅 UID，因為 openAndPopulatePlayerInfoModal 需要完整數據
+                openAndPopulatePlayerInfoModal(GameState.playerData); 
                 handleOpenModalWrapper('player-info-modal');
             } else {
                 showFeedbackModal("提示", "請先登入以查看玩家資訊。", false, true);
@@ -165,13 +166,16 @@ export function initializeStaticEventListeners() {
     if (elements.monsterLogsInfoTab) elements.monsterLogsInfoTab.addEventListener('click', (event) => handleTabSwitch(event, 'monster-logs-tab', '#monster-info-tabs'));
 
     // 模態框關閉按鈕 (使用事件委託，因為它們可能在模態框內容動態載入後才出現)
-    if (elements.modalContainer) {
-        elements.modalContainer.addEventListener('click', (event) => {
-            if (event.target.classList.contains('modal-close') || event.target.dataset.modalCloseButton) {
-                handleCloseModalWrapper(event);
+    // 這裡使用 document 進行事件委託，因為 modal-close 元素可能在任何模態框內
+    document.addEventListener('click', (event) => {
+        const closeButton = event.target.closest('.modal-close');
+        if (closeButton) {
+            const modalId = closeButton.dataset.modalId;
+            if (modalId) {
+                closeModal(modalId);
             }
-        });
-    }
+        }
+    });
 
     // 確認模態框的取消按鈕
     if (elements.cancelActionBtn) {
@@ -260,16 +264,16 @@ export function initializeStaticEventListeners() {
             const playerNicknameLink = event.target.closest('.player-nickname-link');
 
             if (challengeBtn && challengeBtn.dataset.monsterId) {
-                // 需要從 GameState.allPublicMonsters 中找到對應的怪獸數據
-                const opponentMonster = GameState.allPublicMonsters.find(m => m.id === challengeBtn.dataset.monsterId);
+                // 需要從 GameState.allPublicMonsters 或 GameState.npcMonsters 中找到對應的怪獸數據
+                const opponentMonster = GameState.allPublicMonsters.find(m => m.id === challengeBtn.dataset.monsterId) ||
+                                        GameState.npcMonsters.find(m => m.id === challengeBtn.dataset.monsterId);
                 if (opponentMonster) {
                     promptChallengeMonster(opponentMonster); // 呼叫 game-logic.js 中的 promptChallengeMonster，傳遞完整物件
                 } else {
                     showFeedbackModal("錯誤", "找不到要挑戰的怪獸數據。", false, true);
                 }
             } else if (playerNicknameLink && playerNicknameLink.dataset.playerUid) {
-                openAndPopulatePlayerInfoModal(playerNicknameLink.dataset.playerUid);
-                handleOpenModalWrapper('player-info-modal');
+                showPlayerInfoPopup(playerNicknameLink.dataset.playerUid); // 呼叫 game-logic.js 中的 showPlayerInfoPopup
             }
         });
     }
@@ -278,8 +282,7 @@ export function initializeStaticEventListeners() {
         elements.playerLeaderboardTable.addEventListener('click', (event) => {
             const viewPlayerBtn = event.target.closest('button[data-action="view-player"]');
             if (viewPlayerBtn && viewPlayerBtn.dataset.playerUid) {
-                openAndPopulatePlayerInfoModal(viewPlayerBtn.dataset.playerUid);
-                handleOpenModalWrapper('player-info-modal');
+                showPlayerInfoPopup(viewPlayerBtn.dataset.playerUid); // 呼叫 game-logic.js 中的 showPlayerInfoPopup
             }
         });
     }

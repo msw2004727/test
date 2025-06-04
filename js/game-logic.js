@@ -30,7 +30,7 @@ export function handleDrawDnaButtonClick() {
             for (let i = 0; i < 6; i++) {
                 const randomDnaTemplate = drawableDna[Math.floor(Math.random() * drawableDna.length)];
                 const newDnaInstance = JSON.parse(JSON.stringify(randomDnaTemplate));
-                newDnaInstance.tempId = `drawn_${Date.now()}_${i}`;
+                newDnaInstance.tempId = `drawn_${Date.now()}_${i}`; // 給予臨時ID
                 drawnDnaForModal.push(newDnaInstance);
             }
         } else {
@@ -50,7 +50,7 @@ export function addToTemporaryBackpack(dnaItem) {
     for (let i = 0; i < GameState.NUM_TEMP_BACKPACK_SLOTS; i++) {
         if (GameState.temporaryBackpackSlots[i] === null) {
             const newItem = {...dnaItem};
-            newItem.id = dnaItem.id || `temp_dna_${Date.now()}_${i}`;
+            newItem.id = dnaItem.id || `temp_dna_${Date.now()}_${i}`; // 確保有唯一ID
             GameState.temporaryBackpackSlots[i] = newItem;
             added = true;
             break;
@@ -226,7 +226,7 @@ export function handleDrop(e) {
             UI.showFeedbackModal("提示", "組合槽位已被佔用！", false, true);
         }
     } else if (targetDropType === "inventory") {
-        const targetInventorySlotIndex = parseInt(targetDropZone.dataset.inventorySlotIndex);
+        const targetInventorySlotIndex = parseInt(targetDropZone.dataset.slotIndex); // Changed from data-inventory-slot-index
         if (!GameState.playerData.playerOwnedDNA[targetInventorySlotIndex]) {
             GameState.playerData.playerOwnedDNA[targetInventorySlotIndex] = droppedDNA;
 
@@ -367,15 +367,9 @@ export async function combineDNA() {
 
 
     const idsToSend = dnaToCombine.map(dna => {
-        if (dna.baseId) return dna.baseId;
-        if (dna.id && typeof dna.id === 'string' && dna.id.startsWith('dna_frag_')) {
-            const parts = dna.id.split('_');
-            if (parts.length >= 3) {
-                return `${parts[0]}_${parts[1]}_${parts[2]}`;
-            }
-        }
-        return dna.tempId || dna.id;
-    }).filter(Boolean);
+        // 優先使用 baseId，如果沒有則使用 id，最後是 tempId (抽到的臨時DNA)
+        return dna.baseId || dna.id || dna.tempId;
+    }).filter(Boolean); // 過濾掉 null/undefined/空字串
 
     UI.showFeedbackModal("組合中...", "正在努力組合新的怪獸，請稍候...", true, false);
     console.log("正在組合 DNA...", idsToSend);
@@ -388,9 +382,22 @@ export async function combineDNA() {
         }
         let newMonster = response;
 
+        // 檢查是否有農場已滿的警告
+        if (response.farm_full_warning) {
+            UI.showFeedbackModal("組合成功，但農場已滿", response.farm_full_warning + " 新怪獸已生成，但未自動加入農場。", false, true, true, newMonster);
+            // 這裡可以選擇將新怪獸放入臨時背包或直接丟棄，目前邏輯是生成但不加入農場
+            console.warn("農場已滿，新怪獸未自動加入農場。");
+            // 清空組合槽
+            GameState.combinationSlotsData.fill(null);
+            UI.createCombinationSlots();
+            UI.updateActionButtonsStateUI();
+            return; // 不繼續後續的農場加入和AI描述生成
+        }
+
         newMonster = await generateAndStoreAIDescriptions(newMonster);
 
-        const isFirstMonsterEver = GameState.farmedMonsters.length === 0 && (!GameState.playerData.achievements || !GameState.playerData.achievements.includes("首次組合怪獸"));
+        const isFirstMonsterEver = GameState.farmedMonsters.length === 0 && 
+                                   (!GameState.playerData.achievements || !GameState.playerData.achievements.includes("首次組合怪獸"));
 
         GameState.farmedMonsters.push(newMonster);
         addLogEntry(newMonster, "✨ 成功組合誕生！");
@@ -426,10 +433,12 @@ export async function combineDNA() {
 }
 
 export async function generateAndStoreAIDescriptions(monster) {
-    if (!monster || (monster.aiPersonality && monster.aiIntroduction && monster.aiEvaluation)) {
+    // 檢查是否已經有 AI 描述，如果有則直接返回
+    if (monster && monster.aiPersonality && monster.aiIntroduction && monster.aiEvaluation) {
         return monster;
     }
 
+    // 顯示載入中的回饋模態框
     UI.showFeedbackModal(`為 ${monster.nickname} 生成AI評價`, "正在與AI溝通，請稍候...", true, false);
     console.log(`正在為 ${monster.nickname} 生成 AI 描述...`);
 
@@ -437,27 +446,27 @@ export async function generateAndStoreAIDescriptions(monster) {
         const aiDescriptions = await ApiClient.generateAIDescriptions(monster);
 
         if (aiDescriptions) {
-            monster.aiPersonality = {
-                name: aiDescriptions.personality?.name || monster.personality?.name || "未知",
-                text: aiDescriptions.personality?.text || "AI個性描述生成失敗。",
-                color: aiDescriptions.personality?.color || "var(--text-secondary)"
-            };
-            monster.aiIntroduction = aiDescriptions.introduction;
-            monster.aiEvaluation = aiDescriptions.evaluation;
+            // 將 AI 生成的文本賦值給怪獸物件的對應屬性
+            monster.aiPersonality = aiDescriptions.personality_text;
+            monster.aiIntroduction = aiDescriptions.introduction_text;
+            monster.aiEvaluation = aiDescriptions.evaluation_text;
             console.log(`AI 描述為 ${monster.nickname} 生成成功。`);
         } else {
             console.warn(`未能為 ${monster.nickname} 生成 AI 描述。`);
-            monster.aiPersonality = { name: "未知", text: "AI描述生成失敗。", color: "var(--text-secondary)" };
-            monster.aiIntroduction = "AI描述生成失敗。";
-            monster.aiEvaluation = "AI描述生成失敗.";
+            // 提供預設的 AI 描述，以防生成失敗
+            monster.aiPersonality = "AI個性描述生成失敗，這隻怪獸的性格如同一個未解之謎，等待著有緣人去探索。它可能時而溫順，時而狂野，需要訓練師細心的觀察與引導。";
+            monster.aiIntroduction = "AI介紹生成失敗。這隻神秘的怪獸，其基礎數值和元素屬性都隱藏在迷霧之中，只有真正的強者才能揭開它的全部潛力。";
+            monster.aiEvaluation = "AI綜合評價生成失敗。由於未能全面評估此怪獸的個性與數值，暫時無法給出具體的培養建議。但請相信，每一隻怪獸都有其獨特之處，用心培養，定能發光發熱。";
         }
     } catch (error) {
         console.error(`為 ${monster.nickname} 生成 AI 描述失敗:`, error);
-        monster.aiPersonality = { name: "未知", text: "AI描述生成失敗。", color: "var(--text-secondary)" };
-        monster.aiIntroduction = "AI描述生成失敗。";
-        monster.aiEvaluation = "AI描述生成失敗.";
+        // 如果 API 呼叫失敗，也提供預設描述
+        monster.aiPersonality = "AI個性描述生成失敗，這隻怪獸的性格如同一個未解之謎，等待著有緣人去探索。它可能時而溫順，時而狂野，需要訓練師細心的觀察與引導。";
+        monster.aiIntroduction = "AI介紹生成失敗。這隻神秘的怪獸，其基礎數值和元素屬性都隱藏在迷霧之中，只有真正的強者才能揭開它的全部潛力。";
+        monster.aiEvaluation = "AI綜合評價生成失敗。由於未能全面評估此怪獸的個性與數值，暫時無法給出具體的培養建議。但請相信，每一隻怪獸都有其獨特之處，用心培養，定能發光發熱。";
     } finally {
-        UI.closeModal('feedback-modal');
+        UI.closeModal('feedback-modal'); // 無論成功或失敗，關閉載入中的模態框
+        // 如果怪獸資訊模態框是打開的，並且顯示的是當前怪獸，則更新其內容
         const monsterInfoModalEl = GameState.elements.monsterInfoModal;
         if (monsterInfoModalEl && monsterInfoModalEl.style.display === 'flex' && GameState.currentMonster && GameState.currentMonster.id === monster.id) {
             UI.updateMonsterInfoModal(monster);
@@ -600,7 +609,7 @@ export function resolveTrainingAndShowResults(monster, durationSeconds) {
     monster.attack = (monster.attack || 0) + baseGrowth * 3;
     monster.defense = (monster.defense || 0) + baseGrowth * 2;
     monster.speed = (monster.speed || 0) + baseGrowth * 1;
-    monster.totalEvaluation = (monster.totalEvaluation || 0) + baseGrowth * 10;
+    monster.score = (monster.score || 0) + baseGrowth * 10; // 更新 score 而非 totalEvaluation
 
     growthLogHTML += `<ul class="list-disc list-inside text-sm">`;
     growthLogHTML += `<li>生命值提升: +${baseGrowth * 5}</li>`;
@@ -746,15 +755,15 @@ function releaseMonsterConfirmed() {
 export function addLogEntry(monster, message) {
     if (!monster || !message) return;
 
-    if (!monster.activityLogs) {
-        monster.activityLogs = [];
+    if (!monster.activityLog) { // 修正為 activityLog
+        monster.activityLog = [];
     }
 
     const timestamp = new Date().toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'});
-    monster.activityLogs.unshift({ timestamp: timestamp, message: message });
+    monster.activityLog.unshift({ time: timestamp, message: message }); // 修正為 time
 
-    if (monster.activityLogs.length > 50) {
-        monster.activityLogs.pop();
+    if (monster.activityLog.length > 50) {
+        monster.activityLog.pop();
     }
 
     const monsterInfoModalEl = GameState.elements.monsterInfoModal;
@@ -824,12 +833,23 @@ async function simulateBattle(playerMonster, opponentMonster) {
             throw new Error(battleResult.error || "後端戰鬥模擬錯誤但未提供詳細訊息。");
         }
 
-        playerMonster.wins = (playerMonster.wins || 0) + (battleResult.winnerId === playerMonster.id ? 1 : 0);
-        playerMonster.losses = (playerMonster.losses || 0) + (battleResult.winnerId !== playerMonster.id ? 1 : 0);
-        addLogEntry(playerMonster, `⚔️ 參與戰鬥，結果：${battleResult.winnerId === playerMonster.id ? '勝利' : (battleResult.winnerId === 'draw' ? '平手' : '敗北')}！`);
+        // 更新玩家怪獸的戰績
+        playerMonster.resume = playerMonster.resume || {wins: 0, losses: 0};
+        if (battleResult.winner_id === playerMonster.id) {
+            playerMonster.resume.wins = (playerMonster.resume.wins || 0) + 1;
+        } else if (battleResult.loser_id === playerMonster.id) {
+            playerMonster.resume.losses = (playerMonster.resume.losses || 0) + 1;
+        }
+        addLogEntry(playerMonster, `⚔️ 參與戰鬥，結果：${battleResult.winner_id === playerMonster.id ? '勝利' : (battleResult.winner_id === 'draw' ? '平手' : '敗北')}！`);
 
-        GameState.playerData.wins = (GameState.playerData.wins || 0) + (battleResult.winnerId === playerMonster.id ? 1 : 0);
-        GameState.playerData.losses = (GameState.playerData.losses || 0) + (battleResult.winnerId !== playerMonster.id ? 1 : 0);
+        // 更新玩家總戰績
+        GameState.playerData.wins = (GameState.playerData.wins || 0) + (battleResult.winner_id === playerMonster.id ? 1 : 0);
+        GameState.playerData.losses = (GameState.playerData.losses || 0) + (battleResult.winner_id !== playerMonster.id ? 1 : 0);
+        
+        // 更新怪獸技能狀態
+        if (battleResult.monster1_updated_skills) {
+            playerMonster.skills = battleResult.monster1_updated_skills;
+        }
 
         UI.displayBattleLog(battleResult.log);
 
@@ -838,10 +858,10 @@ async function simulateBattle(playerMonster, opponentMonster) {
 
         let feedbackTitle = "戰鬥結束";
         let feedbackMessage = "";
-        if (battleResult.winnerId === playerMonster.id) {
+        if (battleResult.winner_id === playerMonster.id) {
             feedbackMessage = `恭喜！您的 ${playerMonster.nickname} 贏得了戰鬥！`;
             UI.showFeedbackModal(feedbackTitle, feedbackMessage, false, true, true, playerMonster);
-        } else if (battleResult.winnerId === opponentMonster.id) {
+        } else if (battleResult.loser_id === playerMonster.id) {
             feedbackMessage = `很遺憾，您的 ${playerMonster.nickname} 輸掉了戰鬥。`;
             UI.showFeedbackModal(feedbackTitle, feedbackMessage, false, true, true, playerMonster);
         } else {
@@ -868,7 +888,8 @@ export async function searchFriends(searchTerm) {
     console.log(`正在搜尋好友：${searchTerm}。`);
 
     try {
-        const players = await ApiClient.searchPlayers(lowerSearchTerm);
+        const response = await ApiClient.searchPlayers(lowerSearchTerm);
+        const players = response.players; // 假設 API 回傳 { players: [...] }
 
         if (players && players.length > 0) {
             UI.displaySearchedPlayers(players);
@@ -895,7 +916,7 @@ export async function showPlayerInfoPopup(playerUid) {
         const playerDataFromApi = await ApiClient.getPlayer(playerUid);
 
         if (playerDataFromApi) {
-            UI.openAndPopulatePlayerInfoModal(playerDataFromApi, playerUid);
+            UI.openAndPopulatePlayerInfoModal(playerDataFromApi); // 傳遞完整的玩家數據物件
             UI.closeModal('feedback-modal');
         } else {
             throw new Error("未能獲取玩家資訊。");
@@ -908,15 +929,13 @@ export async function showPlayerInfoPopup(playerUid) {
 }
 
 export function getFilteredAndSortedMonstersForLeaderboard(filterElement = 'all') {
-    let filteredMonsters = GameState.farmedMonsters;
+    let filteredMonsters = GameState.allPublicMonsters;
 
-    if (!GameState.allPublicMonsters) {
-        console.warn("GameState.allPublicMonsters 未載入，排行榜可能不完整。");
-        filteredMonsters = GameState.farmedMonsters;
-    } else {
-        filteredMonsters = GameState.allPublicMonsters;
+    if (!GameState.allPublicMonsters || GameState.allPublicMonsters.length === 0) {
+        console.warn("GameState.allPublicMonsters 未載入或為空，排行榜可能不完整。");
+        // 如果公開怪獸未載入，則嘗試使用玩家自己的怪獸作為備援（但不應作為排行榜主數據）
+        filteredMonsters = GameState.farmedMonsters; 
     }
-
 
     if (filterElement !== 'all') {
         filteredMonsters = filteredMonsters.filter(monster =>
@@ -924,20 +943,23 @@ export function getFilteredAndSortedMonstersForLeaderboard(filterElement = 'all'
         );
     }
 
-    return [...filteredMonsters].sort((a, b) => (b.totalEvaluation || 0) - (a.totalEvaluation || 0));
+    // 確保排序是基於 'score' 屬性
+    return [...filteredMonsters].sort((a, b) => (b.score || 0) - (a.score || 0));
 }
 
 export function getSortedPlayersForLeaderboard() {
-    if (!GameState.allPublicPlayers) {
-        console.warn("GameState.allPublicPlayers 未載入，玩家排行榜可能不完整。");
+    if (!GameState.allPublicPlayers || GameState.allPublicPlayers.length === 0) {
+        console.warn("GameState.allPublicPlayers 未載入或為空，玩家排行榜可能不完整。");
+        // 如果公開玩家未載入，則只顯示當前玩家作為備援
         return [{
             uid: GameState.playerData.uid,
             nickname: GameState.playerData.nickname,
-            wins: GameState.playerData.wins,
+            wins: GameState.playerData.wins, // 假設 playerData 頂層有 wins/losses
             losses: GameState.playerData.losses,
-            totalEvaluation: GameState.playerData.totalEvaluation || 0
+            score: GameState.playerData.playerStats?.score || 0 // 使用 playerStats 裡的 score
         }];
     }
+    // 確保排序是基於 'wins' 屬性
     return [...GameState.allPublicPlayers].sort((a, b) => (b.wins || 0) - (a.wins || 0));
 }
 
@@ -1006,10 +1028,14 @@ export async function saveInitialPlayerDataToBackendLogic(uid, nickname, gameSet
             gold: 100,
             diamond: 10,
             achievements: [],
-            ownedMonsters: [],
+            ownedMonsters: [], // 這個在前端可能不直接用，但保留
             playerOwnedDNA: new Array(maxInventorySlots).fill(null),
             temporaryBackpackSlots: new Array(maxTempBackpackSlots).fill(null),
             combinationSlotsData: new Array(maxCombinationSlots).fill(null),
+            playerStats: { // 初始化 playerStats
+                rank: "N/A", wins: 0, losses: 0, score: 0,
+                titles: ["新手"], achievements: ["首次登入異世界"], medals: 0, nickname: nickname
+            }
         };
         GameState.farmedMonsters = [];
         GameState.currentMonster = null;
@@ -1018,6 +1044,7 @@ export async function saveInitialPlayerDataToBackendLogic(uid, nickname, gameSet
         GameState.monsterToReleaseInfo = null;
         GameState.monsterToChallengeInfo = null;
         GameState.currentCultivationMonster = null;
+        // 這些是顯示用的，會被 populate 函數填充，這裡重置為空
         GameState.inventoryDisplaySlots = new Array(GameState.NUM_INVENTORY_SLOTS).fill(null);
         GameState.temporaryBackpackSlots = new Array(GameState.NUM_TEMP_BACKPACK_SLOTS).fill(null);
         GameState.combinationSlotsData = new Array(GameState.NUM_COMBINATION_SLOTS).fill(null);
@@ -1036,18 +1063,19 @@ export async function saveInitialPlayerDataToBackendLogic(uid, nickname, gameSet
 export async function loadPublicMonstersAndPlayers() {
     console.log("GameLogic: 載入公開怪獸和玩家數據...");
     try {
-        const publicMonstersSnapshot = await db.collection('artifacts').doc(__app_id).collection('public').collection('data').doc('monsters').get();
-        if (publicMonstersSnapshot.exists && publicMonstersSnapshot.data().list) {
-            GameState.allPublicMonsters = publicMonstersSnapshot.data().list;
+        // 使用 Firestore v8 語法
+        const publicMonstersDoc = await db.collection('artifacts').doc(__app_id).collection('public').doc('data').collection('monsters').doc('list').get();
+        if (publicMonstersDoc.exists() && publicMonstersDoc.data().list) {
+            GameState.allPublicMonsters = publicMonstersDoc.data().list;
             console.log(`GameLogic: 已載入 ${GameState.allPublicMonsters.length} 隻公開怪獸。`);
         } else {
             GameState.allPublicMonsters = [];
             console.log("GameLogic: 沒有公開怪獸數據。");
         }
 
-        const publicPlayersSnapshot = await db.collection('artifacts').doc(__app_id).collection('public').collection('data').doc('players').get();
-        if (publicPlayersSnapshot.exists && publicPlayersSnapshot.data().list) {
-            GameState.allPublicPlayers = publicPlayersSnapshot.data().list;
+        const publicPlayersDoc = await db.collection('artifacts').doc(__app_id).collection('public').doc('data').collection('players').doc('list').get();
+        if (publicPlayersDoc.exists() && publicPlayersDoc.data().list) {
+            GameState.allPublicPlayers = publicPlayersDoc.data().list;
             console.log(`GameLogic: 已載入 ${GameState.allPublicPlayers.length} 位公開玩家。`);
         } else {
             GameState.allPublicPlayers = [];
@@ -1069,6 +1097,7 @@ export function resetGameDataForUI() {
         wins: 0, losses: 0, gold: 0, diamond: 0,
         achievements: [], ownedMonsters: [], playerOwnedDNA: [],
         temporaryBackpackSlots: [], combinationSlotsData: [],
+        playerStats: { rank: "N/A", wins: 0, losses: 0, score: 0, titles: [], achievements: [], medals: 0, nickname: "" } // 重置 playerStats
     };
     GameState.currentMonster = null;
     GameState.farmedMonsters = [];

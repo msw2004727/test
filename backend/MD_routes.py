@@ -1,36 +1,39 @@
 # MD_routes.py
 # 定義怪獸養成遊戲 (MD) 的 API 路由
 
-from flask import Blueprint, jsonify, request, current_app # 新增 current_app
+from flask import Blueprint, jsonify, request, current_app
 import firebase_admin
 from firebase_admin import auth
-import logging # 新增 logging
+import logging
 
-# 從服務和設定模組引入函式
-from MD_services import (
+# 從服務和設定模組引入函式 (使用相對導入，正確)
+from .MD_services import (
     get_player_data_service,
     save_player_data_service,
     combine_dna_service,
     simulate_battle_service,
-    search_players_service, # 新增引入 search_players_service
-    update_monster_custom_element_nickname_service, # 新增引入
-    absorb_defeated_monster_service, # 新增引入
-    heal_monster_service, # 新增引入
-    disassemble_monster_service, # 新增引入
-    recharge_monster_with_dna_service, # 新增引入
-    complete_cultivation_service, # 新增引入
-    replace_monster_skill_service, # 新增引入
-    get_monster_leaderboard_service, # 新增引入
-    get_player_leaderboard_service # 新增引入
+    search_players_service,
+    update_monster_custom_element_nickname_service,
+    absorb_defeated_monster_service,
+    heal_monster_service,
+    disassemble_monster_service,
+    recharge_monster_with_dna_service,
+    complete_cultivation_service,
+    replace_monster_skill_service,
+    get_monster_leaderboard_service,
+    get_player_leaderboard_service
 )
-from MD_config_services import load_all_game_configs_from_firestore # 新增引入
-from MD_models import PlayerGameData, Monster # 引入類型以便註解
+from .MD_config_services import load_all_game_configs_from_firestore # 使用相對導入，正確
+from .MD_models import PlayerGameData, Monster # 使用相對導入，這是關鍵修正
+
+# 引入 AI 服務模組 (使用相對導入，修正)
+from .MD_ai_services import generate_monster_ai_details # 這裡需要加 .
 
 md_bp = Blueprint('md_bp', __name__, url_prefix='/api/MD')
 routes_logger = logging.getLogger(__name__) # 為路由設定日誌
 
 # --- 輔助函式：獲取遊戲設定 ---
-# 遊戲設定現在將在應用程式啟動時載入一次，並儲存在 current_app.config 中
+# 遊戲設定現在將在應用程式啟動時載入一次，並儲存在 Flask 的 current_app.config 中
 # 或者，如果需要每次請求都重新載入（不建議用於不常變動的設定），則在此處呼叫
 def _get_game_configs_data_from_app_context():
     """
@@ -39,7 +42,8 @@ def _get_game_configs_data_from_app_context():
     """
     if 'MD_GAME_CONFIGS' not in current_app.config:
         routes_logger.warning("MD_GAME_CONFIGS 未在 current_app.config 中找到，將嘗試即時載入。")
-        current_app.config['MD_GAME_CONFIGS'] = load_all_game_configs_from_firestore()
+        from .MD_config_services import load_all_game_configs_from_firestore as load_configs_inner # 避免循環導入
+        current_app.config['MD_GAME_CONFIGS'] = load_configs_inner()
     return current_app.config['MD_GAME_CONFIGS']
 
 # --- API 端點 ---
@@ -135,7 +139,7 @@ def combine_dna_api_route():
         routes_logger.error(f"Combine API Token 驗證 FirebaseAuthError: {e}")
         return jsonify({"error": "Token 無效或已過期。"}), 401
     except Exception as e:
-        routes_logger.error(f"Combine API Token 處理時發生未知錯誤: {e}", exc_info=True)
+        routes_logger.error(f"Token 處理時發生未知錯誤: {e}", exc_info=True)
         return jsonify({"error": f"Token 處理錯誤: {str(e)}"}), 403
 
     if not user_id:
@@ -277,11 +281,11 @@ def simulate_battle_api_route():
                 if monster_updated_in_farm:
                     player_data["farmedMonsters"] = farmed_monsters
                 player_data["playerStats"] = player_stats
-
-                # 處理戰後吸收 (如果 monster1 勝利且對方不是 NPC)
+                
+                # 處理戰後吸收 (如果 monster1 勝利且對方非NPC)
                 if battle_result.get("winner_id") == monster1_data_req.get('id') and \
                    battle_result.get("loser_id") == monster2_data_req.get('id') and \
-                   not monster2_data_req.get('isNPC'):
+                   monster2_data_req.get('isNPC') is not True: # 確保對方不是NPC
                     routes_logger.info(f"怪獸 {monster1_data_req.get('nickname')} 勝利，嘗試吸收 {monster2_data_req.get('nickname')}")
                     absorption_result = absorb_defeated_monster_service(
                         player_id=user_id,
@@ -326,6 +330,27 @@ def simulate_battle_api_route():
 
 # --- 新增的路由 ---
 
+# 新增 AI 描述生成路由
+@md_bp.route('/generate-ai-descriptions', methods=['POST'])
+def generate_ai_descriptions_route():
+    user_id, _, error_response = _get_authenticated_user_id()
+    if error_response: return error_response
+
+    data = request.json
+    monster_data = data.get('monster_data')
+    if not monster_data:
+        return jsonify({"error": "請求中缺少怪獸資料。"}), 400
+
+    try:
+        # 調用 AI 服務模組中的函式
+        from .MD_ai_services import generate_monster_ai_details as generate_ai_details_inner # 避免循環導入
+        ai_details = generate_ai_details_inner(monster_data)
+        return jsonify(ai_details), 200
+    except Exception as e:
+        routes_logger.error(f"生成AI描述時發生錯誤: {e}", exc_info=True)
+        return jsonify({"error": "生成AI描述失敗。", "details": str(e)}), 500
+
+
 @md_bp.route('/monster/<monster_id>/update-nickname', methods=['POST'])
 def update_monster_nickname_route(monster_id: str):
     user_id, nickname_from_token, error_response = _get_authenticated_user_id()
@@ -353,8 +378,11 @@ def update_monster_nickname_route(monster_id: str):
             return jsonify({"success": True, "message": "怪獸暱稱已更新。", "updated_monster": updated_monster}), 200
         else:
             return jsonify({"error": "更新怪獸暱稱後儲存失敗。"}), 500
-    else:
-        return jsonify({"error": "更新怪獸暱稱失敗，可能是找不到怪獸或玩家。"}), 404
+    else: # update_monster_custom_element_nickname_service 可能返回 None 或原始 player_data
+        original_monster = next((m for m in player_data.get("farmedMonsters", []) if m.get("id") == monster_id), None)
+        if original_monster: # 如果只是無需治療
+            return jsonify({"success": True, "message": "怪獸暱稱未變更。", "updated_monster": original_monster }), 200
+        return jsonify({"error": "更新怪獸暱稱失敗。"}), 404
 
 
 @md_bp.route('/monster/<monster_id>/heal', methods=['POST'])
@@ -554,7 +582,7 @@ def _get_authenticated_user_id():
     """從 Authorization Header 驗證 Firebase ID Token 並返回 user_id 和 nickname。"""
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith('Bearer '):
-        return None, None, jsonify({"error": "未授權：缺少 Token"}), 401
+        return None, None, (jsonify({"error": "未授權：缺少 Token"}), 401)
 
     id_token = auth_header.split('Bearer ')[1]
     try:
@@ -566,11 +594,10 @@ def _get_authenticated_user_id():
             return user_id, nickname, None
         else:
             routes_logger.error("Firebase Admin SDK 未初始化，無法驗證 Token。")
-            return None, None, jsonify({"error": "伺服器設定錯誤，Token 驗證失敗。"}), 500
+            return None, None, (jsonify({"error": "伺服器設定錯誤，Token 驗證失敗。"}), 500)
     except auth.FirebaseAuthError as e:
         routes_logger.error(f"Token 驗證 FirebaseAuthError: {e}")
-        return None, None, jsonify({"error": "Token 無效或已過期。"}), 401
+        return None, None, (jsonify({"error": "Token 無效或已過期。"}), 401)
     except Exception as e:
         routes_logger.error(f"Token 處理時發生未知錯誤: {e}", exc_info=True)
-        return None, None, jsonify({"error": f"Token 處理錯誤: {str(e)}"}), 403
-
+        return None, None, (jsonify({"error": f"Token 處理錯誤: {str(e)}"}), 403)

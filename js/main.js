@@ -2,19 +2,26 @@
 
 // --- Global Variables and Initial Setup ---
 // gameState, DOMElements, api-client functions, auth functions, ui functions, game-logic functions, event-handler functions
-// 這些通常會通過 <script> 標籤的順序在全局作用域中可用。
-// 如果使用模塊系統 (ES6 Modules)，則需要 import。
-// 為了簡化，這裡假設它們已在全局作用域。
+
+/**
+ * 清除遊戲緩存 (sessionStorage 和特定的 localStorage 項目)。
+ * 會在頁面刷新或關閉視窗前調用。
+ */
+function clearGameCacheOnExitOrRefresh() {
+    console.log("Clearing game cache (sessionStorage and specific localStorage items)...");
+    sessionStorage.clear();
+    console.log("SessionStorage cleared.");
+    localStorage.removeItem('announcementShown_v1');
+    console.log("localStorage item 'announcementShown_v1' removed.");
+}
 
 /**
  * 初始化 Firebase 應用。
  */
 function initializeFirebaseApp() {
-    // firebaseConfig 來自 firebase-config.js
-    // 確認 firebase 和 firebaseConfig 是否已定義
     if (typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined') {
         try {
-            if (!firebase.apps.length) { // 避免重複初始化
+            if (!firebase.apps.length) { 
                 firebase.initializeApp(firebaseConfig);
                 console.log("Firebase App initialized successfully.");
             } else {
@@ -22,11 +29,12 @@ function initializeFirebaseApp() {
             }
         } catch (error) {
             console.error("Firebase initialization error:", error);
-            showFeedbackModal('嚴重錯誤', '無法初始化遊戲核心服務，請稍後再試或聯繫管理員。');
+            if (typeof showFeedbackModal === 'function') { // 確保 showFeedbackModal 已定義
+                showFeedbackModal('嚴重錯誤', '無法初始化遊戲核心服務，請稍後再試或聯繫管理員。');
+            }
         }
     } else {
         console.error("Firebase or firebaseConfig is not defined. Ensure firebase-config.js is loaded before main.js and Firebase SDKs are included.");
-        // 顯示一個更用戶友好的錯誤
         document.body.innerHTML = '<div style="padding: 20px; text-align: center; color: red; font-size: 1.2em;">遊戲載入失敗：缺少必要的 Firebase 設定。請檢查控制台以獲取更多資訊。</div>';
     }
 }
@@ -38,22 +46,20 @@ function initializeFirebaseApp() {
  */
 async function initializeGame() {
     console.log("Initializing game...");
-    showFeedbackModal('遊戲載入中...', '正在準備您的怪獸異世界...', true);
+    if (typeof showFeedbackModal === 'function') {
+        showFeedbackModal('遊戲載入中...', '正在準備您的怪獸異世界...', true);
+    }
 
     try {
-        // 1. 初始化主題
-        initializeTheme(); // ui.js
+        if (typeof initializeTheme === 'function') initializeTheme(); 
 
-        // 2. 獲取遊戲核心設定
-        const configs = await getGameConfigs(); // api-client.js
+        const configs = await getGameConfigs(); 
         if (configs && Object.keys(configs).length > 0) {
-            updateGameState({ gameConfigs: configs }); // game-state.js
+            updateGameState({ gameConfigs: configs }); 
             console.log("Game configs loaded and saved to gameState.");
-            // 使用遊戲設定更新UI（例如，最大修煉時間等）
             if (DOMElements.maxCultivationTimeText && configs.value_settings) {
                 DOMElements.maxCultivationTimeText.textContent = configs.value_settings.max_cultivation_time_seconds || 3600;
             }
-            // 更新滾動提示
             const gameHints = [
                 `💡 ${configs.naming_constraints?.max_monster_full_nickname_len || 15}字是怪獸暱稱的極限！`,
                 "💡 稀有度越高的DNA，基礎能力越強！",
@@ -64,163 +70,171 @@ async function initializeGame() {
             if (configs.newbie_guide && configs.newbie_guide.length > 0) {
                 gameHints.push(`💡 ${configs.newbie_guide[0].title} - ${configs.newbie_guide[0].content.substring(0,20)}...`);
             }
-            updateScrollingHints(gameHints);
-
+            if (typeof updateScrollingHints === 'function') updateScrollingHints(gameHints);
         } else {
             throw new Error("無法獲取遊戲核心設定。");
         }
 
-        // 3. 處理玩家數據 (這部分會在 onAuthStateChanged 回調中處理)
-        // 如果沒有用戶登入，則停留在登入畫面
         if (!gameState.currentUser) {
             console.log("No user logged in. Staying on auth screen.");
-            toggleElementDisplay(DOMElements.authScreen, true, 'flex');
-            toggleElementDisplay(DOMElements.gameContainer, false);
-            hideModal('feedback-modal');
-            // 檢查是否需要顯示官方公告 (即使未登入)
-            // if (localStorage.getItem('announcementShown_v1') !== 'true') {
-            //     showModal('official-announcement-modal');
-            // }
-            return; // 等待用戶登入
+            if (DOMElements.authScreen) toggleElementDisplay(DOMElements.authScreen, true, 'flex');
+            if (DOMElements.gameContainer) toggleElementDisplay(DOMElements.gameContainer, false);
+            if (typeof hideModal === 'function') hideModal('feedback-modal');
+            return; 
         }
 
-        // 如果已有用戶 (通常是 onAuthStateChanged 觸發後)
         await loadPlayerDataAndInitializeUI(gameState.currentUser);
 
-        hideModal('feedback-modal');
     } catch (error) {
         console.error("Game initialization failed:", error);
-        showFeedbackModal('遊戲載入失敗', `初始化過程中發生錯誤：${error.message}。請嘗試刷新頁面。`);
-        // 保持 Auth Screen 顯示或顯示一個全局錯誤頁面
-        toggleElementDisplay(DOMElements.authScreen, true, 'flex');
-        toggleElementDisplay(DOMElements.gameContainer, false);
+        if (typeof hideModal === 'function') hideModal('feedback-modal');
+        if (typeof showFeedbackModal === 'function') {
+            showFeedbackModal('遊戲載入失敗', `初始化過程中發生錯誤：${error.message}。請嘗試刷新頁面。`);
+        }
+        if (DOMElements.authScreen) toggleElementDisplay(DOMElements.authScreen, true, 'flex');
+        if (DOMElements.gameContainer) toggleElementDisplay(DOMElements.gameContainer, false);
     }
 }
 
 /**
  * 當 Firebase Auth 狀態改變時的回調函數
- * @param {firebase.User | null} user Firebase User 對象，或 null (如果未登入)
  */
 async function onAuthStateChangedHandler(user) {
+    // 確保 DOMElements 已初始化
+    if (Object.keys(DOMElements).length === 0) {
+        console.warn("onAuthStateChangedHandler called before DOMElements initialized. Retrying in 100ms.");
+        setTimeout(() => onAuthStateChangedHandler(user), 100); // 稍微延遲後重試
+        return;
+    }
+
     if (user) {
-        // 用戶已登入
         console.log("User is signed in:", user.uid);
-        updateGameState({ currentUser: user, playerId: user.uid, playerNickname: user.displayName || user.email.split('@')[0] || "玩家" });
-        
-        // 如果遊戲容器尚未顯示，表示這是初次登入或刷新後的自動登入
-        if (DOMElements.gameContainer.style.display === 'none') {
-            await initializeGame(); // 確保遊戲設定已載入，然後載入玩家數據
+        updateGameState({ currentUser: user, playerId: user.uid, playerNickname: user.displayName || (user.email ? user.email.split('@')[0] : "玩家") });
+
+        if (DOMElements.gameContainer && (DOMElements.gameContainer.style.display === 'none' || DOMElements.gameContainer.style.display === '')) {
+            await initializeGame(); 
         } else {
-            // 如果遊戲容器已顯示 (例如，玩家剛完成註冊/登入操作)，直接載入玩家數據
-            await loadPlayerDataAndInitializeUI(user);
+            await loadPlayerDataAndInitializeUI(user); 
         }
-         // 顯示官方公告 (如果尚未顯示過)
-        if (localStorage.getItem('announcementShown_v1') !== 'true') {
-            updateAnnouncementPlayerName(gameState.playerNickname);
-            showModal('official-announcement-modal');
+        if (localStorage.getItem('announcementShown_v1') !== 'true' && gameState.currentUser) { 
+            if (typeof updateAnnouncementPlayerName === 'function') updateAnnouncementPlayerName(gameState.playerNickname);
+            if (typeof showModal === 'function') showModal('official-announcement-modal');
         }
 
     } else {
-        // 用戶已登出或未登入
         console.log("User is signed out or not yet signed in.");
-        updateGameState({ currentUser: null, playerId: null });
-        toggleElementDisplay(DOMElements.authScreen, true, 'flex');
-        toggleElementDisplay(DOMElements.gameContainer, false);
-        updateMonsterSnapshot(null); // 清空快照
-        // 清理可能存在的遊戲狀態
-        resetDNACombinationSlots();
-        renderDNACombinationSlots();
-        renderPlayerDNAInventory();
-        renderMonsterFarm();
-        // 確保在登出時隱藏所有 modals
-        hideAllModals();
+        updateGameState({ currentUser: null, playerId: null, playerNickname: "玩家" }); 
+        if (DOMElements.authScreen) toggleElementDisplay(DOMElements.authScreen, true, 'flex');
+        if (DOMElements.gameContainer) toggleElementDisplay(DOMElements.gameContainer, false);
+        
+        if (typeof updateMonsterSnapshot === 'function') updateMonsterSnapshot(null); 
+        if (typeof resetDNACombinationSlots === 'function') resetDNACombinationSlots();
+        if (typeof renderDNACombinationSlots === 'function') renderDNACombinationSlots();
+        if (typeof renderPlayerDNAInventory === 'function') renderPlayerDNAInventory();
+        if (typeof renderMonsterFarm === 'function') renderMonsterFarm();
+        if (typeof renderTemporaryBackpack === 'function') renderTemporaryBackpack(); 
+        if (typeof hideAllModals === 'function') hideAllModals();
     }
 }
 
 /**
  * 載入玩家數據並初始化相關 UI。
- * @param {firebase.User} user Firebase User 對象。
  */
 async function loadPlayerDataAndInitializeUI(user) {
     if (!user) return;
-    
-    showFeedbackModal('載入中...', '正在獲取您的玩家資料...', true);
+
+    if (typeof showFeedbackModal === 'function') {
+        showFeedbackModal('載入中...', '正在獲取您的玩家資料...', true);
+    }
     try {
-        const playerData = await getPlayerData(user.uid); // api-client.js
+        const playerData = await getPlayerData(user.uid); 
         if (playerData) {
-            updateGameState({ 
-                playerData: playerData, 
-                playerNickname: playerData.nickname || user.displayName || user.email.split('@')[0] || "玩家" 
+            updateGameState({
+                playerData: playerData,
+                playerNickname: playerData.nickname || user.displayName || (user.email ? user.email.split('@')[0] : "玩家")
             });
-            console.log("Player data loaded for:", user.uid, playerData);
+            console.log("Player data loaded for:", user.uid);
 
-            // 初始化 UI 組件
-            renderPlayerDNAInventory();
-            renderDNACombinationSlots();
-            renderMonsterFarm();
-            renderTemporaryBackpack(); // 初始化臨時背包
+            if (typeof renderPlayerDNAInventory === 'function') renderPlayerDNAInventory();
+            if (typeof renderDNACombinationSlots === 'function') renderDNACombinationSlots();
+            if (typeof renderMonsterFarm === 'function') renderMonsterFarm();
+            if (typeof renderTemporaryBackpack === 'function') renderTemporaryBackpack(); 
 
-            // 選擇預設怪獸顯示在快照
-            const defaultMonster = getDefaultSelectedMonster(); // game-state.js
-            if (defaultMonster) {
-                updateMonsterSnapshot(defaultMonster); // ui.js
-            } else {
-                updateMonsterSnapshot(null); // 如果沒有怪獸，顯示空狀態
+            const defaultMonster = getDefaultSelectedMonster(); 
+            if (typeof updateMonsterSnapshot === 'function') {
+                updateMonsterSnapshot(defaultMonster || null);
             }
 
-            // 顯示遊戲主容器，隱藏認證畫面
-            toggleElementDisplay(DOMElements.authScreen, false);
-            toggleElementDisplay(DOMElements.gameContainer, true, 'flex'); // main-container 使用 flex
-            
-            // 更新公告中的玩家名稱
-            updateAnnouncementPlayerName(gameState.playerNickname);
+            if (DOMElements.authScreen) toggleElementDisplay(DOMElements.authScreen, false);
+            if (DOMElements.gameContainer) toggleElementDisplay(DOMElements.gameContainer, true, 'flex'); 
+
+            if (typeof updateAnnouncementPlayerName === 'function') updateAnnouncementPlayerName(gameState.playerNickname);
+            if (typeof hideModal === 'function') hideModal('feedback-modal');
 
         } else {
-            throw new Error("無法獲取玩家遊戲資料。");
+            throw new Error("無法獲取玩家遊戲資料，後端未返回有效數據。");
         }
-        hideModal('feedback-modal');
     } catch (error) {
         console.error("Failed to load player data and initialize UI:", error);
-        showFeedbackModal('資料載入失敗', `獲取玩家資料時發生錯誤：${error.message}。您可以嘗試重新登入。`, false, null, [
-            { text: '重新登入', class: 'primary', onClick: async () => { await logoutUser(); /* onAuthStateChanged 會處理後續 */ } },
-            { text: '關閉', class: 'secondary' }
-        ]);
-        // 如果載入玩家數據失敗，可能需要將用戶登出或顯示錯誤頁面
-        // toggleElementDisplay(DOMElements.authScreen, true, 'flex');
-        // toggleElementDisplay(DOMElements.gameContainer, false);
+        if (typeof hideModal === 'function') hideModal('feedback-modal');
+        if (typeof showFeedbackModal === 'function') {
+            showFeedbackModal('資料載入失敗', `獲取玩家資料時發生錯誤：${error.message}。您可以嘗試重新登入。`, false, null, [
+                { text: '重新登入', class: 'primary', onClick: async () => { await logoutUser(); } },
+                { text: '關閉', class: 'secondary' }
+            ]);
+        }
     }
 }
 
 
 // --- Application Entry Point ---
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM fully loaded and parsed.");
+    // 1. 優先初始化 DOM 元素引用
+    if (typeof initializeDOMElements === 'function') {
+        initializeDOMElements(); 
+    } else {
+        console.error("CRITICAL: initializeDOMElements function is not defined! UI will not work.");
+        document.body.innerHTML = "遊戲介面關鍵組件初始化失敗，請刷新或聯繫管理員。";
+        return; 
+    }
+    
+    // 2. 清理緩存
+    clearGameCacheOnExitOrRefresh();
+    console.log("DOM fully loaded and parsed. DOMElements initialized.");
 
-    // 1. 初始化 Firebase App
+    // 3. 初始化 Firebase App
     initializeFirebaseApp();
 
-    // 2. 設置 Firebase Auth 狀態監聽器
-    // RosterAuthListener 來自 auth.js
+    // 4. 設置 Firebase Auth 狀態監聽器
     if (typeof RosterAuthListener === 'function') {
         RosterAuthListener(onAuthStateChangedHandler);
     } else {
         console.error("RosterAuthListener is not defined. Ensure auth.js is loaded correctly.");
-        showFeedbackModal('嚴重錯誤', '遊戲認證服務載入失敗，請刷新頁面。');
+        if (typeof showFeedbackModal === 'function') {
+            showFeedbackModal('嚴重錯誤', '遊戲認證服務載入失敗，請刷新頁面。');
+        }
         return;
     }
-    
-    // 3. 初始化事件監聽器 (來自 event-handlers.js)
+
+    // 5. 初始化事件監聽器
     if (typeof initializeEventListeners === 'function') {
         initializeEventListeners();
     } else {
         console.error("initializeEventListeners is not defined. Ensure event-handlers.js is loaded correctly.");
     }
 
-    // 4. 初始遊戲化 (部分邏輯移到 onAuthStateChangedHandler 中，確保在用戶登入後執行)
-    // initializeGame(); // initializeGame 會在 onAuthStateChangedHandler 中被適時調用
+    // 6. 預設顯示第一個頁籤 (DNA管理)
+    if (DOMElements.dnaFarmTabs && DOMElements.dnaFarmTabs.querySelector('.tab-button[data-tab-target="dna-inventory-content"]')) {
+        if (typeof switchTabContent === 'function') {
+            switchTabContent('dna-inventory-content', DOMElements.dnaFarmTabs.querySelector('.tab-button[data-tab-target="dna-inventory-content"]'));
+        }
+    } else {
+        console.warn("DNA Farm Tabs or initial tab button not found. Skipping default tab switch. DOMElements.dnaFarmTabs:", DOMElements.dnaFarmTabs);
+    }
+});
 
-    // 預設顯示第一個頁籤 (DNA管理)
-    switchTabContent('dna-inventory-content', DOMElements.dnaFarmTabs.querySelector('.tab-button[data-tab-target="dna-inventory-content"]'));
+window.addEventListener('beforeunload', function (e) {
+    clearGameCacheOnExitOrRefresh();
 });
 
 console.log("Main.js script loaded.");

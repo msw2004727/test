@@ -1,26 +1,158 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>怪獸養成對戰 Demo - 前後端整合</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>怪獸養成對戰 Demo - 前後端整合</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-  <!-- 引入 Google Fonts: Noto Sans TC (繁體中文) 和 Inter (英文) -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        /* 怪獸快照區域特定樣式 */
+        .monster-snapshot-area {
+            position: relative; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 8px; 
+            min-height: 230px; 
+        }
+         @media (min-width: 768px) {
+            .monster-snapshot-area {
+                min-height: 270px; 
+            }
+        }
 
-  <!-- 引入自定義 CSS 樣式表 -->
-  <link rel="stylesheet" href="css/theme.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/components.css">
+        /* 圖層樣式 */
+        #monster-snapshot-base-bg,
+        #monster-snapshot-body-silhouette,
+        #monster-parts-container {
+            position: absolute;
+            top: 50%; 
+            left: 50%;
+            transform: translate(-50%, -50%);
+            object-fit: contain; 
+        }
 
-  <!-- 引入 Firebase CDN (v8.10.1) - 確保在您的 JS 模組之前載入 -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+        #monster-snapshot-base-bg { 
+            z-index: 1; 
+            width: 100%; 
+            height: 100%;
+            object-fit: cover; 
+        }
+
+        #monster-snapshot-body-silhouette { 
+            z-index: 2; 
+            max-width: 75%; 
+            max-height: 75%;
+        }
+
+        #monster-parts-container { 
+            z-index: 3; 
+            width: 70%; 
+            height: 85%; 
+            display: grid; 
+            grid-template-columns: 28% 44% 28%; /* 左(28%) 中(44%) 右(28%) */
+            grid-template-rows: 30% 35% 35%;    /* 頭(30%) 手(35%) 腳(35%) */
+            grid-template-areas:
+                ".    head   ."
+                "lArm body rArm"
+                "lLeg body rLeg"; /* 讓 body 區域也延伸到腿部，以更好地覆蓋全身圖 */
+            gap: 1%; 
+        }
+        
+        .monster-part {
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            width: 100%; 
+            height: 100%; 
+            border: 1px dashed var(--accent-color-dark); /* 預設虛線框，顏色可調 */
+            box-sizing: border-box; /* 確保邊框不會使元素變大 */
+        }
+
+        .monster-part.empty-part { /* 當沒有圖片時，背景透明，但保留虛線框 */
+            background-image: none !important;
+            background-color: transparent !important;
+        }
+
+        #monster-part-head { grid-area: head; }
+        #monster-part-left-arm { grid-area: lArm; }
+        #monster-part-right-arm { grid-area: rArm; }
+        #monster-part-left-leg { grid-area: lLeg; }
+        #monster-part-right-leg { grid-area: rLeg; }
+
+        /* 文字資訊疊加層 */
+        .snapshot-info-overlay {
+            position: absolute;
+            bottom: 8px; 
+            left: 10px;
+            right: 10px;
+            z-index: 4;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end; 
+            pointer-events: none; 
+        }
+
+        .snapshot-info-left {
+            text-align: left;
+        }
+        .snapshot-info-right {
+            text-align: right;
+        }
+        
+        #snapshot-achievement-title { 
+            font-size: 1.1rem; 
+            font-weight: bold;
+            color: var(--accent-color); 
+            display: block; 
+        }
+        #snapshot-nickname { 
+            font-size: 0.8rem; 
+            color: var(--text-secondary); 
+            display: block; 
+            margin-top: 1px; 
+        }
+        #snapshot-evaluation {
+            font-size: 1.1rem; 
+            font-weight: bold;
+            color: var(--success-color);
+        }
+
+        #snapshot-win-loss {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            z-index: 4;
+            background-color: color-mix(in srgb, var(--bg-panel) 70%, transparent);
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+         #snapshot-win-loss span { display: block; }
+
+        #snapshot-main-content { 
+            position: absolute;
+            top: 8px; 
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
+        }
+    </style>
 </head>
 <body>
-    <!-- 認證畫面 - 預設顯示 -->
-    <div id="auth-screen" class="auth-screen">
+    <!-- 身份驗證畫面 -->
+    <div id="auth-screen">
         <div class="auth-container">
             <h1 class="auth-title">怪獸異世界</h1>
             <button id="show-login-form-btn" class="auth-button primary">使用暱稱/密碼登入</button>
@@ -28,46 +160,42 @@
         </div>
     </div>
 
-    <!-- 註冊模態框 -->
+    <!-- 註冊彈窗 -->
     <div id="register-modal" class="modal">
         <div class="modal-content" style="max-width: 420px;">
-            <span class="modal-close" data-modal-id="register-modal" aria-label="關閉註冊視窗">&times;</span>
+            <span class="modal-close" data-modal-id="register-modal">&times;</span> 
             <h3 class="modal-header">創建您的訓獸師帳號</h3>
             <div class="modal-body">
-                <label for="register-nickname" class="sr-only">暱稱</label>
-                <input type="text" id="register-nickname" class="auth-input" placeholder="請輸入您的暱稱" required aria-required="true">
-                <label for="register-password" class="sr-only">密碼</label>
-                <input type="password" id="register-password" class="auth-input" placeholder="請設定您的密碼" required aria-required="true">
-                <div id="register-error" class="auth-error-message" role="alert" aria-live="polite"></div>
+                <input type="text" id="register-nickname" class="auth-input" placeholder="請輸入您的暱稱" required>
+                <input type="password" id="register-password" class="auth-input" placeholder="請設定您的密碼" required>
+                <div id="register-error" class="auth-error-message"></div>
                 <button id="register-submit-btn" class="auth-button success">創建並進入異世界</button>
             </div>
         </div>
     </div>
 
-    <!-- 登入模態框 -->
+    <!-- 登入彈窗 -->
     <div id="login-modal" class="modal">
         <div class="modal-content" style="max-width: 420px;">
-            <span class="modal-close" data-modal-id="login-modal" aria-label="關閉登入視窗">&times;</span>
+            <span class="modal-close" data-modal-id="login-modal">&times;</span> 
             <h3 class="modal-header">訓獸師登入</h3>
             <div class="modal-body">
-                <label for="login-nickname" class="sr-only">暱稱</label>
-                <input type="text" id="login-nickname" class="auth-input" placeholder="您的暱稱" required aria-required="true">
-                <label for="login-password" class="sr-only">密碼</label>
-                <input type="password" id="login-password" class="auth-input" placeholder="您的密碼" required aria-required="true">
-                <div id="login-error" class="auth-error-message" role="alert" aria-live="polite"></div>
+                <input type="text" id="login-nickname" class="auth-input" placeholder="您的暱稱" required>
+                <input type="password" id="login-password" class="auth-input" placeholder="您的密碼" required>
+                <div id="login-error" class="auth-error-message"></div>
                 <button id="login-submit-btn" class="auth-button primary">登入異世界</button>
             </div>
         </div>
     </div>
 
-    <!-- 官方公告模態框 -->
+    <!-- 遊戲官方公告彈窗 -->
     <div id="official-announcement-modal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
-            <span class="modal-close" data-modal-id="official-announcement-modal" aria-label="關閉公告視窗">&times;</span>
+            <span class="modal-close" data-modal-id="official-announcement-modal" id="official-announcement-close-x">&times;</span>
             <h3 class="modal-header">📢 遊戲官方公告</h3>
             <div class="modal-body">
                 <div id="announcement-ad-banner" style="background-color: var(--bg-slot); border: 1px solid var(--border-color); color: var(--text-primary); text-align: center; padding: 20px; border-radius: 6px; margin-bottom: 15px;">
-                    <p>載入中...</p>
+                    -- 這裡是廣告欄位 (可放置圖片或文字) --
                 </div>
                 <div id="announcement-content">
                     <p>親愛的<span id="announcement-player-name" class="font-bold text-[var(--accent-color)]">玩家</span>您好，</p>
@@ -76,135 +204,94 @@
                     <p style="text-align: right; margin-top: 20px;">怪獸異世界營運團隊 敬上</p>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="primary" data-modal-close-button="official-announcement-modal">我知道了</button>
-            </div>
         </div>
     </div>
 
-    <!-- 主遊戲內容容器 - 預設隱藏，登入後顯示 -->
-    <div id="game-container" style="display: none;">
+    <!-- 遊戲主容器 -->
+    <div id="game-container" style="display: none; width:100%; display:flex; flex-direction:column; align-items:center;">
         <div class="main-container">
-            <!-- 主題切換按鈕 -->
-            <button id="theme-switcher" title="切換主題" aria-label="切換主題">
+            <button id="main-logout-btn" class="corner-button top-left-button" title="登出">🚪</button>
+            <button id="theme-switcher" class="corner-button top-right-button" title="切換主題">
                 <span id="theme-icon">🌙</span>
             </button>
-            <!-- 登出按鈕 -->
-            <button id="logout-btn" class="absolute top-10 right-10 mt-10 text-xs secondary p-1">登出</button>
 
             <!-- 怪獸快照面板 -->
             <div class="monster-snapshot-panel panel">
                 <div id="monster-snapshot-area" class="monster-snapshot-area">
-                    <div class="monster-snapshot-img-bg">
-                        <!-- 預設怪獸圖片，將由 JS 動態更新 -->
-                        <img id="monster-image" src="https://placehold.co/200x150/161b22/8b949e?text=怪獸&font=noto-sans-tc" alt="當前怪獸圖片">
+                    <!-- 圖層1: 背景圖 -->
+                    <img id="monster-snapshot-base-bg" src="https://github.com/msw2004727/MD/blob/main/images/a001.png?raw=true" alt="怪獸快照背景">
+                    
+                    <!-- 圖層2: 怪獸全身圖 -->
+                    <img id="monster-snapshot-body-silhouette" src="https://github.com/msw2004727/MD/blob/main/images/mb01.png?raw=true" alt="怪獸全身輪廓">
+
+                    <!-- 圖層3: 部位圖 -->
+                    <div id="monster-parts-container">
+                        <div id="monster-part-head" class="monster-part"></div>
+                        <div id="monster-part-left-arm" class="monster-part"></div>
+                        <div id="monster-part-right-arm" class="monster-part"></div>
+                        <div id="monster-part-left-leg" class="monster-part"></div>
+                        <div id="monster-part-right-leg" class="monster-part"></div>
                     </div>
-                    <div id="snapshot-achievement-title" class="snapshot-achievement-title">初出茅廬</div>
-                    <div id="snapshot-nickname" class="snapshot-nickname">尚 未 命名</div>
+
+                    <!-- 文字資訊疊加層 -->
+                    <div id="snapshot-main-content" class="snapshot-main-content">
+                        <!-- 屬性圖標等 -->
+                    </div>
                     <div id="snapshot-win-loss" class="snapshot-win-loss">
                         <span>勝: 0</span>
                         <span>敗: 0</span>
                     </div>
-                    <!-- 怪獸主要資訊，將由 JS 動態更新 -->
-                    <div id="snapshot-main-content" class="snapshot-main-content">
-                        <p class="text-sm">屬性: <span class="font-bold">?</span></p>
-                        <p class="text-sm">等級: <span class="font-bold">?</span></p>
-                        <p class="text-sm">戰力: <span class="font-bold">?</span></p>
-                        <p class="text-sm">技能: <span class="font-bold">?</span></p>
+                    <div class="snapshot-info-overlay">
+                        <div class="snapshot-info-left">
+                            <span id="snapshot-achievement-title">初出茅廬</span>
+                            <span id="snapshot-nickname">-</span>
+                        </div>
+                        <div class="snapshot-info-right">
+                            <span id="snapshot-evaluation">總評價: 0</span>
+                        </div>
                     </div>
-                    <div id="snapshot-evaluation" class="snapshot-evaluation">總評價: 0</div>
                 </div>
-                <!-- 頂部導航按鈕 -->
                 <div class="top-buttons-container">
-                    <button id="monster-info-button" class="top-nav-button" disabled>當前怪獸</button>
-                    <button id="player-info-button" class="top-nav-button">玩家資訊</button>
-                    <button id="show-monster-leaderboard-btn" class="top-nav-button">怪獸排行</button>
-                    <button id="show-player-leaderboard-btn" class="top-nav-button">玩家排行</button>
-                    <button id="friends-list-btn" class="top-nav-button">好友名單</button>
-                    <button id="newbie-guide-btn" class="top-nav-button">新手上路</button>
+                    <button id="monster-info-button" class="top-nav-button button" disabled>當前怪獸</button> 
+                    <button id="player-info-button" class="top-nav-button button">玩家資訊</button>
+                    <button id="show-monster-leaderboard-btn" class="top-nav-button button">怪獸排行</button>
+                    <button id="show-player-leaderboard-btn" class="top-nav-button button">玩家排行</button>
+                    <button id="friends-list-btn" class="top-nav-button button">好友名單</button>
+                    <button id="newbie-guide-btn" class="top-nav-button button">新手上路</button>
                 </div>
             </div>
 
-            <!-- 主要功能頁籤面板 -->
+            <!-- 主要功能面板 -->
             <div class="panel">
                 <div class="tab-buttons" id="dna-farm-tabs">
-                    <button class="tab-button active" data-tab-target="dna-inventory-content" data-tab-group="dna-farm" id="dna-inventory-tab">🧬 DNA管理</button>
-                    <button class="tab-button" data-tab-target="monster-farm-content" data-tab-group="dna-farm" id="monster-farm-tab">🏡 怪物農場</button>
-                    <button class="tab-button" data-tab-target="exchange-content" data-tab-group="dna-farm" id="exchange-tab">⚖️ 交易所</button>
-                    <button class="tab-button" data-tab-target="homestead-content" data-tab-group="dna-farm" id="homestead-tab">🛠️ 家園建設</button>
-                    <button class="tab-button" data-tab-target="guild-content" data-tab-group="dna-farm" id="guild-tab">🛡️ 工會系統</button>
+                    <button class="tab-button active" data-tab-target="dna-inventory-content">🧬 DNA管理</button>
+                    <button class="tab-button" data-tab-target="monster-farm-content">🏡 怪物農場</button>
+                    <button class="tab-button" data-tab-target="training-ground-content">🏋️ 訓練場</button> 
+                    <button class="tab-button" data-tab-target="exchange-content">⚖️ 交易所</button>
+                    <button class="tab-button" data-tab-target="homestead-content">🛠️ 家園建設</button>
+                    <button class="tab-button" data-tab-target="guild-content">🛡️ 工會系統</button>
                 </div>
 
-                <!-- DNA管理頁籤內容 -->
                 <div id="dna-inventory-content" class="tab-content active">
                     <div id="dna-combination-panel-wrapper" class="panel mb-4">
                         <h2 class="panel-title dna-panel-title">🧬 DNA組合</h2>
-                        <div id="dna-combination-slots" class="dna-combination-grid mt-2" data-droptype="combination">
-                            <!-- DNA 組合槽位，將由 JS 動態生成和更新 -->
-                            <div class="dna-slot border border-dashed border-gray-500 rounded-md flex items-center justify-center text-gray-400" data-slot-id="0">拖曳DNA至此</div>
-                            <div class="dna-slot border border-dashed border-gray-500 rounded-md flex items-center justify-center text-gray-400" data-slot-id="1">拖曳DNA至此</div>
-                            <div class="dna-slot border border-dashed border-gray-500 rounded-md flex items-center justify-center text-gray-400" data-slot-id="2">拖曳DNA至此</div>
-                            <div class="dna-slot border border-dashed border-gray-500 rounded-md flex items-center justify-center text-gray-400" data-slot-id="3">拖曳DNA至此</div>
-                            <div class="dna-slot border border-dashed border-gray-500 rounded-md flex items-center justify-center text-gray-400" data-slot-id="4">拖曳DNA至此</div>
-                        </div>
-                        <div class="action-buttons-grid mt-3">
-                            <button id="combine-button" class="success" disabled>怪物合成</button>
+                        <div id="dna-combination-slots" class="dna-combination-grid mt-2"></div>
+                        <div class="action-buttons-grid dual-buttons mt-3">
+                            <button id="combine-button" class="success action-button-main button" disabled>怪物合成</button>
+                            <button id="dna-draw-button" class="primary action-button-main button">抽取DNA (1次)</button>
                         </div>
                     </div>
-
                     <div class="panel-title-container" style="border-bottom: none; margin-bottom: 5px;">
                          <h2 class="panel-title dna-panel-title">🔬 DNA碎片</h2>
                          <span class="panel-title-hint dna-panel-hint">※DNA碎片可自由拖曳，拖曳至刪除區可刪除</span>
                     </div>
-                    <!-- DNA 碎片庫存區，將由 JS 動態生成和更新 -->
-                    <div id="inventory-items" class="inventory-grid mt-2" data-droptype="inventory">
-                        <!-- 範例 DNA 物品，將由 JS 替換 -->
-                        <div class="dna-item bg-gray-700 p-2 rounded-md text-center text-xs" draggable="true" data-dna-info='{"id":"dna_frag_fire_01","name":"火DNA-A","elements":["火"],"rarity":"普通"}' data-slot-index="0">火DNA-A</div>
-                        <div class="dna-item bg-gray-700 p-2 rounded-md text-center text-xs" draggable="true" data-dna-info='{"id":"dna_frag_water_01","name":"水DNA-B","elements":["水"],"rarity":"普通"}' data-slot-index="1">水DNA-B</div>
-                        <div class="dna-item bg-gray-700 p-2 rounded-md text-center text-xs" draggable="true" data-dna-info='{"id":"dna_frag_wood_01","name":"木DNA-C","elements":["木"],"rarity":"普通"}' data-slot-index="2">木DNA-C</div>
-                        <div class="dna-item bg-gray-700 p-2 rounded-md text-center text-xs" draggable="true" data-dna-info='{"id":"dna_frag_earth_01","name":"土DNA-D","elements":["土"],"rarity":"普通"}' data-slot-index="3">土DNA-D</div>
-                        <div class="dna-item bg-gray-700 p-2 rounded-md text-center text-xs" draggable="true" data-dna-info='{"id":"dna_frag_metal_01","name":"金DNA-E","elements":["金"],"rarity":"普通"}' data-slot-index="4">金DNA-E</div>
-                        <div class="dna-item bg-gray-700 p-2 rounded-md text-center text-xs" draggable="true" data-dna-info='{"id":"dna_frag_fire_02","name":"火DNA-F","elements":["火"],"rarity":"普通"}' data-slot-index="5">火DNA-F</div>
-                        <div class="dna-item bg-gray-700 p-2 rounded-md text-center text-xs" draggable="true" data-dna-info='{"id":"dna_frag_water_02","name":"水DNA-G","elements":["水"],"rarity":"普通"}' data-slot-index="6">水DNA-G</div>
-                        <div class="dna-item bg-gray-700 p-2 rounded-md text-center text-xs" draggable="true" data-dna-info='{"id":"dna_frag_wood_02","name":"木DNA-H","elements":["木"],"rarity":"普通"}' data-slot-index="7">木DNA-H</div>
-                        <!-- 抽DNA按鈕 -->
-                        <div class="dna-item dna-action-slot bg-blue-600 p-2 rounded-md text-center text-xs flex items-center justify-center cursor-pointer" id="draw-dna-btn">
-                            <span class="text-xl">➕</span><br>抽DNA
-                        </div>
-                        <!-- 刪除區 -->
-                        <div class="dna-item dna-action-slot bg-red-700 p-2 rounded-md text-center text-xs flex items-center justify-center cursor-pointer" data-droptype="delete" id="inventory-delete-slot">
-                            <span class="text-xl">🗑️</span><br>刪除區
-                        </div>
-                    </div>
-
+                    <div id="inventory-items" class="inventory-grid mt-2"></div>
                     <div class="mt-4">
                         <h3 class="panel-title dna-panel-title text-sm mb-2">🎒 臨時背包 (拾取物)</h3>
-                        <!-- 臨時背包區，將由 JS 動態生成和更新 -->
-                        <div id="temporary-backpack-items" class="temp-backpack-grid" data-droptype="temporary">
-                            <!-- 範例臨時背包物品，將由 JS 替換 -->
-                            <div class="backpack-item bg-blue-700 p-2 rounded-md text-center text-xs" draggable="true" data-dna-info='{"id":"item_potion_01","name":"藥水","type":"potion"}' data-slot-index="0">藥水</div>
-                            <div class="backpack-item bg-green-700 p-2 rounded-md text-center text-xs" draggable="true" data-dna-info='{"id":"item_gem_01","name":"寶石","type":"gem"}' data-slot-index="1">寶石</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="2">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="3">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="4">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="5">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="6">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="7">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="8">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="9">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="10">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="11">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="12">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="13">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="14">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="15">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="16">空位</div>
-                            <div class="dna-item empty temp-backpack-slot" data-slot-index="17">空位</div>
-                        </div>
+                        <div id="temporary-backpack-items" class="temp-backpack-grid"></div>
                     </div>
                 </div>
 
-                <!-- 怪物農場頁籤內容 -->
                 <div id="monster-farm-content" class="tab-content">
                     <div class="panel-title-container" style="border-bottom: none; margin-bottom: 5px;">
                          <h2 class="panel-title dna-panel-title">🏡 怪物農場</h2>
@@ -214,56 +301,28 @@
                         <div>出戰</div>
                         <div>怪物</div>
                         <div>狀態</div>
-                        <div class="hidden sm:block">總評價</div>
-                        <div class="farm-monster-actions-group-header">操作</div>
+                        <div class="hidden sm:block hidden-on-mobile">總評價</div> 
+                        <div>養成</div>
                     </div>
-                    <!-- 怪獸農場列表，將由 JS 動態生成和更新 -->
                     <div id="farmed-monsters-list">
-                        <!-- 範例怪獸項目，將由 JS 替換 -->
-                        <div class="farm-monster-item farm-header-grid py-2 border-b border-gray-700 items-center" data-monster-id="monster_id_1">
-                            <div><input type="radio" name="active_monster" value="monster_id_1" id="active_monster_1"> <label for="active_monster_1" class="sr-only">選擇火焰獸出戰</label></div>
-                            <div class="flex items-center">
-                                <img src="https://placehold.co/40x40/161b22/8b949e?text=M1" alt="火焰獸圖片" class="rounded-full mr-2">
-                                <span class="farm-monster-name">火焰獸</span>
-                            </div>
-                            <div class="text-green-400 farm-monster-status">活躍</div>
-                            <div class="hidden sm:block farm-monster-score">85</div>
-                            <div class="farm-monster-actions-group">
-                                <button class="text-xs warning p-1 farm-monster-cultivate-btn" data-action="cultivate" data-monster-id="monster_id_1">養成</button>
-                                <button class="text-xs danger p-1 farm-monster-release-btn" data-action="release" data-monster-id="monster_id_1">放生</button>
-                            </div>
-                        </div>
-                        <div class="farm-monster-item farm-header-grid py-2 border-b border-gray-700 items-center" data-monster-id="monster_id_2">
-                            <div><input type="radio" name="active_monster" value="monster_id_2" id="active_monster_2"> <label for="active_monster_2" class="sr-only">選擇水元素出戰</label></div>
-                            <div class="flex items-center">
-                                <img src="https://placehold.co/40x40/161b22/8b949e?text=M2" alt="水元素圖片" class="rounded-full mr-2">
-                                <span class="farm-monster-name">水元素</span>
-                            </div>
-                            <div class="text-yellow-400 farm-monster-status">修煉中 (120s)</div>
-                            <div class="hidden sm:block farm-monster-score">70</div>
-                            <div class="farm-monster-actions-group">
-                                <button class="text-xs warning p-1 farm-monster-cultivate-btn" data-action="cultivate" data-monster-id="monster_id_2" disabled>養成</button>
-                                <button class="text-xs danger p-1 farm-monster-release-btn" data-action="release" data-monster-id="monster_id_2" disabled>放生</button>
-                            </div>
-                        </div>
-                        <p class="text-center text-sm text-[var(--text-secondary)] py-4" id="farm-empty-message">農場空空如也，快去組合怪獸吧！</p>
+                        <p class="text-center text-sm text-[var(--text-secondary)] py-4 col-span-full">農場空空如也，快去組合怪獸吧！</p>
                     </div>
                 </div>
+                
+                <div id="training-ground-content" class="tab-content">
+                    <p class="text-center text-lg text-[var(--text-secondary)] py-10">🏋️ 訓練場功能銳意開發中，敬請期待！</p>
+                </div>
 
-                <!-- 交易所頁籤內容 (未來擴充) -->
                 <div id="exchange-content" class="tab-content">
                     <p class="text-center text-lg text-[var(--text-secondary)] py-10">⚖️ 交易所功能尚未開放，敬請期待！</p>
                 </div>
-                <!-- 家園建設頁籤內容 (未來擴充) -->
                 <div id="homestead-content" class="tab-content">
                     <p class="text-center text-lg text-[var(--text-secondary)] py-10">🛠️ 家園建設功能尚未開放，敬請期待！</p>
                 </div>
-                <!-- 工會系統頁籤內容 (未來擴充) -->
                 <div id="guild-content" class="tab-content">
                     <p class="text-center text-lg text-[var(--text-secondary)] py-10">🛡️ 工會系統功能尚未開放，敬請期待！</p>
                 </div>
 
-                <!-- 滾動提示區 -->
                 <div class="scrolling-hints-container">
                     <div class="scrolling-hint-text">💡 金木水火土屬性相生相剋！</div>
                     <div class="scrolling-hint-text">💡 相同DNA組合產生的怪物是相同的！</div>
@@ -273,280 +332,140 @@
         </div>
     </div>
 
-    <!-- 怪獸排行榜模態框 -->
+    <!-- 確認動作彈窗 -->
+    <div id="confirmation-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" id="confirmation-modal-close-x" data-modal-id="confirmation-modal">&times;</span>
+            <h3 id="confirmation-modal-title" class="modal-header text-center">⚠️ 提示</h3> 
+            <div id="confirmation-modal-body" class="modal-body">
+                <div id="release-monster-image-placeholder" style="display:none; width:120px; height:90px; margin:10px auto;">
+                    <img id="release-monster-img-preview" src="https://placehold.co/120x90/4a5568/a0aec0?text=預覽&font=noto-sans-tc" alt="預覽">
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: center;"> 
+                <button id="confirm-action-btn" class="button danger">✔️ 確定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 怪獸排行榜彈窗 -->
     <div id="monster-leaderboard-modal" class="modal">
         <div class="modal-content large">
-            <span class="modal-close" data-modal-id="monster-leaderboard-modal" aria-label="關閉怪獸排行榜視窗">&times;</span>
+            <span class="modal-close" data-modal-id="monster-leaderboard-modal">&times;</span>
             <h3 class="modal-header">怪獸排行榜</h3>
-            <div id="monster-leaderboard-tabs-container">
-                <div id="monster-leaderboard-element-tabs" class="tab-buttons">
-                    <button class="tab-button active" data-element-filter="all">全部</button>
-                    <button class="tab-button" data-element-filter="火">火</button>
-                    <button class="tab-button" data-element-filter="水">水</button>
-                    <button class="tab-button" data-element-filter="木">木</button>
-                    <button class="tab-button" data-element-filter="金">金</button>
-                    <button class="tab-button" data-element-filter="土">土</button>
-                    <button class="tab-button" data-element-filter="光">光</button>
-                    <button class="tab-button" data-element-filter="暗">暗</button>
-                    <button class="tab-button" data-element-filter="毒">毒</button>
-                    <button class="tab-button" data-element-filter="風">風</button>
-                    <button class="tab-button" data-element-filter="無">無</button>
-                    <button class="tab-button" data-element-filter="混">混</button>
-                </div>
+            <div id="monster-leaderboard-tabs-container"> 
+                <div id="monster-leaderboard-element-tabs" class="tab-buttons"></div>
             </div>
             <div id="monster-leaderboard-table-container" class="modal-body">
-                <table id="monster-leaderboard-table" class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>排名</th>
-                            <th>怪獸名稱</th>
-                            <th>訓獸師</th>
-                            <th>總評價</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- 怪獸排行榜內容將由 JS 動態生成 -->
-                        <tr data-monster-id="leader_monster_1" data-player-uid="player_uid_1">
-                            <td>1</td>
-                            <td>烈焰龍</td>
-                            <td><span class="player-nickname-link cursor-pointer text-[var(--accent-color)]" data-player-uid="player_uid_1">小明</span></td>
-                            <td>999</td>
-                            <td><button class="text-xs primary p-1" data-action="challenge" data-monster-id="leader_monster_1">挑戰</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p class="text-center text-sm text-[var(--text-secondary)] py-4" id="monster-leaderboard-empty-message" style="display:none;">目前沒有怪獸在榜上。</p>
+                <table id="monster-leaderboard-table" class="leaderboard-table"></table>
             </div>
         </div>
     </div>
 
-    <!-- 玩家英雄榜模態框 -->
+    <!-- 玩家排行榜彈窗 -->
     <div id="player-leaderboard-modal" class="modal">
         <div class="modal-content large">
-            <span class="modal-close" data-modal-id="player-leaderboard-modal" aria-label="關閉玩家英雄榜視窗">&times;</span>
+            <span class="modal-close" data-modal-id="player-leaderboard-modal">&times;</span>
             <h3 class="modal-header">玩家英雄榜</h3>
             <div id="player-leaderboard-table-container" class="modal-body">
-                <table id="player-leaderboard-table" class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>排名</th>
-                            <th>玩家暱稱</th>
-                            <th>總勝場</th>
-                            <th>總敗場</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- 玩家英雄榜內容將由 JS 動態生成 -->
-                        <tr data-player-uid="player_uid_1">
-                            <td>1</td>
-                            <td>戰神阿力</td>
-                            <td>120</td>
-                            <td>15</td>
-                            <td><button class="text-xs primary p-1" data-action="view-player" data-player-uid="player_uid_1">查看</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p class="text-center text-sm text-[var(--text-secondary)] py-4" id="player-leaderboard-empty-message" style="display:none;">目前沒有玩家在榜上。</p>
+                <table id="player-leaderboard-table" class="leaderboard-table"></table>
             </div>
         </div>
     </div>
 
-    <!-- 怪獸資訊模態框 -->
+    <!-- 怪獸資訊彈窗 -->
     <div id="monster-info-modal" class="modal">
         <div class="modal-content large">
-            <span class="modal-close" data-modal-id="monster-info-modal" aria-label="關閉怪獸資訊視窗">&times;</span>
-            <div id="monster-info-modal-header-content" class="monster-info-header">
-                <!-- 怪獸頭像和名稱將由 JS 動態更新 -->
-                <img src="https://placehold.co/80x80/161b22/8b949e?text=怪獸" alt="怪獸頭像" class="rounded-full mr-4">
-                <div>
-                    <h4 class="text-xl font-bold monster-info-name-styled">火焰龍 (Lv. 15)</h4>
-                    <p class="text-sm text-[var(--text-secondary)]">訓獸師: <span class="player-nickname-link cursor-pointer text-[var(--accent-color)]" data-player-uid="current_player_uid">小明</span></p>
-                </div>
-            </div>
+            <span class="modal-close" data-modal-id="monster-info-modal">&times;</span>
+            <div id="monster-info-modal-header-content" class="monster-info-header"></div>
             <div class="tab-buttons" id="monster-info-tabs">
-                <button class="tab-button active" data-tab-target="monster-details-tab" data-tab-group="monster-info" id="monster-details-info-tab">📜 詳細資訊</button>
-                <button class="tab-button" data-tab-target="monster-logs-tab" data-tab-group="monster-info" id="monster-logs-info-tab">🐾 活動紀錄</button>
+                <button class="tab-button active" data-tab-target="monster-details-tab" data-parent-modal="monster-info-modal">📜 詳細資訊</button>
+                <button class="tab-button" data-tab-target="monster-logs-tab" data-parent-modal="monster-info-modal">🐾 活動紀錄</button>
             </div>
-            <!-- 怪獸詳細資訊頁籤內容 -->
-            <div id="monster-details-tab" class="tab-content active modal-body">
-                <h5 class="font-bold mb-2">基本屬性</h5>
-                <div class="details-grid">
-                    <div class="details-item"><span class="details-label">類型:</span> <span class="details-value">龍系</span></div>
-                    <div class="details-item"><span class="details-label">元素:</span> <span class="details-value">火</span></div>
-                    <div class="details-item"><span class="details-label">生命值(HP):</span> <span class="details-value">1500</span></div>
-                    <div class="details-item"><span class="details-label">魔力值(MP):</span> <span class="details-value">500</span></div>
-                    <div class="details-item"><span class="details-label">攻擊力:</span> <span class="details-value">200</span></div>
-                    <div class="details-item"><span class="details-label">防禦力:</span> <span class="details-value">100</span></div>
-                    <div class="details-item"><span class="details-label">速度:</span> <span class="details-value">80</span></div>
-                    <div class="details-item"><span class="details-label">爆擊率:</span> <span class="details-value">15%</span></div>
-                    <div class="details-item"><span class="details-label">個性:</span> <span class="details-value">熱血</span></div>
-                </div>
-                <p class="personality-text mt-2">一段關於怪獸個性的詳細描述。</p>
-                <h5 class="font-bold mb-2 mt-4">技能列表</h5>
-                <div class="skills-list">
-                    <div class="skill-entry">
-                        <span class="skill-name">火焰噴射</span>
-                        <span class="skill-details">對敵人造成大量火焰傷害。</span>
-                    </div>
-                </div>
-
-                <h5 class="font-bold mb-2 mt-4">背景故事</h5>
-                <p class="ai-generated-text">一段關於怪獸的背景故事或趣味介紹，包含其數值如何融入敘述。</p>
-                <h5 class="font-bold mb-2 mt-4">綜合評價與培養建議</h5>
-                <p class="ai-generated-text">一段針對怪獸的綜合評價與培養建議，指出優勢劣勢及戰術定位。</p>
-                <p class="creation-time-centered">創建時間: 未知</p>
-            </div>
-            <!-- 怪獸活動紀錄頁籤內容 -->
+            <div id="monster-details-tab" class="tab-content active modal-body"></div>
             <div id="monster-logs-tab" class="tab-content modal-body">
                 <div id="monster-activity-logs" class="max-h-[300px] overflow-y-auto">
-                    <!-- 活動紀錄將由 JS 動態生成 -->
-                    <ul class="list-disc list-inside text-sm">
-                        <li><span class="log-time">[2025-05-30 14:30]</span> <span class="log-message">成功擊敗野外魔物，獲得經驗值100。</span></li>
-                    </ul>
-                    <p class="text-center text-sm text-[var(--text-secondary)] py-4" id="monster-activity-logs-empty-message" style="display:none;">尚無活動紀錄。</p>
+                    <p class="text-center text-sm text-[var(--text-secondary)] py-4">尚無活動紀錄。</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 玩家資訊模態框 -->
+    <!-- 玩家資訊彈窗 -->
     <div id="player-info-modal" class="modal">
-        <div class="modal-content large">
-            <span class="modal-close" data-modal-id="player-info-modal" aria-label="關閉玩家資訊視窗">&times;</span>
+        <div class="modal-content large"> 
+            <span class="modal-close" data-modal-id="player-info-modal">&times;</span>
             <h3 class="modal-header">👤 玩家資訊</h3>
-            <div id="player-info-modal-body" class="modal-body">
-                <p class="text-lg font-bold mb-2">訓獸師暱稱: <span class="text-[var(--accent-color)]" id="player-info-nickname">勇者小傑</span></p>
-                <p class="text-sm mb-1">玩家ID: <span class="text-[var(--text-secondary)]" id="player-info-uid">user_abc123def456</span></p>
-                <p class="text-sm mb-1">總勝場: <span class="font-bold" id="player-info-wins">120</span></p>
-                <p class="text-sm mb-1">總敗場: <span class="font-bold" id="player-info-losses">15</span></p>
-                <p class="text-sm mb-1">當前金幣: <span class="font-bold" id="player-info-gold">5000</span></p>
-                <p class="text-sm mb-4">當前鑽石: <span class="font-bold" id="player-info-diamond">100</span></p>
-
-                <h5 class="font-bold mb-2">成就列表</h5>
-                <ul id="player-info-achievements" class="list-disc list-inside text-sm">
-                    <li>初出茅廬: 首次合成怪獸。</li>
-                </ul>
-                <p class="text-center text-sm text-[var(--text-secondary)] py-4" id="player-info-achievements-empty-message" style="display:none;">尚無成就。</p>
-
-                <h5 class="font-bold mb-2 mt-4">擁有怪獸 (範例)</h5>
-                <ul id="player-info-owned-monsters" class="owned-monsters-list">
-                    <li><span class="monster-name">火焰獸</span> <span class="monster-score">總評價: 85</span></li>
-                </ul>
-                <p class="text-center text-sm text-[var(--text-secondary)] py-4" id="player-info-owned-monsters-empty-message" style="display:none;">尚未擁有任何怪獸。</p>
-            </div>
+            <div id="player-info-modal-body" class="modal-body"></div>
         </div>
     </div>
 
-    <!-- 訊息/回饋模態框 -->
+    <!-- 回饋/提示彈窗 -->
     <div id="feedback-modal" class="modal">
-        <div class="modal-content feedback-wide">
-            <span id="feedback-modal-close-x" class="modal-close" data-modal-id="feedback-modal" aria-label="關閉訊息視窗">&times;</span>
+        <div class="modal-content feedback-wide"> 
+            <span id="feedback-modal-close-x" class="modal-close" data-modal-id="feedback-modal">&times;</span>
             <h3 id="feedback-modal-title" class="modal-header text-center">處理中...</h3>
             <div id="feedback-modal-body-content" class="modal-body text-left">
                  <div id="feedback-modal-spinner" class="loading-spinner" style="display: none;"></div>
-                 <div id="feedback-modal-message" class="text-center text-lg text-green-400">操作成功！</div>
-                 <div id="feedback-monster-details" style="display:none;" class="mt-3 p-3 border rounded-md border-gray-600 bg-gray-800">
-                    <!-- 怪獸詳細資訊將由 JS 動態填充 -->
-                    <p class="text-sm font-bold">怪獸名稱: <span class="text-[var(--accent-color)]">閃電鳥</span></p>
-                    <p class="text-sm">等級: 12</p>
-                    <p class="text-sm">總評價: 90</p>
-                    <h6 class="font-bold mt-2">技能:</h6>
-                    <div class="feedback-skill-entry">
-                        <span class="feedback-skill-name">閃電衝擊</span>
-                        <span class="feedback-skill-description">對敵人造成雷電傷害。</span>
-                    </div>
-                 </div>
+                 <div id="feedback-modal-message"></div>
+                 <div id="feedback-monster-details" style="display:none;" class="mt-3"></div>
             </div>
         </div>
     </div>
 
-    <!-- 確認模態框 -->
-    <div id="confirmation-modal" class="modal">
-        <div class="modal-content">
-            <h3 id="confirmation-modal-title" class="modal-header text-center">⚠️ 提示</h3>
-            <div id="confirmation-modal-body" class="modal-body">
-                <div id="release-monster-image-placeholder" style="display:none;">
-                    <img id="release-monster-img-preview" src="https://placehold.co/100x100/161b22/8b949e?text=怪獸" alt="預覽怪獸圖片" class="mx-auto mb-4">
-                </div>
-                <p class="text-center text-lg text-[var(--text-primary)]" id="confirmation-message">您確定要執行此操作嗎？此操作不可逆！</p>
-            </div>
-            <div class="modal-footer">
-                <button id="confirm-action-btn" class="danger">✔️ 確定</button>
-                <button id="cancel-action-btn" class="secondary" data-modal-close-button="confirmation-modal">❌ 取消</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 修煉設定模態框 -->
+    <!-- 養成設定彈窗 -->
     <div id="cultivation-setup-modal" class="modal">
         <div class="modal-content" style="max-width: 400px;">
-            <span class="modal-close" data-modal-id="cultivation-setup-modal" aria-label="關閉養成設定視窗">&times;</span>
+            <span class="modal-close" data-modal-id="cultivation-setup-modal">&times;</span>
             <h3 id="cultivation-setup-modal-title" class="modal-header">🌱 怪獸養成</h3>
             <div class="modal-body">
                 <p class="mb-2">正在為 <strong id="cultivation-monster-name" class="text-[var(--accent-color)]"></strong> 進行養成計畫。</p>
-                <button id="start-cultivation-btn" class="w-full primary">💪 開始修煉</button>
+                <button id="start-cultivation-btn" class="w-full primary button">💪 開始修煉</button>
                 <p class="cultivation-hint text-base mt-2">提示：修煉期間，怪獸將無法放生或出戰。</p>
                 <p class="cultivation-hint text-sm mt-1">修煉時長上限為 <span id="max-cultivation-time">999</span> 秒。</p>
             </div>
         </div>
     </div>
 
-    <!-- 修煉成果模態框 -->
+    <!-- 修煉成果彈窗 -->
     <div id="training-results-modal" class="modal">
         <div class="modal-content large">
-            <span class="modal-close" data-modal-id="training-results-modal" id="training-results-modal-close-btn" aria-label="關閉修煉成果視窗">&times;</span>
+            <span class="modal-close" id="close-training-results-btn" data-modal-id="training-results-modal">&times;</span>
             <h3 id="training-results-modal-title" class="modal-header">🎉 修煉成果 🎉</h3>
             <div class="modal-body">
                 <div class="training-result-section">
                     <h5>📜 冒險故事</h5>
-                    <p id="training-story-result">您的怪獸「小火龍」在森林深處進行了艱苦的修煉，牠克服了重重困難，擊敗了強大的野獸，最終領悟了新的力量！</p>
+                    <p id="training-story-result"></p>
                 </div>
                 <div class="training-result-section">
                     <h5>📈 成長紀錄</h5>
-                    <div id="training-growth-result">
-                        <ul class="list-disc list-inside text-sm">
-                            <li>攻擊力提升: +5</li>
-                            <li>防禦力提升: +3</li>
-                            <li>生命值提升: +10</li>
-                            <li>獲得經驗值: 200</li>
-                        </ul>
-                    </div>
+                    <div id="training-growth-result"></div>
                 </div>
                 <div class="training-result-section">
                     <h5>💎 拾獲物品</h5>
-                    <div id="training-items-result" class="mb-2 grid grid-cols-3 gap-2">
-                        <!-- 拾獲物品將由 JS 動態生成 -->
-                        <div class="item-card bg-gray-700 p-2 rounded-md text-center text-xs">力量藥水 x1</div>
-                    </div>
-                    <button id="add-all-to-temp-backpack-btn" class="w-full secondary mt-2">一鍵全數加入背包</button>
+                    <div id="training-items-result" class="mb-2"></div>
+                    <button id="add-all-to-temp-backpack-btn" class="w-full secondary button mt-2">一鍵全數加入背包</button>
                 </div>
             </div>
              <div class="modal-footer" style="justify-content: flex-end;">
-                <button class="secondary" data-modal-close-button="training-results-modal" id="training-results-modal-final-close-btn">關閉</button>
+                <button id="final-close-training-results-btn" class="secondary button" data-modal-id="training-results-modal">關閉</button>
             </div>
         </div>
     </div>
 
-    <!-- 新手指南模態框 -->
+    <!-- 新手指南彈窗 -->
     <div id="newbie-guide-modal" class="modal">
         <div class="modal-content large">
-            <span class="modal-close" data-modal-id="newbie-guide-modal" aria-label="關閉新手指南視窗">&times;</span>
+            <span class="modal-close" data-modal-id="newbie-guide-modal">&times;</span>
             <h3 class="modal-header">📖 新手上路指南</h3>
             <div class="modal-body">
-                <label for="newbie-guide-search-input" class="sr-only">搜尋指南內容</label>
                 <input type="text" id="newbie-guide-search-input" placeholder="搜尋指南內容..." class="mb-4">
-                <div id="newbie-guide-content-area" class="max-h-[50vh] overflow-y-auto">
-                    <!-- 新手指南內容將由 JS 動態填充 -->
-                    <h4 class="font-bold mb-2">1. 如何合成怪獸</h4>
-                    <p class="text-sm mb-4">在「DNA管理」頁面，將不同屬性的DNA碎片拖曳到組合槽位中，當滿足特定組合條件後，即可點擊「怪物合成」按鈕來創造新的怪獸。</p>
-                </div>
+                <div id="newbie-guide-content-area" class="max-h-[50vh] overflow-y-auto"></div>
             </div>
         </div>
     </div>
 
-    <!-- 提醒模態框 (修煉拾獲物品未領取) -->
+    <!-- 提醒彈窗 (關閉修煉成果時) -->
     <div id="reminder-modal" class="modal">
         <div class="modal-content" style="max-width: 380px;">
             <h3 id="reminder-modal-title" class="modal-header text-center">溫馨提醒</h3>
@@ -554,84 +473,62 @@
                 <p>您有尚未加入背包的修煉拾獲物品，確定要關閉嗎？關閉後未加入的物品將會消失。</p>
             </div>
             <div class="modal-footer">
-                <button id="reminder-confirm-close-btn" class="danger">仍要關閉</button>
-                <button id="reminder-cancel-btn" class="secondary" data-modal-close-button="reminder-modal">返回查看</button>
+                <button id="reminder-confirm-close-btn" class="danger button">仍要關閉</button>
+                <button id="reminder-cancel-btn" class="secondary button" data-modal-id="reminder-modal">返回查看</button>
             </div>
         </div>
     </div>
 
-    <!-- 好友名單模態框 -->
+    <!-- 好友列表/搜尋彈窗 -->
     <div id="friends-list-modal" class="modal">
         <div class="modal-content large">
-            <span class="modal-close" data-modal-id="friends-list-modal" aria-label="關閉好友名單視窗">&times;</span>
+            <span class="modal-close" data-modal-id="friends-list-modal">&times;</span>
             <h3 class="modal-header">🧑‍🤝‍🧑 好友名單</h3>
             <div class="modal-body">
-                <label for="friends-list-search-input" class="sr-only">搜尋玩家暱稱</label>
                 <input type="text" id="friends-list-search-input" placeholder="搜尋玩家暱稱..." class="mb-3">
                 <div id="friends-list-container">
                     <p class="text-center text-sm text-[var(--text-secondary)]">輸入暱稱搜尋其他玩家。</p>
-                    <!-- 搜尋結果將由 JS 動態填充 -->
-                    <ul class="list-disc list-inside text-sm mt-4">
-                        <li class="friend-item">
-                            <span class="friend-name">玩家A</span> (ID: user_123)
-                            <button class="text-xs secondary p-1 ml-2" data-action="view-player" data-player-uid="user_123">查看</button>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 戰鬥記錄模態框 -->
+    <!-- 戰鬥記錄彈窗 -->
     <div id="battle-log-modal" class="modal">
         <div class="modal-content">
-            <span class="modal-close" data-modal-id="battle-log-modal" aria-label="關閉戰鬥記錄視窗">&times;</span>
+            <span class="modal-close" data-modal-id="battle-log-modal">&times;</span>
             <h3 class="modal-header">⚔️ 戰鬥記錄 ⚔️</h3>
-            <div id="battle-log-area" class="modal-body">
-                <!-- 戰鬥記錄將由 JS 動態填充 -->
-                <p class="turn-divider">--- 第 1 回合 ---</p>
-                <p>您的<span class="text-[var(--accent-color)]">火焰獸</span>對<span class="text-[var(--danger-color)]">水元素</span>造成了<span class="crit-hit">120</span>點傷害！</p>
-                <p class="text-center text-sm text-[var(--text-secondary)] py-4" id="battle-log-empty-message" style="display:none;">尚無戰鬥記錄。</p>
-            </div>
+            <div id="battle-log-area" class="modal-body"></div>
             <div class="modal-footer">
-                <button class="secondary" data-modal-close-button="battle-log-modal">關閉</button>
+                <button id="close-battle-log-btn" class="secondary button" data-modal-id="battle-log-modal">關閉</button>
             </div>
         </div>
     </div>
 
-    <!-- DNA 抽取結果模態框 -->
+    <!-- DNA 抽取結果彈窗 -->
     <div id="dna-draw-modal" class="modal">
         <div class="modal-content">
-            <span class="modal-close" data-modal-id="dna-draw-modal" aria-label="關閉DNA抽取結果視窗">&times;</span>
+            <span class="modal-close" data-modal-id="dna-draw-modal">&times;</span>
             <h3 class="modal-header">🧬 DNA 抽取結果</h3>
             <div class="modal-body">
-                <div id="dna-draw-results-grid" class="grid grid-cols-3 gap-2">
-                    <!-- DNA 抽取結果將由 JS 動態填充 -->
-                    <div class="dna-draw-result-item">
-                        <span class="dna-name text-rarity-legendary">傳說DNA-A</span>
-                        <span class="dna-type text-element-fire">火屬性</span>
-                        <span class="dna-rarity text-rarity-legendary">稀有度: 傳說</span>
-                        <button class="text-xs secondary p-1 add-drawn-to-temp-backpack-btn" data-dna='{"id":"drawn_dna_legendary_01","name":"傳說DNA-A","elements":["火"],"rarity":"傳說"}'>加入背包</button>
-                    </div>
-                </div>
+                <div id="dna-draw-results-grid"></div>
                 <p class="text-sm text-[var(--text-secondary)] mt-3 text-center">點擊物品可將其加入臨時背包。</p>
             </div>
             <div class="modal-footer">
-                <button class="secondary" data-modal-close-button="dna-draw-modal">關閉</button>
+                <button id="close-dna-draw-btn" class="secondary button" data-modal-id="dna-draw-modal">關閉</button>
             </div>
         </div>
     </div>
 
-  <!-- 引入 JavaScript 模組 (type="module" 確保它們作為模組載入) -->
-  <!-- 順序很重要：GameState 和 Firebase Config 應在其他模組之前載入 -->
-  <script type="module" src="js/game-state.js"></script>
-  <script type="module" src="js/firebase-config.js"></script>
-  <script type="module" src="js/auth.js"></script>
-  <script type="module" src="js/api-client.js"></script>
-  <script type="module" src="js/loadApiKey.js"></script> <!-- 確保在 api-client.js 之後，如果 api-client 依賴它 -->
-  <script type="module" src="js/ui.js"></script>
-  <script type="module" src="js/game-logic.js"></script>
-  <script type="module" src="js/event-handlers.js"></script> <!-- 事件處理器通常在所有 UI 和 Logic 模組之後載入 -->
-  <script type="module" src="js/main.js"></script> <!-- 主入口點最後載入，協調所有初始化 -->
+    <!-- JavaScript 檔案 -->
+    <script src="js/firebase-config.js" defer></script>
+    <script src="js/config.js" defer></script> 
+    <script src="js/game-state.js" defer></script>
+    <script src="js/api-client.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/game-logic.js" defer></script>
+    <script src="js/ui.js" defer></script> 
+    <script src="js/event-handlers.js" defer></script>
+    <script src="js/main.js" defer></script>
 </body>
 </html>

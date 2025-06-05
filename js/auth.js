@@ -31,7 +31,7 @@ async function registerUser(nickname, password) {
     if (typeof firebase === 'undefined' || !firebase.auth) {
         throw new Error("Firebase Auth SDK 尚未載入或初始化。");
     }
-    // 為了符合 Firebase email 格式，我們將 nickname 轉換
+    // 為了符合 Firebase email 格式，我們將 nickname 轉換 
     // 實際應用中，後端可能需要更複雜的處理來支持純暱稱登入
     const email = `${nickname.trim().toLowerCase()}@monstergame.dev`; // 使用一個虛構的域名
 
@@ -39,7 +39,7 @@ async function registerUser(nickname, password) {
         const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
         // 更新用戶的 displayName (如果需要，但我們主要依賴後端存儲的 nickname)
         await userCredential.user.updateProfile({
-            displayName: nickname 
+            displayName: nickname
         });
         console.log("用戶註冊成功:", userCredential.user.uid, "暱稱:", nickname);
         return userCredential.user;
@@ -63,11 +63,26 @@ async function loginUser(nickname, password) {
     const email = `${nickname.trim().toLowerCase()}@monstergame.dev`;
 
     try {
+        console.log("嘗試使用 Firebase 登入..."); // 新增日誌
         const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
-        console.log("用戶登入成功:", userCredential.user.uid);
+        
+        console.log("Firebase 登入成功。User UID:", userCredential.user.uid); // 新增日誌
+        console.log("Firebase User 物件:", userCredential.user); // 新增日誌
+
+        // 嘗試獲取 ID Token 並觀察是否在此處卡住或觸發錯誤
+        try {
+            console.log("嘗試獲取 ID Token..."); // 新增日誌
+            const idToken = await userCredential.user.getIdToken(true); // 嘗試強制刷新 token
+            console.log("成功獲取 ID Token:", idToken); // 新增日誌
+        } catch (tokenError) {
+            console.error("獲取 ID Token 失敗 (loginUser 內部):", tokenError.code, tokenError.message); // 新增日誌
+            // 這裡的錯誤會被外層的 catch 捕獲並映射
+            throw tokenError; // 重新拋出以讓外層處理
+        }
+
         return userCredential.user;
     } catch (error) {
-        console.error("登入錯誤:", error.code, error.message);
+        console.error("登入錯誤 (loginUser):", error.code, error.message); // 新增日誌
         throw mapAuthError(error);
     }
 }
@@ -104,7 +119,7 @@ async function getCurrentUserToken(forceRefresh = false) {
         const token = await firebase.auth().currentUser.getIdToken(forceRefresh);
         return token;
     } catch (error) {
-        console.error("獲取 ID Token 錯誤:", error);
+        console.error("獲取 ID Token 錯誤 (getCurrentUserToken):", error); // 新增日誌
         // 如果是 token 過期等問題，可能需要引導用戶重新登入
         if (error.code === 'auth/user-token-expired' || error.code === 'auth/invalid-user-token') {
             // 可以觸發一個事件或調用一個函數來處理重新登入邏
@@ -138,7 +153,8 @@ function mapAuthError(error) {
             message = "此暱稱已被註冊。請嘗試其他暱稱。";
             break;
         case "auth/invalid-email":
-            message = "暱稱格式無效 (可能包含不允許的字符)。";
+            // 這個錯誤碼在我們的上下文中，因為 email 是從 nickname 轉換來的，所以可以解釋為暱稱格式問題
+            message = "暱稱格式無效 (可能包含不允許的字元，或長度不符)。";
             break;
         case "auth/operation-not-allowed":
             message = "此操作未被允許。請聯繫管理員。";
@@ -150,10 +166,13 @@ function mapAuthError(error) {
             message = "此帳號已被禁用。";
             break;
         case "auth/user-not-found":
-            message = "找不到此暱稱對應的帳號。";
+            message = "找不到此暱稱對應的帳號，請確認輸入是否正確。";
             break;
         case "auth/wrong-password":
             message = "密碼錯誤，請重新輸入。";
+            break;
+        case "auth/invalid-credential": // **<-- 新增此案例來處理 "INVALID_LOGIN_CREDENTIALS"**
+            message = "登入憑證無效。請檢查您的暱稱和密碼是否正確。";
             break;
         case "auth/network-request-failed":
             message = "網路請求失敗，請檢查您的網路連線。";
@@ -162,8 +181,12 @@ function mapAuthError(error) {
             message = "操作過於頻繁，請稍後再試。";
             break;
         default:
-            if (error.message) { // 如果有原始錯誤訊息，也附加上
-                message = `操作失敗: ${error.message}`;
+            // 對於其他未明確處理的 Firebase 錯誤，或者如果 error.message 包含 "INVALID_LOGIN_CREDENTIALS"
+            if (error.message && typeof error.message === 'string' && error.message.includes("INVALID_LOGIN_CREDENTIALS")) {
+                message = "登入憑證無效。請檢查您的暱稱和密碼。";
+            } else if (error.message) {
+                message = `操作失敗，請稍後再試。(${error.code || '未知錯誤'})`; // 提供一個更通用的後備訊息
+                console.warn("未明確處理的 Firebase Auth 錯誤:", error.code, error.message);
             }
     }
     const newError = new Error(message);

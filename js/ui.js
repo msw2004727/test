@@ -52,12 +52,14 @@ function switchTabContent(targetTabId, clickedButton, modalId = null) {
 
     tabContentsContainer.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
-        content.style.display = 'none';
+        // 【移除】移除這一行，不再使用JS直接控制樣式
+        // content.style.display = 'none';
     });
     const targetContent = tabContentsContainer.querySelector(`#${targetTabId}`);
     if (targetContent) {
         targetContent.classList.add('active');
-        targetContent.style.display = 'block';
+        // 【移除】移除這一行，不再使用JS直接控制樣式
+        // targetContent.style.display = 'block';
 
         // 當切換到特定頁籤時，觸發對應的渲染函式
         if (targetTabId === 'friends-list-content') {
@@ -103,7 +105,6 @@ function initializeDOMElements() {
         monsterPartRightArm: document.getElementById('monster-part-right-arm'),
         monsterPartLeftLeg: document.getElementById('monster-part-left-leg'),
         monsterPartRightLeg: document.getElementById('monster-part-right-leg'),
-        monsterInfoButton: document.getElementById('monster-info-button'),
         playerInfoButton: document.getElementById('player-info-button'),
         showMonsterLeaderboardBtn: document.getElementById('show-monster-leaderboard-btn'),
         showPlayerLeaderboardBtn: document.getElementById('show-player-leaderboard-btn'),
@@ -113,8 +114,6 @@ function initializeDOMElements() {
         dnaDrawButton: document.getElementById('dna-draw-button'),
         inventoryItemsContainer: document.getElementById('inventory-items'),
         temporaryBackpackContainer: document.getElementById('temporary-backpack-items'),
-        farmedMonstersListContainer: document.getElementById('farmed-monsters-list'),
-        farmHeaders: document.getElementById('farm-headers'),
         dnaFarmTabs: document.getElementById('dna-farm-tabs'),
         dnaInventoryContent: document.getElementById('dna-inventory-content'),
         monsterFarmContent: document.getElementById('monster-farm-content'),
@@ -126,6 +125,8 @@ function initializeDOMElements() {
         exchangeContent: document.getElementById('exchange-content'),
         homesteadContent: document.getElementById('homestead-content'),
         guildContent: document.getElementById('guild-content'),
+        medicalContent: document.getElementById('medical-content'),
+        breedingContent: document.getElementById('breeding-content'),
         monsterInfoModal: document.getElementById('monster-info-modal'),
         monsterInfoModalHeader: document.getElementById('monster-info-modal-header-content'),
         monsterInfoTabs: document.getElementById('monster-info-tabs'),
@@ -184,6 +185,10 @@ function initializeDOMElements() {
         officialAnnouncementCloseX: document.getElementById('official-announcement-close-x'),
         announcementPlayerName: document.getElementById('announcement-player-name'),
         refreshMonsterLeaderboardBtn: document.getElementById('refresh-monster-leaderboard-btn'),
+        // 新增：快照狀態條相關元素
+        snapshotBarsContainer: document.getElementById('snapshot-bars-container'),
+        snapshotHpFill: document.getElementById('snapshot-hp-fill'),
+        snapshotMpFill: document.getElementById('snapshot-mp-fill'),
     };
     console.log("DOMElements initialized in ui.js");
 }
@@ -230,6 +235,24 @@ function hideAllModals() {
         modal.style.display = 'none';
     });
     gameState.activeModalId = null;
+}
+
+/**
+ * 從怪獸農場點擊怪獸名稱時，顯示其詳細資訊彈窗
+ * @param {string} monsterId - 被點擊的怪獸的ID
+ */
+function showMonsterInfoFromFarm(monsterId) {
+    if (!monsterId) return;
+    const monster = gameState.playerData.farmedMonsters.find(m => m.id === monsterId);
+    if (monster) {
+        // updateMonsterInfoModal is in ui-modals.js but should be globally accessible
+        // showModal is in this file (ui.js) and is globally accessible
+        updateMonsterInfoModal(monster, gameState.gameConfigs, gameState.playerData);
+        showModal('monster-info-modal');
+    } else {
+        console.error(`Monster with ID ${monsterId} not found in farm.`);
+        showFeedbackModal('錯誤', '找不到該怪獸的資料。');
+    }
 }
 
 function showFeedbackModal(title, message, isLoading = false, monsterDetails = null, actionButtons = null, awardDetails = null) {
@@ -580,7 +603,7 @@ function clearMonsterBodyPartsDisplay() {
 function updateMonsterSnapshot(monster) {
     if (!DOMElements.monsterSnapshotArea || !DOMElements.snapshotAchievementTitle ||
         !DOMElements.snapshotNickname || !DOMElements.snapshotWinLoss ||
-        !DOMElements.snapshotEvaluation || !DOMElements.monsterInfoButton ||
+        !DOMElements.snapshotEvaluation || 
         !DOMElements.monsterSnapshotBaseBg || !DOMElements.monsterSnapshotBodySilhouette ||
         !DOMElements.monsterPartsContainer) {
         console.error("一個或多個怪獸快照相關的 DOM 元素未找到。");
@@ -613,7 +636,16 @@ function updateMonsterSnapshot(monster) {
 
         const resume = monster.resume || { wins: 0, losses: 0 };
         DOMElements.snapshotWinLoss.innerHTML = `<span>勝: ${resume.wins}</span><span>敗: ${resume.losses}</span>`;
-        DOMElements.snapshotEvaluation.textContent = `總評價: ${monster.score || 0}`;
+        DOMElements.snapshotEvaluation.textContent = `評價: ${monster.score || 0}`;
+
+        // 新增：更新HP和MP狀態條
+        if (DOMElements.snapshotBarsContainer && DOMElements.snapshotHpFill && DOMElements.snapshotMpFill) {
+            toggleElementDisplay(DOMElements.snapshotBarsContainer, true);
+            const hpPercent = monster.initial_max_hp > 0 ? (monster.hp / monster.initial_max_hp) * 100 : 0;
+            const mpPercent = monster.initial_max_mp > 0 ? (monster.mp / monster.initial_max_mp) * 100 : 0;
+            DOMElements.snapshotHpFill.style.width = `${hpPercent}%`;
+            DOMElements.snapshotMpFill.style.width = `${mpPercent}%`;
+        }
 
         if (DOMElements.snapshotMainContent) {
             DOMElements.snapshotMainContent.innerHTML = '';
@@ -622,7 +654,6 @@ function updateMonsterSnapshot(monster) {
         const rarityColorVar = `var(--rarity-${rarityKey}-text, var(--text-secondary))`;
         DOMElements.monsterSnapshotArea.style.borderColor = rarityColorVar;
         DOMElements.monsterSnapshotArea.style.boxShadow = `0 0 10px -2px ${rarityColorVar}, inset 0 0 15px -5px color-mix(in srgb, ${rarityColorVar} 30%, transparent)`;
-        DOMElements.monsterInfoButton.disabled = false;
         gameState.selectedMonsterId = monster.id;
 
         if (monster.constituent_dna_ids && monster.constituent_dna_ids.length > 0 && gameState.gameConfigs?.dna_fragments) {
@@ -663,11 +694,16 @@ function updateMonsterSnapshot(monster) {
         DOMElements.snapshotNickname.textContent = '尚無怪獸';
         DOMElements.snapshotNickname.className = '';
         DOMElements.snapshotWinLoss.innerHTML = `<span>勝: -</span><span>敗: -</span>`;
-        DOMElements.snapshotEvaluation.textContent = `總評價: -`;
+        DOMElements.snapshotEvaluation.textContent = `評價: -`;
+
+        // 新增：隱藏HP和MP狀態條
+        if (DOMElements.snapshotBarsContainer) {
+            toggleElementDisplay(DOMElements.snapshotBarsContainer, false);
+        }
+
         if(DOMElements.snapshotMainContent) DOMElements.snapshotMainContent.innerHTML = '';
         DOMElements.monsterSnapshotArea.style.borderColor = 'var(--border-color)';
         DOMElements.monsterSnapshotArea.style.boxShadow = 'none';
-        DOMElements.monsterInfoButton.disabled = true;
         gameState.selectedMonsterId = null;
         clearMonsterBodyPartsDisplay();
         DOMElements.monsterPartsContainer.classList.add('empty-snapshot');
@@ -856,194 +892,6 @@ function renderTemporaryBackpack() {
     });
 }
 
-function renderMonsterFarm() {
-    const listContainer = DOMElements.farmedMonstersListContainer;
-    const farmHeaders = DOMElements.farmHeaders;
-    if (!listContainer || !farmHeaders) return;
-    
-    // --- 排序邏輯開始 ---
-    const sortConfig = gameState.farmSortConfig || { key: 'score', order: 'desc' };
-    const key = sortConfig.key;
-    const order = sortConfig.order;
-    const sortedMonsters = [...(gameState.playerData?.farmedMonsters || [])].sort((a, b) => {
-        let valA, valB;
-
-        if (key === 'nickname') {
-            valA = a.nickname || '';
-            valB = b.nickname || '';
-            return order === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
-        } else if (key === 'status') {
-             // 狀態排序較複雜，此處簡化為訓練中 > 完成 > 瀕死 > 出戰中 > 待命
-            const getStatusValue = (monster) => {
-                if(monster.hp <= monster.initial_max_hp * 0.25) return 3; // 瀕死
-                if(monster.farmStatus?.isTraining) {
-                    const trainingComplete = (Date.now() - (monster.farmStatus.trainingStartTime || 0)) >= (monster.farmStatus.trainingDuration || Infinity);
-                    return trainingComplete ? 4 : 5; // 訓練完成 > 訓練中
-                }
-                if(gameState.selectedMonsterId === monster.id) return 2; // 出戰中
-                return 1; // 待命中
-            };
-            valA = getStatusValue(a);
-            valB = getStatusValue(b);
-        } else if (key === 'battle') {
-            valA = (a.id === gameState.selectedMonsterId) ? 1 : 0;
-            valB = (b.id === gameState.selectedMonsterId) ? 1 : 0;
-        }
-        else { // 默認為數字排序 (如 score)
-            valA = a[key] || 0;
-            valB = b[key] || 0;
-        }
-
-        return order === 'asc' ? valA - valB : valB - valA;
-    });
-    // --- 排序邏輯結束 ---
-
-    // 動態產生可點擊的表頭
-    farmHeaders.innerHTML = `
-        <div class="sortable" data-sort-key="battle">出戰 ${key === 'battle' ? (order === 'asc' ? '▲' : '▼') : ''}</div>
-        <div class="sortable" data-sort-key="nickname">怪獸 ${key === 'nickname' ? (order === 'asc' ? '▲' : '▼') : ''}</div>
-        <div class="sortable" data-sort-key="score">評價 ${key === 'score' ? (order === 'asc' ? '▲' : '▼') : ''}</div>
-        <div class="sortable" data-sort-key="status">狀態 ${key === 'status' ? (order === 'asc' ? '▲' : '▼') : ''}</div>
-        <div class="sortable" data-sort-key="actions">養成</div>
-    `;
-
-    listContainer.innerHTML = '';
-
-    if (!sortedMonsters || sortedMonsters.length === 0) {
-        listContainer.innerHTML = `<p class="text-center text-sm text-[var(--text-secondary)] py-4 col-span-full">農場空空如也，快去組合怪獸吧！</p>`;
-        farmHeaders.style.display = 'none';
-        return;
-    }
-    farmHeaders.style.display = 'grid';
-
-    const rarityMap = {'普通':'common', '稀有':'rare', '菁英':'elite', '傳奇':'legendary', '神話':'mythical'};
-
-    sortedMonsters.forEach(monster => { // 使用排序後的陣列
-        const item = document.createElement('div');
-        item.classList.add('farm-monster-item');
-
-        const isDeployed = gameState.selectedMonsterId === monster.id;
-        if (isDeployed) {
-            item.classList.add('selected');
-        }
-
-        item.dataset.monsterId = monster.id;
-
-        let statusText = "待命中";
-        let statusStyle = "color: var(--warning-color); font-weight: bold;";
-
-        // 新增：優先檢查瀕死狀態
-        if (monster.hp <= monster.initial_max_hp * 0.25) {
-            statusText = "瀕死";
-            statusStyle = "color: var(--danger-color); font-weight: bold;";
-        }
-
-        if (monster.farmStatus) {
-            if (isDeployed) {
-                statusText = "出戰中";
-                statusStyle = "color: var(--danger-color); font-weight: bold;";
-            } else if (monster.farmStatus.isTraining) {
-                const startTime = monster.farmStatus.trainingStartTime || 0;
-                const totalDuration = monster.farmStatus.trainingDuration || 0;
-                const totalDurationInSeconds = Math.floor(totalDuration / 1000);
-
-                const elapsedTimeInSeconds = Math.floor((Date.now() - startTime) / 1000);
-
-                if (elapsedTimeInSeconds < totalDurationInSeconds) {
-                    statusText = `修煉中 (${elapsedTimeInSeconds}/${totalDurationInSeconds}s)`;
-                    statusStyle = "color: var(--accent-color);";
-                } else {
-                    statusText = "修煉完成";
-                    statusStyle = "color: var(--success-color); font-weight: bold;";
-                }
-            }
-        }
-
-        const rarityKey = monster.rarity ? (rarityMap[monster.rarity] || 'common') : 'common';
-
-        const battleButtonIcon = isDeployed ? '⚔️' : '🛡️';
-        const battleButtonClass = isDeployed ? 'danger' : 'success';
-        const battleButtonTitle = isDeployed ? '出戰中' : '設為出戰';
-
-        const isTraining = monster.farmStatus?.isTraining;
-        const cultivateBtnText = isTraining ? '召回' : '修煉';
-        let cultivateBtnClasses = 'farm-monster-cultivate-btn button text-xs';
-        let cultivateBtnStyle = '';
-
-        if (isTraining) {
-            cultivateBtnClasses += ' secondary';
-            cultivateBtnStyle = `background-color: #D8BFD8; color: black; border-color: #C8A2C8;`;
-        } else {
-            cultivateBtnClasses += ' warning';
-        }
-
-
-        item.innerHTML = `
-            <div class="farm-col farm-col-battle">
-                <button class="farm-battle-btn button ${battleButtonClass}" title="${battleButtonTitle}">
-                    ${battleButtonIcon}
-                </button>
-            </div>
-            <div class="farm-col farm-col-info">
-                <a href="#" class="farm-monster-name-link monster-name-display text-rarity-${rarityKey}">${monster.nickname}</a>
-                <div class="monster-details-display">
-                    ${(monster.elements || []).map(el => `<span class="text-xs text-element-${getElementCssClassKey(el)}">${el}</span>`).join(' ')}
-                </div>
-            </div>
-            <div class="farm-col farm-col-score">
-                <span class="score-value">${monster.score || 0}</span>
-            </div>
-            <div class="farm-col farm-col-status">
-                <span class="status-text" style="${statusStyle}">${statusText}</span>
-            </div>
-            <div class="farm-col farm-col-actions">
-                <button class="${cultivateBtnClasses}"
-                        style="${cultivateBtnStyle}"
-                        title="${isTraining ? '召回修煉' : '開始修煉'}"
-                        ${isDeployed ? 'disabled' : ''}>
-                    ${cultivateBtnText}
-                </button>
-                <button class="farm-monster-release-btn button danger text-xs" ${isTraining || isDeployed ? 'disabled' : ''}>放生</button>
-            </div>
-        `;
-
-        item.querySelector('.farm-battle-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            handleDeployMonsterClick(monster.id);
-        });
-
-        item.querySelector('.farm-monster-name-link').addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            updateMonsterInfoModal(monster, gameState.gameConfigs);
-            showModal('monster-info-modal');
-        });
-
-        const cultivateBtn = item.querySelector('.farm-monster-cultivate-btn');
-        if (cultivateBtn) {
-             cultivateBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (monster.farmStatus?.isTraining) {
-                    handleEndCultivationClick(e, monster.id, monster.farmStatus.trainingStartTime, monster.farmStatus.trainingDuration);
-                } else {
-                    handleCultivateMonsterClick(e, monster.id);
-                }
-            });
-        }
-
-        item.querySelector('.farm-monster-release-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            handleReleaseMonsterClick(e, monster.id);
-        });
-
-        listContainer.appendChild(item);
-    });
-
-    if (!gameState.farmTimerInterval) {
-        gameState.farmTimerInterval = setInterval(renderMonsterFarm, 1000);
-    }
-}
-
 async function renderFriendsList() {
     const container = DOMElements.friendsListDisplayArea;
     if (!container) return;
@@ -1111,6 +959,101 @@ function getElementCssClassKey(chineseElement) {
         '光': 'light', '暗': 'dark', '毒': 'poison', '風': 'wind', '混': 'mix', '無': '無'
     };
     return elementTypeMap[chineseElement] || '無'; // 預設為 '無'
+}
+
+
+function renderMonsterFarm() {
+    const container = DOMElements.monsterFarmContent;
+    if (!container) return;
+
+    const table = container.querySelector('.farm-table');
+    if (!table) {
+        console.error("renderMonsterFarm Error: '.farm-table' not found.");
+        return;
+    }
+
+    let tbody = table.querySelector('tbody');
+    if (!tbody) {
+        tbody = document.createElement('tbody');
+        table.appendChild(tbody);
+    }
+    tbody.innerHTML = ''; // 清除舊的怪獸列
+
+    const monsters = gameState.playerData?.farmedMonsters || [];
+
+    if (monsters.length === 0) {
+        const row = tbody.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 6; // 表頭有6欄
+        cell.textContent = '您的農場空空如也，快去組合新的怪獸吧！';
+        cell.style.textAlign = 'center';
+        cell.style.padding = '20px';
+        cell.style.color = 'var(--text-secondary)';
+        return;
+    }
+
+    const rarityMap = {
+        '普通': 'common',
+        '稀有': 'rare',
+        '菁英': 'elite',
+        '傳奇': 'legendary',
+        '神話': 'mythical'
+    };
+
+    const sortConfig = gameState.farmSortConfig || { key: 'score', order: 'desc' };
+    monsters.sort((a, b) => {
+        let valA = a[sortConfig.key] || 0;
+        let valB = b[sortConfig.key] || 0;
+        if (typeof valA === 'string') {
+            return sortConfig.order === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        } else {
+            return sortConfig.order === 'asc' ? valA - valB : valB - valA;
+        }
+    });
+
+    monsters.forEach((monster, index) => {
+        const row = tbody.insertRow(); // 建立 <tr>
+        if (gameState.selectedMonsterId === monster.id) {
+            row.classList.add('selected');
+        }
+
+        // 建立 <td> 並填入內容
+        const cellIndex = row.insertCell();
+        cellIndex.textContent = index + 1;
+
+        const cellDeploy = row.insertCell();
+        const isDeployed = gameState.playerData.selectedMonsterId === monster.id;
+        cellDeploy.innerHTML = `<button class="button ${isDeployed ? 'success' : 'secondary'} text-xs" onclick="handleDeployMonsterClick('${monster.id}')" ${isDeployed ? 'disabled' : ''}>${isDeployed ? '出戰中' : '出戰'}</button>`;
+        
+        const cellMonster = row.insertCell();
+        const rarityKey = monster.rarity ? (rarityMap[monster.rarity] || 'common') : 'common';
+        cellMonster.innerHTML = `<a href="#" class="monster-name-link text-rarity-${rarityKey}" onclick="showMonsterInfoFromFarm('${monster.id}'); return false;">${monster.nickname}</a>`;
+        
+        const cellScore = row.insertCell();
+        cellScore.textContent = monster.score || 0;
+
+        const cellStatus = row.insertCell();
+        let statusText = '閒置中';
+        if (monster.farmStatus?.isTraining) {
+            statusText = '修煉中';
+        } else if (monster.farmStatus?.isBattling) {
+            statusText = '戰鬥中';
+        }
+        cellStatus.textContent = statusText;
+
+        const cellActions = row.insertCell();
+        cellActions.className = 'farm-actions-cell';
+        let otherButtonsHTML = '';
+        if (monster.farmStatus?.isTraining) {
+            const startTime = monster.farmStatus.trainingStartTime || Date.now();
+            const duration = monster.farmStatus.trainingDuration || 3600000;
+            otherButtonsHTML += `<button class="button warning text-xs" onclick="handleEndCultivationClick(event, '${monster.id}', ${startTime}, ${duration})">招回</button>`;
+        } else {
+            otherButtonsHTML += `<button class="button primary text-xs" onclick="handleCultivateMonsterClick(event, '${monster.id}')">修煉</button>`;
+        }
+        otherButtonsHTML += `<button class="button danger text-xs" onclick="handleReleaseMonsterClick(event, '${monster.id}')">放生</button>`;
+        cellActions.innerHTML = otherButtonsHTML;
+    });
 }
 
 

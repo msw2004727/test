@@ -30,12 +30,6 @@
 .top-left-button { top: 10px; left: 10px; }
 .top-right-button { top: 10px; right: 10px; }
 
-.top-center-button {
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
 #theme-switcher {
     color: var(--text-primary-dark);
 }
@@ -216,7 +210,7 @@ button.warning-outline:hover, .button.warning-outline:hover {
     width: auto;
     padding: 0.5rem 0.5rem;
     min-width: 0;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     height: 38px;
     display: flex;
     align-items: center;
@@ -234,6 +228,12 @@ button.warning-outline:hover, .button.warning-outline:hover {
 }
 .top-nav-button:disabled {
      background-color: color-mix(in srgb, var(--accent-color) 50%, var(--bg-primary)) !important;
+}
+
+@media (min-width: 768px) {
+    .top-nav-button {
+        font-size: 1rem;
+    }
 }
 
 .auth-button {
@@ -280,28 +280,32 @@ button.warning-outline:hover, .button.warning-outline:hover {
     min-width: auto;
 }
 
-.delete-dna-btn {
-    position: absolute;
-    top: -8px;
-    left: -8px;
-    width: 22px;
-    height: 22px;
-    background-color: var(--danger-color);
-    color: white;
-    border-radius: 50%;
-    border: 2px solid var(--bg-panel);
-    font-size: 14px;
-    font-weight: bold;
-    line-height: 1;
+/* --- 核心修改處 START --- */
+.title-action-button {
+    background-color: var(--button-secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 50%; /* 圓形 */
+    width: 32px;
+    height: 32px;
+    font-size: 1rem; /* 圖標大小 */
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-    transition: transform 0.2s ease-out;
-    padding-bottom: 2px; /* For better 'x' alignment */
+    padding: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: background-color 0.2s, transform 0.1s;
+    /* 移除不必要的繼承樣式 */
+    font-weight: normal;
+    border-bottom: 1px solid var(--border-color);
 }
-.delete-dna-btn:hover {
-    transform: scale(1.15);
+
+.title-action-button:hover {
+    background-color: var(--button-secondary-hover-bg);
+    transform: translateY(-1px);
 }
+
+.title-action-button:active {
+    transform: translateY(0);
+}
+/* --- 核心修改處 END --- */

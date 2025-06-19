@@ -1,48 +1,76 @@
+好的，這是我根據您提供的所有檔案，為「怪獸異世界」專案整理出的最新結構樹狀圖。
+
+```
 MD/
 ├── backend/
-│   ├── MD_ai_services.py
-│   ├── MD_config_services.py
-│   ├── MD_firebase_config.py
-│   ├── MD_models.py
-│   ├── MD_populate_gamedata.py
-│   ├── MD_routes.py
+│   ├── data/
+│   │   ├── cultivation_stories.json
+│   │   ├── dna_fragments.json
+│   │   ├── element_nicknames.json
+│   │   ├── newbie_guide.json
+│   │   ├── personalities.csv
+│   │   ├── skills.json
+│   │   └── titles.json
 │   ├── api_key.txt
 │   ├── battle_services.py
-│   ├── data/
-│   │   ├── dna_fragments.json
-│   │   ├── personalities.csv
-│   │   └── skills.json
 │   ├── leaderboard_search_services.py
 │   ├── main.py
 │   ├── monster_absorption_services.py
+│   ├── monster_chat_services.py
 │   ├── monster_combination_services.py
 │   ├── monster_cultivation_services.py
 │   ├── monster_disassembly_services.py
 │   ├── monster_healing_services.py
 │   ├── monster_nickname_services.py
 │   ├── player_services.py
+│   ├── post_battle_services.py
 │   ├── requirements.txt
 │   ├── serviceAccountKey.json
-│   └── utils_services.py
+│   ├── utils_services.py
+│   ├── MD_ai_services.py
+│   ├── MD_config_services.py
+│   ├── MD_firebase_config.py
+│   ├── MD_models.py
+│   └── MD_populate_gamedata.py
 ├── css/
+│   ├── buttons.css
 │   ├── components.css
 │   ├── layout.css
+│   ├── modals.css
 │   └── theme.css
 ├── images/
 │   ├── BN001.png
 │   ├── a001.png
-│   ├── amb01.png
 │   └── mb01.png
 ├── js/
+│   ├── handlers/
+│   │   ├── drag-drop-handlers.js
+│   │   ├── game-interaction-handlers.js
+│   │   ├── monster-handlers.js
+│   │   └── ui-handlers.js
 │   ├── api-client.js
 │   ├── auth.js
 │   ├── config.js
-│   ├── event-handlers.js
 │   ├── firebase-config.js
 │   ├── game-logic.js
 │   ├── game-state.js
 │   ├── loadApiKey.js
 │   ├── main.js
-│   └── ui.js
+│   ├── monster-part-assets.js
+│   ├── ui.js
+│   ├── ui-chat.js
+│   ├── ui-farm.js
+│   ├── ui-inventory.js
+│   ├── ui-leaderboard-modals.js
+│   ├── ui-monster-modals.js
+│   ├── ui-notes.js
+│   ├── ui-player-modals.js
+│   ├── ui-snapshot.js
+│   └── utils.js
+├── announcement.json
+├── assets.json
+├── chat_greetings.json
 ├── github結構.txt
-└── index.html
+├── index.html
+└── ui_text.json
+```

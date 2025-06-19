@@ -14,8 +14,15 @@ function moveDnaToCombinationSlot(draggedDnaObject, sourceSlotIndexIfFromCombina
         renderDNACombinationSlots(); // 保持UI一致
         return;
     }
+    
+    // 修改：從新的 gameState.playerData 中讀取組合槽
+    const combinationSlots = gameState.playerData?.dnaCombinationSlots;
+    if (!combinationSlots) {
+        console.error("moveDnaToCombinationSlot: 玩家資料中的組合槽未定義。");
+        return;
+    }
 
-    if (targetSlotIndex < 0 || targetSlotIndex >= gameState.dnaCombinationSlots.length) {
+    if (targetSlotIndex < 0 || targetSlotIndex >= combinationSlots.length) {
         console.warn(`moveDnaToCombinationSlot: 無效的目標槽位索引 ${targetSlotIndex}。`);
         renderDNACombinationSlots();
         return;
@@ -26,11 +33,11 @@ function moveDnaToCombinationSlot(draggedDnaObject, sourceSlotIndexIfFromCombina
         return;
     }
 
-    const itemCurrentlyInTargetSlot = gameState.dnaCombinationSlots[targetSlotIndex];
-    gameState.dnaCombinationSlots[targetSlotIndex] = draggedDnaObject;
+    const itemCurrentlyInTargetSlot = combinationSlots && combinationSlots.length > targetSlotIndex ? combinationSlots?.[targetSlotIndex] : null;
+    if (combinationSlots) combinationSlots[targetSlotIndex] = draggedDnaObject;
 
-    if (sourceSlotIndexIfFromCombination !== null) {
-        gameState.dnaCombinationSlots[sourceSlotIndexIfFromCombination] = itemCurrentlyInTargetSlot;
+    if (sourceSlotIndexIfFromCombination !== null && combinationSlots) {
+        combinationSlots[sourceSlotIndexIfFromCombination] = itemCurrentlyInTargetSlot;
     }
     
     renderDNACombinationSlots();
@@ -61,14 +68,17 @@ function handleDnaMoveIntoInventory(dnaToMove, sourceInfo, targetInventoryIndex,
         return;
     }
 
-    let currentOwnedDna = [...gameState.playerData.playerOwnedDNA];
+    let currentOwnedDna = [...(gameState.playerData.playerOwnedDNA || [])];
 
     if (sourceInfo.type === 'inventory') {
         if (sourceInfo.originalInventoryIndex !== null && sourceInfo.originalInventoryIndex !== undefined) {
              currentOwnedDna[sourceInfo.originalInventoryIndex] = null;
         }
     } else if (sourceInfo.type === 'combination') {
-        gameState.dnaCombinationSlots[sourceInfo.id] = null;
+        // 修改：從新的 gameState.playerData 中清空組合槽
+        if (gameState.playerData?.dnaCombinationSlots) {
+            gameState.playerData.dnaCombinationSlots[sourceInfo.id] = null;
+        }
     } else if (sourceInfo.type === 'temporaryBackpack') {
         if (sourceInfo.id !== null && sourceInfo.id !== undefined) {
             gameState.temporaryBackpack[sourceInfo.id] = null;
@@ -180,9 +190,13 @@ async function handleEndCultivationClick(event, monsterId, trainingStartTime, tr
     const totalDurationSeconds = trainingDuration / 1000;
 
     if (elapsedTimeSeconds < totalDurationSeconds) {
+        // --- 核心修改處 START ---
+        const displayName = getMonsterDisplayName(monster, gameState.gameConfigs);
+        // --- 核心修改處 END ---
+
         showConfirmationModal(
             '提前結束修煉',
-            `怪獸 ${monster.nickname} 的修煉時間尚未結束 (${totalDurationSeconds - elapsedTimeSeconds}秒剩餘)。提前結束將無法獲得完整獎勵。確定要結束嗎？`,
+            `怪獸 ${displayName} 的修煉時間尚未結束 (${totalDurationSeconds - elapsedTimeSeconds}秒剩餘)。提前結束將無法獲得完整獎勵。確定要結束嗎？`,
             async () => {
                 await handleCompleteCultivation(monsterId, elapsedTimeSeconds);
             },
@@ -302,7 +316,6 @@ function promptLearnNewSkill(monsterId, newSkillTemplate, currentSkills) {
 
     const maxSkills = gameState.gameConfigs.value_settings?.max_monster_skills || 3;
     
-    // ===== 新增：產生「目前技能」的HTML =====
     let currentSkillsHtml = '<div style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px dashed var(--border-color);">';
     currentSkillsHtml += `<h5 style="font-weight: bold; color: var(--text-secondary); margin-bottom: 0.5rem;">${monster.nickname} 的目前技能：</h5>`;
     if (currentSkills.length > 0) {
@@ -315,15 +328,12 @@ function promptLearnNewSkill(monsterId, newSkillTemplate, currentSkills) {
         currentSkillsHtml += '<p style="font-size: 0.9em; color: var(--text-secondary);">無</p>';
     }
     currentSkillsHtml += '</div>';
-    // =====================================
 
     let message = `${monster.nickname} 領悟了新技能：${newSkillLink} (威力: ${newSkillTemplate.power}, MP: ${newSkillTemplate.mp_cost || 0})！<br>`;
     message += `<p class="text-sm text-[var(--text-secondary)] mt-2" style="font-size: 0.9em !important;">技能簡述：${skillDescription}</p>`;
     
-    // 新增：為查看技能詳情預留的注入點
     message += `<div id="skill-details-injection-point" class="mt-2"></div>`;
     
-    // 新增：無論如何都顯示目前技能
     message += currentSkillsHtml;
 
     const onLearn = async (slotToReplace = null) => {
@@ -494,7 +504,6 @@ async function handleMoveFromTempBackpackToInventory(tempBackpackIndex) {
             updateMonsterSnapshot(getSelectedMonster() || null);
             await savePlayerData(gameState.playerId, gameState.playerData);
             
-            // 已移除「物品已移動」的提示彈窗
         } else {
             showFeedbackModal('庫存已滿', '您的 DNA 庫存已滿，無法再從臨時背包移動物品。請清理後再試。');
         }
@@ -516,14 +525,13 @@ async function handleDrawDNAClick() {
     showFeedbackModal('DNA抽取中...', '正在搜尋稀有的DNA序列...', true);
 
     try {
-        // Call the new API function
         const result = await drawFreeDNA();
         
         if (result && result.success && result.drawn_dna) {
             const drawnItems = result.drawn_dna;
-            gameState.lastDnaDrawResult = drawnItems; // 保存抽卡結果
+            gameState.lastDnaDrawResult = drawnItems; 
             hideModal('feedback-modal');
-            showDnaDrawModal(drawnItems); // 顯示抽卡結果彈窗
+            showDnaDrawModal(drawnItems);
         } else {
             throw new Error(result.error || '從伺服器返回的抽卡數據無效。');
         }
@@ -531,6 +539,50 @@ async function handleDrawDNAClick() {
         console.error("DNA 抽取失敗:", error);
         hideModal('feedback-modal');
         showFeedbackModal('抽卡失敗', `與伺服器通信時發生錯誤: ${error.message}`);
+    }
+}
+
+
+async function handleDeployMonsterClick(monsterId) {
+    if (!monsterId || !gameState.playerData) {
+        console.error("handleDeployMonsterClick: 無效的怪獸ID或玩家資料不存在。");
+        return;
+    }
+
+    const monster = gameState.playerData.farmedMonsters.find(m => m.id === monsterId);
+    if (!monster) {
+         console.error(`handleDeployMonsterClick: 在農場中找不到ID為 ${monsterId} 的怪獸。`);
+         return;
+    }
+
+    if (monster.farmStatus?.isTraining) {
+        showFeedbackModal('提示', '該怪獸正在修煉中，需要先召回才可以指派出戰。');
+        return;
+    }
+    
+    // 【新增】檢查瀕死狀態
+    if (monster.hp < monster.initial_max_hp * 0.25) {
+        showFeedbackModal('無法出戰', '瀕死狀態下無法出戰，請先治療您的怪獸。');
+        return;
+    }
+
+    gameState.selectedMonsterId = monsterId;
+    gameState.playerData.selectedMonsterId = monsterId;
+    
+    if (typeof updateMonsterSnapshot === 'function') {
+        updateMonsterSnapshot(monster);
+    }
+    if (typeof renderMonsterFarm === 'function') {
+        renderMonsterFarm();
+    }
+
+    try {
+        await savePlayerData(gameState.playerId, gameState.playerData);
+        console.log(`玩家 ${gameState.playerId} 已將怪獸 ${monsterId} 設為出戰並儲存。`);
+
+    } catch (error) {
+        console.error("設置出戰怪獸並儲存時發生錯誤:", error);
+        showFeedbackModal('錯誤', `設置出戰怪獸失敗: ${error.message}`);
     }
 }
 
@@ -582,7 +634,7 @@ async function refreshPlayerData() {
  * @param {string} [ownerId=null] - 如果挑戰的是其他玩家的怪獸，傳入擁有者ID。
  * @param {string} [npcId=null] - 如果挑戰的是NPC，傳入NPC ID。
  */
-async function handleChallengeMonsterClick(event, monsterIdToChallenge = null, ownerId = null, npcId = null) {
+async function handleChallengeMonsterClick(event, monsterIdToChallenge = null, ownerId = null, npcId = null, ownerNickname = null) {
     if(event) event.stopPropagation();
 
     const playerMonsterId = gameState.selectedMonsterId;
@@ -606,8 +658,6 @@ async function handleChallengeMonsterClick(event, monsterIdToChallenge = null, o
     try {
         showFeedbackModal('準備戰鬥...', '正在獲取對手資訊...', true);
         
-        // 暫時將玩家怪獸設為戰鬥中狀態，以便UI更新
-        // 注意：這是一個前端的臨時狀態，真實狀態由後端確認
         playerMonster.farmStatus = { ...playerMonster.farmStatus, isBattling: true };
         renderMonsterFarm();
         updateMonsterSnapshot(playerMonster);
@@ -651,22 +701,25 @@ async function handleChallengeMonsterClick(event, monsterIdToChallenge = null, o
             async () => {
                 try {
                     showFeedbackModal('戰鬥中...', '正在激烈交鋒...', true);
-                    const battleResult = await simulateBattle(playerMonster, opponentMonster);
+                    
+                    const { battle_result: battleResult } = await simulateBattle({
+                        player_monster_data: playerMonster,
+                        opponent_monster_data: opponentMonster,
+                        opponent_owner_id: ownerId,
+                        opponent_owner_nickname: ownerNickname
+                    });
 
-                    await refreshPlayerData(); // 戰後刷新數據，確保狀態同步
-                    updateMonsterSnapshot(getSelectedMonster()); // 更新快照為當前選中怪獸
+                    await refreshPlayerData(); 
+                    updateMonsterSnapshot(getSelectedMonster()); 
 
-                    showBattleLogModal(battleResult.log,
-                        battleResult.winner_id === playerMonster.id ? playerMonster.nickname : (battleResult.winner_id === opponentMonster.id ? opponentMonster.nickname : null),
-                        battleResult.loser_id === playerMonster.id ? playerMonster.nickname : (battleResult.loser_id === opponentMonster.id ? opponentMonster.nickname : null)
-                    );
+                    showBattleLogModal(battleResult);
 
                     hideModal('feedback-modal');
 
                 } catch (battleError) {
                     showFeedbackModal('戰鬥失敗', `模擬戰鬥時發生錯誤: ${battleError.message}`);
                     console.error("模擬戰鬥錯誤:", battleError);
-                    await refreshPlayerData(); // 即使戰鬥出錯，也刷新數據以同步狀態
+                    await refreshPlayerData(); 
                 }
             },
             { confirmButtonClass: 'primary', confirmButtonText: '開始戰鬥' }
@@ -733,9 +786,92 @@ function sortAndRenderLeaderboard(tableType, dataToRender = null) {
     });
 
     if (typeof updateLeaderboardTable === 'function') {
-        updateLeaderboardTable(tableType, data);
+        const containerId = `${tableType}-leaderboard-table-container`;
+        updateLeaderboardTable(tableType, data, containerId);
     }
 }
 
 
 console.log("Game logic module loaded with updated drag-drop logic and other enhancements.");
+
+async function fetchAndDisplayMonsterLeaderboard() {
+    try {
+        showFeedbackModal('載入中...', '正在獲取怪獸排行榜...', true);
+        const leaderboardData = await getMonsterLeaderboard(20); // Fetch top 20
+        
+        updateGameState({ monsterLeaderboard: leaderboardData || [] });
+        
+        filterAndRenderMonsterLeaderboard(); 
+        
+        if (DOMElements.monsterLeaderboardElementTabs && DOMElements.monsterLeaderboardElementTabs.innerHTML.trim() === '') {
+            const allElements = ['all', '火', '水', '木', '金', '土', '光', '暗', '毒', '風', '混', '無'];
+            updateMonsterLeaderboardElementTabs(allElements);
+        }
+
+        hideModal('feedback-modal');
+    } catch (error) {
+        hideModal('feedback-modal');
+        showFeedbackModal('載入失敗', `無法獲取怪獸排行榜: ${error.message}`);
+    }
+}
+
+async function handleClickInventory(event) {
+    const itemElement = event.target.closest('.dna-item.occupied');
+    if (!itemElement) return;
+
+    const inventoryIndex = parseInt(itemElement.dataset.inventoryIndex, 10);
+    const dnaObject = gameState.playerData.playerOwnedDNA[inventoryIndex];
+    if (!dnaObject) return;
+    
+    // Find the first empty slot in the combination area
+    const targetSlotIndex = gameState.playerData.dnaCombinationSlots.findIndex(slot => slot === null);
+
+    if (targetSlotIndex !== -1) {
+        // Move the DNA object
+        gameState.playerData.playerOwnedDNA[inventoryIndex] = null;
+        gameState.playerData.dnaCombinationSlots[targetSlotIndex] = dnaObject;
+        
+        // Re-render UI
+        renderPlayerDNAInventory();
+        renderDNACombinationSlots();
+        
+        // Save the new state
+        await savePlayerData(gameState.playerId, gameState.playerData);
+    } else {
+        showFeedbackModal('提示', 'DNA組合欄位已滿！');
+    }
+}
+
+async function handleClickCombinationSlot(event) {
+    const slotElement = event.target.closest('.dna-slot.occupied');
+    if (!slotElement) return;
+
+    const slotIndex = parseInt(slotElement.dataset.slotIndex, 10);
+    const dnaObject = gameState.playerData.dnaCombinationSlots[slotIndex];
+    if (!dnaObject) return;
+
+    // Find the first empty slot in the main inventory, skipping the delete slot
+    let targetInventoryIndex = -1;
+    for (let i = 0; i < gameState.MAX_INVENTORY_SLOTS; i++) {
+        // Index 11 is the delete slot
+        if (i !== 11 && !gameState.playerData.playerOwnedDNA[i]) {
+            targetInventoryIndex = i;
+            break;
+        }
+    }
+
+    if (targetInventoryIndex !== -1) {
+        // Move the DNA object
+        gameState.playerData.dnaCombinationSlots[slotIndex] = null;
+        gameState.playerData.playerOwnedDNA[targetInventoryIndex] = dnaObject;
+        
+        // Re-render UI
+        renderPlayerDNAInventory();
+        renderDNACombinationSlots();
+        
+        // Save the new state
+        await savePlayerData(gameState.playerId, gameState.playerData);
+    } else {
+        showFeedbackModal('提示', 'DNA碎片庫存區已滿！');
+    }
+}

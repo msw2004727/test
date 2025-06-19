@@ -3,6 +3,8 @@
 
 import logging
 from typing import List, Dict, Optional, Union, Tuple, Literal, Any
+import time
+import math
 
 # 從 MD_models 導入相關的 TypedDict 定義
 from .MD_models import (
@@ -14,6 +16,11 @@ from .MD_models import (
 )
 # 從 MD_firebase_config 導入 db 實例
 from . import MD_firebase_config
+# --- 核心修改處 START ---
+# 從共用函式庫導入感情值計算工具
+from .utils_services import update_bond_with_diminishing_returns
+# --- 核心修改處 END ---
+
 
 monster_healing_services_logger = logging.getLogger(__name__)
 
@@ -126,6 +133,17 @@ def heal_monster_service(
             monster_healing_services_logger.info(f"怪獸 {monster_id} 的健康狀況已清除。")
 
     if healed:
+        # --- 核心修改處 START ---
+        interaction_stats = monster_to_heal.setdefault("interaction_stats", {})
+        interaction_stats["heal_count"] = interaction_stats.get("heal_count", 0) + 1
+        
+        # 改為呼叫共用的函式
+        point_change = update_bond_with_diminishing_returns(interaction_stats, "heal", 1)
+
+        if point_change > 0:
+            monster_healing_services_logger.info(f"治療成功，感情值增加 {point_change} 點，目前為 {interaction_stats.get('bond_points', 0)}。")
+        # --- 核心修改處 END ---
+        
         player_data["farmedMonsters"][monster_index] = monster_to_heal # type: ignore
         monster_healing_services_logger.info(f"怪獸 {monster_id} 治療成功（等待路由層儲存）。")
         return player_data

@@ -7,12 +7,17 @@ import requests # 用於發送 HTTP 請求
 import logging
 import time
 from typing import Dict, Any, List, Optional # 用於類型提示
+import random 
+
+# 從專案的其他模組導入必要的模型
+from .MD_models import Monster, PlayerGameData, ChatHistoryEntry, GameConfigs
+
 
 # 設定日誌記錄器
 ai_logger = logging.getLogger(__name__)
 
 # --- DeepSeek API 設定 ---
-DEEPSEEK_API_KEY = "sk-19179bb0c0c94acaa53ca82dc1d28bbf" # 這是你提供的金鑰
+DEEPSEEK_API_KEY = None # 初始化為 None
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions" # DeepSeek API 端點
 DEEPSEEK_MODEL = "deepseek-chat" # 常用的 DeepSeek 模型，如有需要請更改
 
@@ -29,6 +34,223 @@ DEFAULT_BATTLE_REPORT_CONTENT = {
     "loot_info": "戰利品資訊待補。",
     "growth_info": "怪獸成長資訊待補。"
 }
+DEFAULT_CHAT_REPLY = "嗯...（牠似乎在思考要說些什麼，但又不知道怎麼開口。）"
+
+# 新增：用於載入 API 金鑰的函式
+def _load_deepseek_api_key():
+    """從 api_key.txt 檔案載入 DeepSeek API 金鑰。"""
+    global DEEPSEEK_API_KEY
+    try:
+        # 檔案路徑相對於目前檔案（MD_ai_services.py）
+        key_file_path = os.path.join(os.path.dirname(__file__), 'api_key.txt')
+        if os.path.exists(key_file_path):
+            with open(key_file_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if "deepseek api key" in line.lower():
+                        parts = line.split()
+                        for part in parts:
+                            if part.startswith("sk-"):
+                                DEEPSEEK_API_KEY = part
+                                ai_logger.info("成功從 api_key.txt 載入 DeepSeek API Key。")
+                                return # 找到金鑰後就結束函式
+            
+            # 如果迴圈結束了還沒找到金鑰
+            if not DEEPSEEK_API_KEY:
+                ai_logger.warning("在 api_key.txt 中未找到符合格式的金鑰 (sk-...)。")
+        else:
+            ai_logger.warning(f"api_key.txt 檔案不存在於: {key_file_path}。AI 服務將無法運作。")
+    except Exception as e:
+        ai_logger.error(f"讀取 api_key.txt 時發生錯誤: {e}", exc_info=True)
+
+# 在模組載入時執行一次金鑰載入
+_load_deepseek_api_key()
+
+
+def _get_world_knowledge_context(player_message: str, game_configs: GameConfigs, player_data: PlayerGameData, current_monster_id: str) -> Optional[Dict[str, Any]]:
+    """
+    分析玩家的訊息，判斷是否在詢問遊戲知識。
+    如果是，則從 game_configs 或 player_data 中查找相關資訊並返回。
+    """
+    # 檢查是否在詢問關於農場裡的其他怪獸
+    farmed_monsters = player_data.get("farmedMonsters", [])
+    for monster in farmed_monsters:
+        # 【修改】使用怪獸的短稱呼（屬性代表名）來進行匹配
+        monster_short_name = monster.get("element_nickname_part") or monster.get("nickname")
+        if monster_short_name and monster_short_name in player_message and monster.get("id") != current_monster_id:
+            skills_str = ', '.join([s.get('name', '未知技能') for s in monster.get('skills', [])]) or '沒有特殊技能'
+            context_str = f"關於我的夥伴「{monster_short_name}」的資料：牠是一隻 {monster.get('rarity')} 的 {monster.get('elements', ['未知'])[0]} 屬性怪獸。聽說牠的技能有 {skills_str}。"
+            return {"topic_type": "Monster", "topic_name": monster_short_name, "context": context_str}
+
+    # 檢查是否在詢問關於特定 DNA 的資訊
+    all_dna = game_configs.get("dna_fragments", [])
+    for dna in all_dna:
+        if dna['name'] in player_message:
+            context_str = f"關於「{dna['name']}」的資料：{dna['description']} 它是 {dna['rarity']} 的 {dna['type']} 屬性 DNA，主要影響HP({dna['hp']})、攻擊({dna['attack']})、防禦({dna['defense']})等能力。"
+            return {"topic_type": "DNA", "topic_name": dna['name'], "context": context_str}
+
+    # 檢查是否在詢問關於特定技能的資訊
+    all_skills = game_configs.get("skills", {})
+    for element_skills in all_skills.values():
+        for skill in element_skills:
+            if skill['name'] in player_message:
+                context_str = f"關於技能「{skill['name']}」的資料：{skill.get('description', '一個神秘的招式')} 這是個 {skill.get('rarity', '普通')} 的 {skill.get('type', '無')} 屬性 {skill.get('skill_category', '技能')}，威力是 {skill.get('power', 0)}，消耗MP是 {skill.get('mp_cost', 0)}。"
+                return {"topic_type": "Skill", "topic_name": skill['name'], "context": context_str}
+
+    # 檢查是否在詢問一般性的遊戲指南問題
+    guide_keywords = ["怎麼", "如何", "什麼是", "教我", "合成", "修煉", "屬性", "克制"]
+    if any(keyword in player_message for keyword in guide_keywords):
+        all_guides = game_configs.get("newbie_guide", [])
+        for entry in all_guides:
+            if any(keyword in entry['title'] for keyword in player_message.split()):
+                return {"topic_type": "Guide", "topic_name": entry['title'], "context": f"關於「{entry['title']}」的說明：{entry['content']}"}
+        if all_guides:
+            return {"topic_type": "Guide", "topic_name": "遊戲目標", "context": f"關於「遊戲目標」的說明：{all_guides[0]['content']}"}
+
+    return None
+
+
+def get_ai_chat_completion(
+    monster_data: Monster,
+    player_data: PlayerGameData,
+    chat_history: List[ChatHistoryEntry],
+    player_message: str
+) -> Optional[str]:
+    """
+    根據怪獸的完整資料、玩家資訊和對話歷史，生成個人化的聊天回應。
+    """
+    if not DEEPSEEK_API_KEY:
+        ai_logger.error("DeepSeek API 金鑰未設定。無法呼叫 AI 聊天服務。")
+        return DEFAULT_CHAT_REPLY
+    
+    monster_short_name = monster_data.get('element_nickname_part') or monster_data.get('nickname', '怪獸')
+
+
+    try:
+        from .MD_config_services import load_all_game_configs_from_firestore
+        game_configs = load_all_game_configs_from_firestore()
+        knowledge_context = _get_world_knowledge_context(player_message, game_configs, player_data, monster_data.get("id", ""))
+    except Exception as e:
+        ai_logger.error(f"查找世界知識時出錯: {e}", exc_info=True)
+        knowledge_context = None
+
+    if knowledge_context:
+        # --- 知識問答模式 ---
+        system_prompt = f"""
+你現在將扮演一隻名為「{monster_short_name}」的怪獸。
+你的核心準則是：完全沉浸在你的角色中，用「我」作為第一人稱來回應。
+你的個性是「{monster_data.get('personality', {}).get('name', '未知')}」，這意味著：{monster_data.get('personality', {}).get('description', '你很普通')}。
+你的回應中，請根據你的個性和當下情境，自然地加入適當的 emoji 和日式顏文字（如 (´・ω・`) 或 (✧∀✧)），讓你的角色更生動。
+你的飼主「{player_data.get('nickname', '訓練師')}」正在向你請教遊戲知識。
+你的任務是根據以下提供的「相關資料」，用你自己的個性和口吻，自然地回答玩家的問題。不要只是照本宣科。
+"""
+        user_content = f"""
+--- 相關資料 ---
+{knowledge_context.get('context')}
+---
+玩家的問題是：「{player_message}」
+
+現在，請以「{monster_short_name}」的身份回答。
+我:
+"""
+    else:
+        # --- 一般閒聊模式 ---
+        system_prompt = f"""
+你現在將扮演一隻名為「{monster_short_name}」的怪獸。
+你的核心準則是：完全沉浸在你的角色中，用「我」作為第一人稱來回應。
+你的個性是「{monster_data.get('personality', {}).get('name', '未知')}」，這意味著：{monster_data.get('personality', {}).get('description', '你很普通')}。
+你的回應中，請根據你的個性和當下情境，自然地加入適當的 emoji 和日式顏文字（如 (´・ω・`) 或 (✧∀✧)），讓你的角色更生動。
+你的回應必須簡短、口語化，並且絕對符合你被賦予的個性和以下資料。你可以參照你的技能和DNA組成來豐富你的回答，但不要像在讀說明書。
+你的飼主，也就是正在與你對話的玩家，名字是「{player_data.get('nickname', '訓練師')}」。
+"""
+        should_ask_question = False
+        if len(chat_history) >= 4 and (len(chat_history) - 4) % 6 == 0 and random.random() < 0.25:
+            should_ask_question = True
+
+        skills_with_desc = [f"「{s.get('name')}」" for s in monster_data.get("skills", [])]
+        dna_with_desc = [f"「{d.get('name')}」" for d in game_configs.get("dna_fragments", []) if d.get("id") in monster_data.get("constituent_dna_ids", [])]
+
+        # 【修改】修正f-string語法錯誤
+        activity_log_entries = monster_data.get("activityLog", [])
+        recent_activities_str = ""
+        if activity_log_entries:
+            recent_logs = activity_log_entries[:3]
+            formatted_logs = []
+            for log in recent_logs:
+                # 先將訊息處理好，再放入f-string
+                message = log.get('message', '').replace('\n', ' ')
+                formatted_logs.append(f"- {log.get('time', '')}: {message}")
+            recent_activities_str = "\n".join(formatted_logs)
+        else:
+            recent_activities_str = "- 最近沒發生什麼特別的事。"
+
+        stats_str = f"HP: {monster_data.get('hp')}/{monster_data.get('initial_max_hp')}, 攻擊: {monster_data.get('attack')}, 防禦: {monster_data.get('defense')}, 速度: {monster_data.get('speed')}"
+        health_conditions = monster_data.get("healthConditions", [])
+        conditions_str = "、".join([cond.get('name', '未知狀態') for cond in health_conditions]) if health_conditions else "非常健康"
+
+
+        monster_profile = f"""
+--- 我的資料 ---
+- 我的名字：{monster_short_name}
+- 我的屬性：{', '.join(monster_data.get('elements', []))}
+- 我的稀有度：{monster_data.get('rarity')}
+- 我的數值：{stats_str}
+- 我的狀態：{conditions_str}
+- 我的簡介：{monster_data.get('aiIntroduction', '一個謎。')}
+- 我的技能：{', '.join(skills_with_desc) or '無'}
+- 我的DNA組成：{', '.join(dna_with_desc) or '謎'}
+- 我的最近動態：
+{recent_activities_str}
+"""
+        formatted_history = "\n".join([f"{'玩家' if entry['role'] == 'user' else '我'}: {entry['content']}" for entry in chat_history])
+        user_content = f"""
+{monster_profile}
+
+--- 最近的對話如下 ---
+{formatted_history}
+玩家: {player_message}
+---
+"""
+        if should_ask_question:
+            user_content += """
+**特別指示：** 在你的回應中，除了回覆玩家的話，請自然地向玩家反問一個簡單的問題，像是「你今天過得怎麼樣？」、「你喜歡吃什麼？」或「你覺得我該加強哪個技能？」。
+"""
+        user_content += f"""
+現在，請以「{monster_short_name}」的身份，用符合你個性的方式回應玩家。
+我:
+"""
+
+    payload = {
+        "model": DEEPSEEK_MODEL,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content}
+        ],
+        "temperature": 0.85, 
+        "max_tokens": 150,
+    }
+    headers = {
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    try:
+        response = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+        response_json = response.json()
+        if response_json.get("choices") and response_json["choices"][0].get("message"):
+            reply = response_json["choices"][0]["message"].get("content", DEFAULT_CHAT_REPLY).strip()
+            ai_logger.info(f"成功為怪獸 {monster_data.get('id')} 生成聊天回應。")
+            return reply
+        else:
+            ai_logger.error(f"DeepSeek API 聊天回應格式不符: {response_json}")
+            return DEFAULT_CHAT_REPLY
+    except requests.exceptions.RequestException as e:
+        ai_logger.error(f"呼叫 DeepSeek API 進行聊天時發生網路錯誤: {e}", exc_info=True)
+        return "（網路訊號好像不太好，我聽不太清楚...）"
+    except Exception as e:
+        ai_logger.error(f"生成 AI 聊天回應時發生未知錯誤: {e}", exc_info=True)
+        return DEFAULT_CHAT_REPLY
 
 
 def generate_monster_ai_details(monster_data: Dict[str, Any]) -> Dict[str, str]:
@@ -233,41 +455,31 @@ def generate_battle_report_content(
     opponent_monster: Dict[str, Any],
     battle_result: Dict[str, Any],
     full_raw_battle_log: List[str] 
-) -> Dict[str, str]:
+) -> Dict[str, Any]:
     """
-    根據戰鬥數據，生成完整的戰報內容。
-    修改：交戰描述將由此函式根據原始日誌重新格式化，以符合用戶需求。
+    根據戰鬥數據，生成完整的戰報內容，包含總結與 Hashtag。
     """
     ai_logger.info(f"開始為戰鬥生成 AI 戰報 (玩家: {player_monster.get('nickname')}, 對手: {opponent_monster.get('nickname')})。")
 
-    # --- 1. 全新的日誌解析與格式化邏輯 ---
     battle_description_parts = []
-    # 遍歷原始日誌，只提取並格式化需要的行動訊息
     for raw_line in full_raw_battle_log:
         line = raw_line.strip()
-        # 處理行動日誌 (以 "- " 開頭)
         if line.startswith("- "):
-            # 移除開頭的 "- "
             action_line = line[2:]
-            # 將內部的 <damage> 和 <heal> 標籤保留，以便前端處理
-            # action_line = action_line.replace("<damage>", "-").replace("</damage>", "")
-            # action_line = action_line.replace("<heal>", "+").replace("</heal>", "")
             battle_description_parts.append(action_line)
-        # 對於非行動日誌（如回合分隔線、HP/MP狀態），直接保留
         else:
             battle_description_parts.append(line)
-
 
     formatted_description = "\n".join(battle_description_parts)
     if not formatted_description.strip():
         formatted_description = "戰鬥瞬間結束，未能記錄詳細過程。"
 
-    # --- 2. 準備給 AI 的 prompt (僅用於生成總結) ---
     if not DEEPSEEK_API_KEY:
         ai_logger.error("DeepSeek API 金鑰未設定。無法為戰鬥生成 AI 總結。")
         return {
             "battle_description": formatted_description,
             "battle_summary": "戰報總結生成失敗：AI服務未設定。",
+            "tags": [],
             "loot_info": "戰利品資訊待補。",
             "growth_info": "怪獸成長資訊待補。"
         }
@@ -277,18 +489,34 @@ def generate_battle_report_content(
     highlights_str = "、".join(battle_result.get("battle_highlights", []))
 
     if winner_id != "平手":
-        summary_prompt = f"一場激烈的怪獸對戰剛剛結束，最終由「{winner_name}」取得了勝利。請你根據這場戰鬥的幾個關鍵亮點：「{highlights_str}」，為這場戰鬥撰寫一段約50-70字的精彩戰報總結。"
+        prompt_intro = f"一場激烈的怪獸對戰剛剛結束，最終由「{winner_name}」取得了勝利。"
     else:
-        summary_prompt = f"一場激烈的怪獸對戰剛剛以「平手」告終。請你根據這場戰鬥的幾個關鍵亮點：「{highlights_str}」，為這場戰鬥撰寫一段約50-70字的戰報總結，描述雙方勢均力敵的膠著戰況。"
+        prompt_intro = f"一場激烈的怪獸對戰剛剛以「平手」告終。"
+
+    # ----- BUG 修正邏輯 START -----
+    # 新的指令，要求 AI 提供 JSON 格式的回應
+    summary_prompt = f"""
+{prompt_intro}
+請根據這場戰鬥的幾個關鍵亮點：「{highlights_str}」，完成以下任務：
+1. 撰寫一段約50-70字的精彩戰報總結。
+2. 根據戰鬥亮點和總結，提煉出1到3個有趣的、吸引眼球的中文 Hashtag (例如：#逆轉勝 #一擊必殺 #持久戰大師)。
+
+請嚴格按照以下JSON格式提供回應，不要有任何額外的解釋或開頭文字：
+{{
+  "summary": "（請在此處填寫戰報總結）",
+  "tags": ["#範例標籤一", "#範例標籤二"]
+}}
+"""
+    # ----- BUG 修正邏輯 END -----
 
     payload = {
         "model": DEEPSEEK_MODEL,
         "messages": [
-            {"role": "system", "content": "你是一位專業的怪獸戰報記者，精通中文，擅長撰寫生動、有張力的戰鬥報告。"},
+            {"role": "system", "content": "你是一位專業的怪獸戰報記者，精通中文，擅長撰寫生動、有張力的戰鬥報告，並且會嚴格遵循用戶指定的JSON格式輸出。"},
             {"role": "user", "content": summary_prompt}
         ],
         "temperature": 0.8,
-        "max_tokens": 150, 
+        "max_tokens": 250, 
     }
     
     headers = {
@@ -297,18 +525,39 @@ def generate_battle_report_content(
     }
     
     ai_summary = DEFAULT_BATTLE_REPORT_CONTENT["battle_summary"]
+    ai_tags = []
     try:
-        response = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers, timeout=25) # 將超時設為25秒，小於Gunicorn的30秒
+        response = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers, timeout=25)
         response.raise_for_status()
         response_json = response.json()
         
         if (response_json.get("choices") and response_json["choices"][0].get("message")):
-            ai_summary = response_json["choices"][0]["message"].get("content", ai_summary).strip()
-            ai_logger.info(f"成功為戰鬥生成 AI 總結。")
+            content_str = response_json["choices"][0]["message"].get("content", "{}").strip()
+            
+            # 清理可能的 markdown 標記
+            if content_str.startswith("```json"):
+                content_str = content_str[7:]
+            if content_str.endswith("```"):
+                content_str = content_str[:-3]
+            content_str = content_str.strip()
+
+            try:
+                parsed_content = json.loads(content_str)
+                ai_summary = parsed_content.get("summary", DEFAULT_BATTLE_REPORT_CONTENT["battle_summary"])
+                ai_tags = parsed_content.get("tags", [])
+                ai_logger.info(f"成功為戰鬥生成 AI 總結與標籤。")
+            except json.JSONDecodeError:
+                ai_logger.error(f"解析戰報AI回應的JSON失敗。將整個回應作為總結。原始字串: {content_str}")
+                ai_summary = content_str # 如果JSON解析失敗，退回原始行為
+                
     except Exception as e:
         ai_logger.error(f"呼叫 DeepSeek API 生成戰報總結時發生錯誤: {e}", exc_info=True)
 
-    # --- 3. 組合最終結果 ---
+    # 將標籤附加到總結後面
+    if ai_tags:
+        tags_str = " ".join(ai_tags)
+        ai_summary += f"\n\n{tags_str}"
+
     absorption_details = battle_result.get("absorption_details", {})
     loot_info_parts = []
     if absorption_details.get("extracted_dna_templates"):

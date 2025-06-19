@@ -12,6 +12,17 @@ RarityNames = Literal["普通", "稀有", "菁英", "傳奇", "神話"]
 SkillCategory = Literal["近戰", "遠程", "魔法", "輔助", "物理", "特殊", "變化", "其他"] # 技能類別
 BattleLogStyle = Literal["嚴肅", "幽默", "武俠", "科幻", "驚悚", "獵奇"] # 戰鬥日誌風格
 
+# --- 【新增】註記與聊天項目結構 ---
+class NoteEntry(TypedDict):
+    """單條註記的結構"""
+    timestamp: int
+    content: str
+
+class ChatHistoryEntry(TypedDict):
+    """單條聊天歷史的結構"""
+    role: Literal["user", "assistant"]
+    content: str
+
 # --- 設定檔模型 (對應 Firestore 中 MD_GameConfigs 集合的結構) ---
 
 class DNAFragment(TypedDict):
@@ -69,6 +80,7 @@ class Skill(TypedDict):
     story: NotRequired[str] # 招式敘述，用於戰鬥履歷
     description: NotRequired[str] # 備用敘述欄位
     type: ElementTypes
+    rarity: NotRequired[RarityNames]
     baseLevel: int
     mp_cost: NotRequired[int]
     skill_category: NotRequired[SkillCategory]
@@ -169,6 +181,26 @@ class NamingConstraints(TypedDict): # 新增：命名限制設定
 
 # --- 玩家及怪獸資料模型 ---
 
+# --- 新增：怪獸互動統計資料模型 ---
+class MonsterInteractionStats(TypedDict):
+    chat_count: NotRequired[int]
+    cultivation_count: NotRequired[int]
+    touch_count: NotRequired[int]
+    heal_count: NotRequired[int]
+    near_death_count: NotRequired[int]
+    feed_count: NotRequired[int]
+    gift_count: NotRequired[int]
+    bond_level: NotRequired[int]
+    bond_points: NotRequired[int]
+    last_touch_timestamp: NotRequired[int]
+    touch_count_in_window: NotRequired[int]
+    last_chat_timestamp: NotRequired[int]
+    chat_count_in_window: NotRequired[int]
+    last_heal_timestamp: NotRequired[int]
+    heal_count_in_window: NotRequired[int]
+    last_cultivation_timestamp: NotRequired[int]
+    cultivation_count_in_window: NotRequired[int]
+
 class MonsterFarmStatus(TypedDict):
     active: bool
     type: NotRequired[Optional[str]]
@@ -202,6 +234,9 @@ class Monster(TypedDict):
     """怪獸實例模型"""
     id: str
     nickname: str
+    player_title_part: NotRequired[str]      # 新增
+    achievement_part: NotRequired[str]       # 新增
+    element_nickname_part: NotRequired[str]  # 新增
     elements: List[ElementTypes]
     elementComposition: Dict[ElementTypes, float]
     hp: int
@@ -236,6 +271,9 @@ class Monster(TypedDict):
     resume: NotRequired[MonsterResume]
     constituent_dna_ids: NotRequired[List[str]]
     cultivation_gains: NotRequired[Dict[str, int]] # 新增：用於儲存修煉獲得的額外數值
+    monsterNotes: NotRequired[List[NoteEntry]] # 【新增】怪獸的專屬註記
+    chatHistory: NotRequired[List[ChatHistoryEntry]] # 【新增】怪獸的聊天歷史
+    interaction_stats: NotRequired[MonsterInteractionStats] # 【新增】互動統計資料
     # 戰鬥相關動態數值 (非持久化，僅用於戰鬥模擬)
     temp_attack_modifier: NotRequired[int]
     temp_defense_modifier: NotRequired[int]
@@ -246,15 +284,29 @@ class Monster(TypedDict):
 
 
 class PlayerStats(TypedDict):
+    """玩家統計資料模型"""
     rank: Union[str, int]
     wins: int
     losses: int
     score: int
-    titles: List[Dict[str, Any]] # 之前是 List[str]，現在是完整的物件列表
+    titles: List[Dict[str, Any]]
     achievements: List[str]
     medals: int
     nickname: str
-    equipped_title_id: NotRequired[Optional[str]] # 新增：儲存當前裝備的稱號ID
+    equipped_title_id: NotRequired[Optional[str]]
+    
+    # 【新增】用於追蹤稱號條件的欄位
+    current_win_streak: NotRequired[int]
+    current_loss_streak: NotRequired[int]
+    highest_win_streak: NotRequired[int]
+    completed_cultivations: NotRequired[int]
+    disassembled_monsters: NotRequired[int]
+    discovered_recipes: NotRequired[List[str]] # 儲存已發現的配方組合鍵
+    highest_rarity_created: NotRequired[RarityNames]
+    status_applied_counts: NotRequired[Dict[str, int]] # e.g., {"poisoned": 50, "paralyzed": 20}
+    leech_skill_uses: NotRequired[int]
+    flawless_victories: NotRequired[int]
+    special_victories: NotRequired[Dict[str, int]] # e.g., {"win_without_damage_skills": 5}
 
 
 class PlayerOwnedDNA(DNAFragment):
@@ -267,7 +319,10 @@ class PlayerGameData(TypedDict):
     playerStats: PlayerStats
     nickname: NotRequired[str]
     selectedMonsterId: NotRequired[Optional[str]]
-    lastSeen: NotRequired[int] # 新增：最後上線時間戳
+    lastSeen: NotRequired[int]
+    dnaCombinationSlots: NotRequired[List[Optional[PlayerOwnedDNA]]]
+    friends: NotRequired[List[Any]] # 確保 friends 欄位存在
+    playerNotes: NotRequired[List[NoteEntry]] # 【新增】玩家的通用註記
 
 
 # --- 新增的組合配方模型 (MonsterRecipes) ---
@@ -327,7 +382,7 @@ class BattleResult(TypedDict):
     player_activity_log: Optional[MonsterActivityLogEntry]
     opponent_activity_log: Optional[MonsterActivityLogEntry]
     battle_highlights: List[str]
-    ai_battle_report_content: Dict[str, str]
+    ai_battle_report_content: Dict[str, Any]
     absorption_details: NotRequired[Dict[str, Any]]
 
 

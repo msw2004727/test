@@ -1,8 +1,9 @@
 // js/handlers/ui-handlers.js
 
-function initializeUIEventHandlers() {
+// 【修改】將主初始化函數改名，避免與舊檔案衝突
+function initializeUIEventHandlers_NEW() {
     handleThemeSwitch();
-    handleAuthForms();
+    handleAuthForms_NEW(); // 【修改】呼叫新的函數名稱
     handleTabSwitching();
     handleModalCloseButtons(); 
     handleAnnouncementModalClose();
@@ -57,31 +58,18 @@ function handleThemeSwitch() {
     }
 }
 
-// 【核心修改處】強化登入按鈕的事件綁定與偵錯
-function handleAuthForms() {
-    // 註冊按鈕
+// 【修改】將驗證表單的處理函數改名，避免衝突
+function handleAuthForms_NEW() {
     if (DOMElements.showRegisterFormBtn) {
         DOMElements.showRegisterFormBtn.addEventListener('click', () => showModal('register-modal'));
     }
     
-    // 登入按鈕 - 加入視覺偵錯
     if (DOMElements.showLoginFormBtn) {
-        // 偵錯：滑鼠移入時改變邊框顏色
-        DOMElements.showLoginFormBtn.addEventListener('mouseenter', () => {
-            DOMElements.showLoginFormBtn.style.borderColor = 'yellow';
-        });
-        // 偵錯：滑鼠移出時恢復邊框顏色
-        DOMElements.showLoginFormBtn.addEventListener('mouseleave', () => {
-            DOMElements.showLoginFormBtn.style.borderColor = '';
-        });
-        // 點擊事件
         DOMElements.showLoginFormBtn.addEventListener('click', () => {
-            console.log('登入按鈕被點擊，準備顯示 modal...');
             showModal('login-modal');
         });
     }
 
-    // 註冊表單提交
     if (DOMElements.registerSubmitBtn) {
         DOMElements.registerSubmitBtn.addEventListener('click', async () => {
             const nickname = DOMElements.registerNicknameInput.value.trim();
@@ -102,7 +90,6 @@ function handleAuthForms() {
         });
     }
 
-    // 登入表單提交
     if (DOMElements.loginSubmitBtn) {
         DOMElements.loginSubmitBtn.addEventListener('click', async () => {
             const nickname = DOMElements.loginNicknameInput.value.trim();
@@ -123,7 +110,6 @@ function handleAuthForms() {
         });
     }
 
-    // 登出按鈕
     if (DOMElements.mainLogoutBtn) {
         DOMElements.mainLogoutBtn.addEventListener('click', async () => {
             try {
@@ -172,11 +158,8 @@ async function handlePlayerLeaderboardClick() {
     try {
         showFeedbackModal('載入中...', '正在獲取玩家排行榜...', true);
         const leaderboardData = await getPlayerLeaderboard(20);
-
         gameState.playerLeaderboard = leaderboardData || [];
-
         updateLeaderboardTable('player', gameState.playerLeaderboard, 'player-leaderboard-table-container');
-
         hideModal('feedback-modal');
         showModal('player-leaderboard-modal');
     } catch (error) {
@@ -261,12 +244,9 @@ function handleNewbieGuideSearch() {
 
 async function handleSkillLinkClick(event) {
     if (!event || !event.target) return;
-
     const target = event.target.closest('.skill-name-link');
     if (!target) return;
-
     event.preventDefault();
-
     const skillName = target.dataset.skillName;
     if (!skillName) return;
 
@@ -289,7 +269,6 @@ async function handleSkillLinkClick(event) {
         const mpCost = skillDetails.mp_cost !== undefined ? skillDetails.mp_cost : 'N/A';
         const power = skillDetails.power !== undefined ? skillDetails.power : 'N/A';
         const category = skillDetails.skill_category || '未知';
-        
         const message = `
             <div style="text-align: left; background-color: var(--bg-primary); padding: 8px; border-radius: 4px; border: 1px solid var(--border-color);">
                 <p><strong>技能: ${skillName}</strong></p>
@@ -298,10 +277,8 @@ async function handleSkillLinkClick(event) {
                 <p>${description}</p>
             </div>
         `;
-        
         const feedbackModalBody = target.closest('#feedback-modal-body-content');
         const injectionPoint = document.getElementById('skill-details-injection-point');
-
         if (feedbackModalBody && injectionPoint) {
             injectionPoint.innerHTML = message;
         } else {

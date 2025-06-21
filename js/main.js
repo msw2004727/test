@@ -186,22 +186,11 @@ async function onAuthStateChangedHandler(user) {
     }
 }
 
-/**
- * 嘗試初始化所有應用程式組件。
- * 會檢查所有必要的初始化函數是否都已定義，然後才執行。
- */
-function attemptToInitializeApp() {
-    const requiredFunctions = [
-        'initializeDOMElements', 'RosterAuthListener', 'initializeUIEventHandlers',
-        'initializeGameInteractionEventHandlers', 'initializeDragDropEventHandlers',
-        'initializeMonsterEventHandlers', 'initializeNoteHandlers', 'initializeChatSystem',
-        'initializeMailboxSystem'
-    ];
-    
-    const undefinedFunctions = requiredFunctions.filter(fnName => typeof window[fnName] !== 'function');
-
-    if (undefinedFunctions.length === 0) {
-        console.log("所有核心函式已準備就緒，開始初始化應用程式。");
+// --- 程式進入點 (已修改) ---
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM 已載入，開始直接初始化...");
+    try {
+        // 直接依序執行所有初始化函數
         initializeDOMElements();
         initializeTheme();
         initializeFirebaseApp();
@@ -216,21 +205,20 @@ function attemptToInitializeApp() {
         initializeChatSystem();
         initializeMailboxSystem(); 
 
+        // 啟動計時器
         setInterval(updateAllTimers, 1000);
 
         // 預設顯示第一個分頁
         if (DOMElements.dnaFarmTabs && DOMElements.dnaFarmTabs.querySelector('.tab-button[data-tab-target="dna-inventory-content"]')) {
             switchTabContent('dna-inventory-content', DOMElements.dnaFarmTabs.querySelector('.tab-button[data-tab-target="dna-inventory-content"]'));
         }
-    } else {
-        console.warn(`一個或多個核心初始化函式尚未定義: [${undefinedFunctions.join(', ')}]，將在 100ms 後重試...`);
-        setTimeout(attemptToInitializeApp, 100);
+        console.log("所有初始化函數已呼叫。");
+    } catch (error) {
+        console.error("初始化過程中發生嚴重錯誤:", error);
+        document.body.innerHTML = `<div style="padding: 20px; text-align: center; color: red; font-size: 1.2em;">遊戲初始化失敗，請按F12查看錯誤訊息並回報。</div>`;
     }
-}
+});
 
-
-// --- 程式進入點 ---
-document.addEventListener('DOMContentLoaded', attemptToInitializeApp);
 window.addEventListener('beforeunload', clearGameCacheOnExitOrRefresh);
 
 console.log("Main.js script loaded.");

@@ -151,6 +151,11 @@ async function initializeGame() {
         if (typeof updatePlayerCurrencyDisplay === 'function') {
             updatePlayerCurrencyDisplay(gameState.playerData.playerStats.gold || 0);
         }
+        
+        // 【新增】檢查信件狀態並更新小紅點
+        if (typeof updateMailNotificationDot === 'function') {
+            updateMailNotificationDot(playerData.mailbox || []);
+        }
 
         if (typeof renderPlayerDNAInventory === 'function') renderPlayerDNAInventory();
         if (typeof renderDNACombinationSlots === 'function') renderDNACombinationSlots();
@@ -267,9 +272,9 @@ window.addEventListener('beforeunload', clearGameCacheOnExitOrRefresh);
 
 console.log("Main.js script loaded.");
 
-// --- 【修改】將 js/ui-mailbox.js 加入到動態載入列表中 ---
 (function() {
-    const gameVersion = gameState.gameVersion || '0.3.8'; 
+    const gameVersion = '0.3.8'; // 在 gameState 中定義，或直接在此處使用
+
     const jsFiles = [
         'js/firebase-config.js',
         'js/config.js',
@@ -299,15 +304,21 @@ console.log("Main.js script loaded.");
         'js/main.js'
     ];
 
-    // 清除舊的載入邏輯
-    const oldScripts = document.querySelectorAll('script[src*="?v="]');
-    oldScripts.forEach(s => s.remove());
+    const existingScripts = document.querySelectorAll('script[src*="?v="]');
+    const loadedSources = new Set(Array.from(existingScripts).map(s => s.src));
 
-    // 使用新的、更可靠的方式載入
     jsFiles.forEach(path => {
-        const script = document.createElement('script');
-        script.src = `${path}?v=${gameVersion}`;
-        script.defer = true;
-        document.body.appendChild(script);
+        const fullSrc = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/${path}?v=${gameVersion}`;
+        
+        let alreadyLoaded = false;
+        loadedSources.forEach(loadedSrc => {
+            if (loadedSrc.includes(path)) {
+                alreadyLoaded = true;
+            }
+        });
+
+        if (!alreadyLoaded) {
+            document.write(`<script src="${path}?v=${gameVersion}" defer><\/script>`);
+        }
     });
 })();

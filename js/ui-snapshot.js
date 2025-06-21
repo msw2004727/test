@@ -132,11 +132,6 @@ function updateMonsterSnapshot(monster) {
     mailBtn.style.height = '32px';
     mailBtn.style.fontSize = '0.9rem';
     mailBtn.style.zIndex = '5';
-    // --- 核心修改處 START: 移除錯誤的 onclick 事件 ---
-    // mailBtn.onclick = () => {
-    //     showFeedbackModal('提示', '信箱功能正在施工中！'); 
-    // };
-    // --- 核心修改處 END ---
     DOMElements.monsterSnapshotArea.appendChild(mailBtn);
 
     // 新手上路按鈕 (第3個)
@@ -289,7 +284,6 @@ function updateMonsterSnapshot(monster) {
         DOMElements.monsterSnapshotArea.style.boxShadow = `0 0 10px -2px ${rarityColorVar}, inset 0 0 15px -5px color-mix(in srgb, ${rarityColorVar} 30%, transparent)`;
         gameState.selectedMonsterId = monster.id;
 
-        // 怪獸詳細資訊按鈕 (第1個)
         const monsterBtn = document.createElement('button');
         monsterBtn.id = 'snapshot-monster-details-btn';
         monsterBtn.title = '查看怪獸詳細資訊';
@@ -325,4 +319,11 @@ function updateMonsterSnapshot(monster) {
         DOMElements.monsterSnapshotArea.style.boxShadow = 'none';
         gameState.selectedMonsterId = null;
     }
+
+    // --- 核心修改處 START ---
+    // 確保在整個快照區塊被完整繪製後，才呼叫紅點更新函式
+    if (typeof updateMailNotificationDot === 'function') {
+        updateMailNotificationDot();
+    }
+    // --- 核心修改處 END ---
 }

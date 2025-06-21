@@ -21,7 +21,8 @@
             'css/buttons.css',
             'css/components.css',
             'css/modals.css',
-            'css/champions.css'
+            'css/champions.css',
+            'css/mailbox.css' // 【新增】載入信箱系統的樣式表
         ];
         
         cssFiles.forEach(path => {
@@ -511,39 +512,6 @@
         <div class="modal-content banner-only">
             <button class="banner-close-button modal-close" data-modal-id="banner-modal">&times;</button>
             <div id="banner-modal-content" class="banner-placeholder">
-                </div>
-        </div>
-    </div>
-
-    <div id="mailbox-modal" class="modal">
-        <div class="modal-content large">
-            <span class="modal-close" data-modal-id="mailbox-modal">&times;</span>
-            <div class="modal-header-container">
-                <h3 class="modal-header">📬 信箱</h3>
-                <button id="compose-mail-btn" class="button primary text-xs" title="寫信">✍️ 寫信</button>
-            </div>
-            <div id="mailbox-list-container" class="modal-body">
-                <p class="text-center text-sm text-[var(--text-secondary)] py-4">您的信箱是空的。</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="mail-reader-modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" data-modal-id="mail-reader-modal">&times;</span>
-            <h3 id="mail-reader-title" class="modal-header">讀取信件</h3>
-            <div id="mail-reader-body" class="modal-body">
-                </div>
-            <div id="mail-reader-footer" class="modal-footer">
-                </div>
-        </div>
-    </div>
-
-    <div id="mail-composer-modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" data-modal-id="mail-composer-modal">&times;</span>
-            <h3 class="modal-header">撰寫新信件</h3>
-            <div id="mail-composer-body" class="modal-body">
                 </div>
         </div>
     </div>

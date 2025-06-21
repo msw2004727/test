@@ -228,7 +228,7 @@ function attemptToInitializeApp() {
         'initializeDOMElements', 'RosterAuthListener', 'initializeUIEventHandlers',
         'initializeGameInteractionEventHandlers', 'initializeDragDropEventHandlers',
         'initializeMonsterEventHandlers', 'initializeNoteHandlers', 'initializeChatSystem',
-        'initializeMailboxSystem' // 【新增】檢查信箱系統的初始化函式
+        'initializeMailboxSystem' // 檢查信箱系統的初始化函式
     ];
     
     const undefinedFunctions = requiredFunctions.filter(fnName => typeof window[fnName] !== 'function');
@@ -246,7 +246,7 @@ function attemptToInitializeApp() {
         initializeMonsterEventHandlers();
         initializeNoteHandlers();
         initializeChatSystem();
-        initializeMailboxSystem(); // 【新增】呼叫信箱系統的初始化函式
+        initializeMailboxSystem(); // 呼叫信箱系統的初始化函式
 
         setInterval(updateAllTimers, 1000);
 

@@ -13,7 +13,7 @@
 
     <script>
         // 當您更新遊戲檔案後，只需要修改這個版本號，就能強制所有玩家更新
-        const gameVersion = '0.3.7'; // 例如從 '1.0.0' 改為 '1.0.1'
+        const gameVersion = '0.3.8'; // 例如從 '1.0.0' 改為 '1.0.1'
 
         const cssFiles = [
             'css/theme.css',
@@ -177,16 +177,8 @@
                 </div>
 
                 <div id="monster-farm-content" class="tab-content">
-                    <div class="panel-title-container" style="border-bottom: none; margin-bottom: 5px;">
-                         <h2 class="panel-title dna-panel-title">🏡 怪獸農場</h2>
-                         <span class="panel-title-hint dna-panel-hint">※最多收納10隻怪獸</span>
-                    </div>
-                    <div id="farm-table-wrapper" style="overflow-x: auto; padding-bottom: 5px;">
-                        <div id="farm-headers" class="farm-header-grid mt-2">
-                        </div>
-                        <div id="farmed-monsters-list">
-                            <p class="text-center text-sm text-[var(--text-secondary)] py-4 col-span-full">農場空空如也，快去組合怪獸吧！</p>
-                        </div>
+                    <div id="farmed-monsters-list">
+                        <p class="text-center text-sm text-[var(--text-secondary)] py-4 col-span-full">農場空空如也，快去組合怪獸吧！</p>
                     </div>
                 </div>
 
@@ -208,7 +200,15 @@
                 </div>
 
                 <div id="medical-content" class="tab-content">
-                    <p class="text-center text-lg text-[var(--text-secondary)] py-10">🚑 正在招募醫護人員中，敬請期待！</p>
+                    <div class="panel-title-container" style="border-bottom: none; margin-bottom: 5px;">
+                         <h2 class="panel-title dna-panel-title">🚑 醫療站</h2>
+                    </div>
+                    <div id="medical-station-table-wrapper" style="overflow-x: auto; padding-bottom: 5px;">
+                        <div id="medical-station-headers" class="farm-header-grid mt-2"></div>
+                        <div id="medical-station-list">
+                            <p class="text-center text-sm text-[var(--text-secondary)] py-4 col-span-full">您的農場空空如也，沒有可操作的怪獸。</p>
+                        </div>
+                    </div>
                 </div>
                 
                 <div id="training-ground-content" class="tab-content">
@@ -514,12 +514,45 @@
                 </div>
         </div>
     </div>
+
+    <div id="mailbox-modal" class="modal">
+        <div class="modal-content large">
+            <span class="modal-close" data-modal-id="mailbox-modal">&times;</span>
+            <div class="modal-header-container">
+                <h3 class="modal-header">📬 信箱</h3>
+                <button id="compose-mail-btn" class="button primary text-xs" title="寫信">✍️ 寫信</button>
+            </div>
+            <div id="mailbox-list-container" class="modal-body">
+                <p class="text-center text-sm text-[var(--text-secondary)] py-4">您的信箱是空的。</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="mail-reader-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" data-modal-id="mail-reader-modal">&times;</span>
+            <h3 id="mail-reader-title" class="modal-header">讀取信件</h3>
+            <div id="mail-reader-body" class="modal-body">
+                </div>
+            <div id="mail-reader-footer" class="modal-footer">
+                </div>
+        </div>
+    </div>
+
+    <div id="mail-composer-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" data-modal-id="mail-composer-modal">&times;</span>
+            <h3 class="modal-header">撰寫新信件</h3>
+            <div id="mail-composer-body" class="modal-body">
+                </div>
+        </div>
+    </div>
     
     <script>
         (function() {
             // 這個版本號是實現強制更新的關鍵。
             // 每次更新遊戲檔案後，只需要修改這個變數的值 (例如 '1.0.1')
-            const gameVersion = '0.3.7'; 
+            const gameVersion = '0.3.8'; 
 
             const jsFiles = [
                 'js/firebase-config.js',

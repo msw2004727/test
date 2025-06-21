@@ -1,19 +1,13 @@
 // js/ui-snapshot.js
 // 這個檔案專門處理主畫面上方「怪獸快照」面板的渲染與更新。
 
-// --- 核心修改處 START ---
-/**
- * 檢查玩家是否有未讀信件，並更新信箱按鈕上的紅點提示。
- */
 function updateMailNotificationDot() {
     const dot = document.getElementById('mail-notification-dot');
     if (!dot) return;
 
-    // 檢查 gameState 中是否存在未讀信件
     const hasUnread = gameState.playerData?.mailbox?.some(mail => !mail.is_read);
     dot.style.display = hasUnread ? 'block' : 'none';
 }
-// --- 核心修改處 END ---
 
 
 function getMonsterImagePathForSnapshot(primaryElement, rarity) {
@@ -101,10 +95,8 @@ function updateMonsterSnapshot(monster) {
     if (existingLeaderboardBtn) existingLeaderboardBtn.remove();
     const existingSelectionBtn = DOMElements.monsterSnapshotArea.querySelector('#snapshot-selection-modal-btn');
     if (existingSelectionBtn) existingSelectionBtn.remove();
-    // --- 核心修改處 START: 移除可能殘留的舊信箱按鈕 ---
     const existingMailBtn = DOMElements.monsterSnapshotArea.querySelector('#snapshot-mail-btn');
     if(existingMailBtn) existingMailBtn.remove();
-    // --- 核心修改處 END ---
 
 
     // 玩家資訊按鈕 (第2個)
@@ -128,25 +120,24 @@ function updateMonsterSnapshot(monster) {
     };
     DOMElements.monsterSnapshotArea.appendChild(playerBtn);
 
-    // --- 核心修改處 START: 新增信箱按鈕 ---
     const mailBtn = document.createElement('button');
     mailBtn.id = 'snapshot-mail-btn';
     mailBtn.title = '信箱';
-    mailBtn.innerHTML = '✉️<span id="mail-notification-dot" class="notification-dot"></span>'; // 按鈕內包含一個用於顯示紅點的 span
+    mailBtn.innerHTML = '✉️<span id="mail-notification-dot" class="notification-dot"></span>';
     mailBtn.classList.add('corner-button');
     mailBtn.style.position = 'absolute';
-    mailBtn.style.bottom = '44px'; // 與玩家資訊按鈕平行
-    mailBtn.style.right = '8px';  // 放在右邊
+    mailBtn.style.bottom = '44px';
+    mailBtn.style.right = '8px';
     mailBtn.style.width = '32px';
     mailBtn.style.height = '32px';
     mailBtn.style.fontSize = '0.9rem';
     mailBtn.style.zIndex = '5';
-    mailBtn.onclick = () => {
-        // TODO: 未來點擊此處會開啟信箱介面
-        showFeedbackModal('提示', '信箱功能正在施工中！'); 
-    };
-    DOMElements.monsterSnapshotArea.appendChild(mailBtn);
+    // --- 核心修改處 START: 移除錯誤的 onclick 事件 ---
+    // mailBtn.onclick = () => {
+    //     showFeedbackModal('提示', '信箱功能正在施工中！'); 
+    // };
     // --- 核心修改處 END ---
+    DOMElements.monsterSnapshotArea.appendChild(mailBtn);
 
     // 新手上路按鈕 (第3個)
     const guideBtn = document.createElement('button');
@@ -298,6 +289,7 @@ function updateMonsterSnapshot(monster) {
         DOMElements.monsterSnapshotArea.style.boxShadow = `0 0 10px -2px ${rarityColorVar}, inset 0 0 15px -5px color-mix(in srgb, ${rarityColorVar} 30%, transparent)`;
         gameState.selectedMonsterId = monster.id;
 
+        // 怪獸詳細資訊按鈕 (第1個)
         const monsterBtn = document.createElement('button');
         monsterBtn.id = 'snapshot-monster-details-btn';
         monsterBtn.title = '查看怪獸詳細資訊';

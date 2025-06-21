@@ -152,7 +152,6 @@ async function initializeGame() {
             updatePlayerCurrencyDisplay(gameState.playerData.playerStats.gold || 0);
         }
         
-        // 【新增】檢查信件狀態並更新小紅點
         if (typeof updateMailNotificationDot === 'function') {
             updateMailNotificationDot(playerData.mailbox || []);
         }
@@ -233,7 +232,7 @@ function attemptToInitializeApp() {
         'initializeDOMElements', 'RosterAuthListener', 'initializeUIEventHandlers',
         'initializeGameInteractionEventHandlers', 'initializeDragDropEventHandlers',
         'initializeMonsterEventHandlers', 'initializeNoteHandlers', 'initializeChatSystem',
-        'initializeMailboxSystem' // 檢查信箱系統的初始化函式
+        'initializeMailboxSystem'
     ];
     
     const undefinedFunctions = requiredFunctions.filter(fnName => typeof window[fnName] !== 'function');
@@ -251,7 +250,7 @@ function attemptToInitializeApp() {
         initializeMonsterEventHandlers();
         initializeNoteHandlers();
         initializeChatSystem();
-        initializeMailboxSystem(); // 呼叫信箱系統的初始化函式
+        initializeMailboxSystem(); 
 
         setInterval(updateAllTimers, 1000);
 
@@ -272,53 +271,4 @@ window.addEventListener('beforeunload', clearGameCacheOnExitOrRefresh);
 
 console.log("Main.js script loaded.");
 
-(function() {
-    const gameVersion = '0.3.8'; // 在 gameState 中定義，或直接在此處使用
-
-    const jsFiles = [
-        'js/firebase-config.js',
-        'js/config.js',
-        'js/game-state.js',
-        'js/api-client.js',
-        'js/auth.js',
-        'js/game-logic.js',
-        'js/utils.js',
-        'js/monster-part-assets.js',
-        'js/ui.js',
-        'js/ui-inventory.js',
-        'js/ui-snapshot.js',
-        'js/ui-farm.js',
-        'js/ui-player-modals.js',
-        'js/ui-monster-details.js',
-        'js/ui-battle-modals.js',
-        'js/ui-result-modals.js',
-        'js/ui-leaderboard-modals.js',
-        'js/ui-champions.js',
-        'js/ui-notes.js',
-        'js/ui-chat.js',
-        'js/ui-mailbox.js', // 【新增】載入信箱系統的JS檔案
-        'js/handlers/ui-handlers.js',
-        'js/handlers/game-interaction-handlers.js',
-        'js/handlers/drag-drop-handlers.js',
-        'js/handlers/monster-handlers.js',
-        'js/main.js'
-    ];
-
-    const existingScripts = document.querySelectorAll('script[src*="?v="]');
-    const loadedSources = new Set(Array.from(existingScripts).map(s => s.src));
-
-    jsFiles.forEach(path => {
-        const fullSrc = `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/${path}?v=${gameVersion}`;
-        
-        let alreadyLoaded = false;
-        loadedSources.forEach(loadedSrc => {
-            if (loadedSrc.includes(path)) {
-                alreadyLoaded = true;
-            }
-        });
-
-        if (!alreadyLoaded) {
-            document.write(`<script src="${path}?v=${gameVersion}" defer><\/script>`);
-        }
-    });
-})();
+// --- 【移除】整個動態載入腳本的 (function() { ... })(); 區塊 ---

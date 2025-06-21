@@ -13,7 +13,7 @@
 
     <script>
         // 當您更新遊戲檔案後，只需要修改這個版本號，就能強制所有玩家更新
-        const gameVersion = '0.3.8'; // 例如從 '1.0.0' 改為 '1.0.1'
+        const gameVersion = '0.3.8'; 
 
         const cssFiles = [
             'css/theme.css',
@@ -22,7 +22,7 @@
             'css/components.css',
             'css/modals.css',
             'css/champions.css',
-            'css/mailbox.css' // 【新增】載入信箱系統的樣式表
+            'css/mailbox.css'
         ];
         
         cssFiles.forEach(path => {
@@ -515,6 +515,39 @@
                 </div>
         </div>
     </div>
+
+    <div id="mailbox-modal" class="modal">
+        <div class="modal-content large">
+            <span class="modal-close" data-modal-id="mailbox-modal">&times;</span>
+            <div class="modal-header-container">
+                <h3 class="modal-header">📬 信箱</h3>
+                <button id="compose-mail-btn" class="button primary text-xs" title="寫信">✍️ 寫信</button>
+            </div>
+            <div id="mailbox-list-container" class="modal-body">
+                <p class="text-center text-sm text-[var(--text-secondary)] py-4">您的信箱是空的。</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="mail-reader-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" data-modal-id="mail-reader-modal">&times;</span>
+            <h3 id="mail-reader-title" class="modal-header">讀取信件</h3>
+            <div id="mail-reader-body" class="modal-body">
+                </div>
+            <div id="mail-reader-footer" class="modal-footer">
+                </div>
+        </div>
+    </div>
+
+    <div id="mail-composer-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" data-modal-id="mail-composer-modal">&times;</span>
+            <h3 class="modal-header">撰寫新信件</h3>
+            <div id="mail-composer-body" class="modal-body">
+                </div>
+        </div>
+    </div>
     
     <script>
         (function() {
@@ -543,6 +576,42 @@
                 'js/ui-champions.js',
                 'js/ui-notes.js',
                 'js/ui-chat.js',
+                // --- 【修改】移除舊的載入邏輯，改由下方新的載入器統一處理 ---
+                'js/handlers/ui-handlers.js',
+                'js/handlers/game-interaction-handlers.js',
+                'js/handlers/drag-drop-handlers.js',
+                'js/handlers/monster-handlers.js',
+                'js/main.js'
+            ];
+            
+            // --- 【修改】移除舊的 document.write 載入器 ---
+        })();
+    </script>
+    <script>
+        (function() {
+            const gameVersion = '0.3.8'; 
+            const jsFiles = [
+                'js/firebase-config.js',
+                'js/config.js',
+                'js/game-state.js',
+                'js/api-client.js',
+                'js/auth.js',
+                'js/game-logic.js',
+                'js/utils.js',
+                'js/monster-part-assets.js',
+                'js/ui.js',
+                'js/ui-inventory.js',
+                'js/ui-snapshot.js',
+                'js/ui-farm.js',
+                'js/ui-player-modals.js',
+                'js/ui-monster-details.js',
+                'js/ui-battle-modals.js',
+                'js/ui-result-modals.js',
+                'js/ui-leaderboard-modals.js',
+                'js/ui-champions.js',
+                'js/ui-notes.js',
+                'js/ui-chat.js',
+                'js/ui-mailbox.js',
                 'js/handlers/ui-handlers.js',
                 'js/handlers/game-interaction-handlers.js',
                 'js/handlers/drag-drop-handlers.js',
@@ -550,10 +619,18 @@
                 'js/main.js'
             ];
 
-            // 使用 document.write 確保腳本按順序同步加載和解析
-            jsFiles.forEach(path => {
-                document.write(`<script src="${path}?v=${gameVersion}" defer><\/script>`);
-            });
+            function loadScript(path) {
+                const script = document.createElement('script');
+                // 對於 loadApiKey.js，我們將其標記為 module
+                if (path.includes('loadApiKey.js')) {
+                    script.type = 'module';
+                }
+                script.src = `${path}?v=${gameVersion}`;
+                script.defer = true;
+                document.body.appendChild(script);
+            }
+
+            jsFiles.forEach(loadScript);
         })();
     </script>
 </body>

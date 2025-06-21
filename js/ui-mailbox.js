@@ -15,8 +15,11 @@ function initializeMailboxDOMElements() {
         mailReaderTitle: document.getElementById('mail-reader-title'),
         mailReaderSender: document.getElementById('mail-reader-sender'),
         mailReaderTimestamp: document.getElementById('mail-reader-timestamp'),
-        mailReaderBody: document.getElementById('mail-reader-body').querySelector('.mail-content-text'),
+        mailReaderBody: document.getElementById('mail-reader-modal').querySelector('.mail-content-text'),
         mailReaderAttachmentsContainer: document.getElementById('mail-reader-attachments'),
+        // --- 核心修改處 START ---
+        mailReaderCloseBtn: document.getElementById('mail-reader-modal').querySelector('.button[data-modal-id="mail-reader-modal"]')
+        // --- 核心修改處 END ---
     };
 }
 
@@ -33,7 +36,6 @@ function renderMailboxList(mails) {
         return;
     }
 
-    // 根據時間戳由新到舊排序
     mails.sort((a, b) => b.timestamp - a.timestamp);
 
     container.innerHTML = mails.map(mail => {
@@ -66,26 +68,21 @@ async function openMailReader(mailId) {
         return;
     }
 
-    // 填充讀信彈窗的內容
     mailboxDOMElements.mailReaderTitle.textContent = mail.title;
     mailboxDOMElements.mailReaderSender.textContent = mail.sender_name || '系統';
     mailboxDOMElements.mailReaderTimestamp.textContent = new Date(mail.timestamp * 1000).toLocaleString();
     mailboxDOMElements.mailReaderBody.innerHTML = mail.content.replace(/\n/g, '<br>');
 
-    // TODO: 未來在此處處理附件的顯示與領取邏輯
     mailboxDOMElements.mailReaderAttachmentsContainer.style.display = 'none';
 
     showModal('mail-reader-modal');
 
-    // 如果信件是未讀的，則呼叫 API 將其標記為已讀
     if (!mail.is_read) {
         try {
             await fetchAPI(`/mailbox/${mailId}/read`, { method: 'POST' });
-            // 成功後刷新玩家資料，這會自動更新 UI
             await refreshPlayerData(); 
-            // 重新渲染信箱列表以立即移除未讀狀態
             renderMailboxList(gameState.playerData.mailbox);
-            updateMailNotificationDot(); // 更新小紅點
+            updateMailNotificationDot();
         } catch (error) {
             console.error(`標記信件 ${mailId} 為已讀時失敗:`, error);
         }
@@ -98,7 +95,7 @@ async function openMailReader(mailId) {
  * @param {Event} event - 點擊事件
  */
 async function handleDeleteMail(mailId, event) {
-    event.stopPropagation(); // 防止觸發外層的 openMailReader
+    event.stopPropagation(); 
 
     showConfirmationModal(
         '確認刪除',
@@ -126,25 +123,58 @@ async function handleDeleteMail(mailId, event) {
  */
 function initializeMailboxEventHandlers() {
     initializeMailboxDOMElements();
-
-    const mailButton = document.getElementById('snapshot-mail-btn');
-    if (mailButton) {
-        mailButton.onclick = async () => {
-            // 每次打開信箱時，都先從後端獲取最新的信件列表
-            showFeedbackModal('載入中...', '正在收取信件...', true);
-            try {
-                await refreshPlayerData(); // 刷新確保資料最新
-                renderMailboxList(gameState.playerData?.mailbox || []);
-                updateMailNotificationDot();
-                hideModal('feedback-modal');
-                showModal('mailbox-modal');
-            } catch (error) {
-                hideModal('feedback-modal');
-                showFeedbackModal('錯誤', `無法開啟信箱：${error.message}`);
-            }
+    
+    // --- 核心修改處 START ---
+    // 刷新按鈕
+    if (mailboxDOMElements.refreshMailboxBtn) {
+        mailboxDOMElements.refreshMailboxBtn.onclick = async () => {
+            showFeedbackModal('刷新中...', '正在重新收取信件...', true);
+            await refreshPlayerData();
+            renderMailboxList(gameState.playerData?.mailbox || []);
+            updateMailNotificationDot();
+            hideModal('feedback-modal');
         };
     }
-    
+
+    // 刪除已讀按鈕
+    if (mailboxDOMElements.deleteReadMailsBtn) {
+        mailboxDOMElements.deleteReadMailsBtn.onclick = async () => {
+            const readMails = gameState.playerData?.mailbox?.filter(m => m.is_read) || [];
+            if (readMails.length === 0) {
+                showFeedbackModal('提示', '沒有已讀的信件可以刪除。');
+                return;
+            }
+            
+            showConfirmationModal(
+                '確認操作',
+                `您確定要刪除所有 ${readMails.length} 封已讀信件嗎？`,
+                async () => {
+                    showFeedbackModal('刪除中...', '正在批量刪除信件...', true);
+                    try {
+                        const deletePromises = readMails.map(mail => fetchAPI(`/mailbox/${mail.id}`, { method: 'DELETE' }));
+                        await Promise.all(deletePromises);
+                        await refreshPlayerData();
+                        renderMailboxList(gameState.playerData.mailbox);
+                        updateMailNotificationDot();
+                        hideModal('feedback-modal');
+                        showFeedbackModal('成功', '所有已讀信件均已刪除。');
+                    } catch (error) {
+                         hideModal('feedback-modal');
+                         showFeedbackModal('刪除失敗', `刪除已讀信件時發生錯誤：${error.message}`);
+                    }
+                },
+                { confirmButtonClass: 'danger', confirmButtonText: '全部刪除' }
+            );
+        };
+    }
+
+    // 讀信視窗的關閉按鈕
+    if (mailboxDOMElements.mailReaderCloseBtn) {
+        mailboxDOMElements.mailReaderCloseBtn.addEventListener('click', () => {
+            hideModal('mail-reader-modal');
+        });
+    }
+
     // 為信箱列表容器設定事件委派
     if (mailboxDOMElements.mailListContainer) {
         mailboxDOMElements.mailListContainer.addEventListener('click', (event) => {
@@ -152,14 +182,13 @@ function initializeMailboxEventHandlers() {
             const deleteBtn = event.target.closest('.mail-delete-btn');
 
             if (deleteBtn) {
-                // 如果點擊的是刪除按鈕
                 const mailId = deleteBtn.dataset.mailId;
                 handleDeleteMail(mailId, event);
             } else if (mailItem) {
-                // 如果點擊的是信件本身
                 const mailId = mailItem.dataset.mailId;
                 openMailReader(mailId);
             }
         });
     }
+    // --- 核心修改處 END ---
 }

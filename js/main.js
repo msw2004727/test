@@ -171,7 +171,6 @@ async function initializeGame() {
         
         if (typeof hideModal === 'function') hideModal('feedback-modal');
 
-        // --- 【修改】呼叫新的專用函式來處理彈窗 ---
         if (typeof checkAndShowNewTitleModal === 'function') {
             checkAndShowNewTitleModal(playerData);
         }
@@ -228,7 +227,8 @@ function attemptToInitializeApp() {
     const requiredFunctions = [
         'initializeDOMElements', 'RosterAuthListener', 'initializeUIEventHandlers',
         'initializeGameInteractionEventHandlers', 'initializeDragDropEventHandlers',
-        'initializeMonsterEventHandlers', 'initializeNoteHandlers', 'initializeChatSystem'
+        'initializeMonsterEventHandlers', 'initializeNoteHandlers', 'initializeChatSystem',
+        'initializeMailboxSystem' // 【新增】檢查信箱系統的初始化函式
     ];
     
     const undefinedFunctions = requiredFunctions.filter(fnName => typeof window[fnName] !== 'function');
@@ -246,6 +246,7 @@ function attemptToInitializeApp() {
         initializeMonsterEventHandlers();
         initializeNoteHandlers();
         initializeChatSystem();
+        initializeMailboxSystem(); // 【新增】呼叫信箱系統的初始化函式
 
         setInterval(updateAllTimers, 1000);
 
@@ -265,3 +266,48 @@ document.addEventListener('DOMContentLoaded', attemptToInitializeApp);
 window.addEventListener('beforeunload', clearGameCacheOnExitOrRefresh);
 
 console.log("Main.js script loaded.");
+
+// --- 【修改】將 js/ui-mailbox.js 加入到動態載入列表中 ---
+(function() {
+    const gameVersion = gameState.gameVersion || '0.3.8'; 
+    const jsFiles = [
+        'js/firebase-config.js',
+        'js/config.js',
+        'js/game-state.js',
+        'js/api-client.js',
+        'js/auth.js',
+        'js/game-logic.js',
+        'js/utils.js',
+        'js/monster-part-assets.js',
+        'js/ui.js',
+        'js/ui-inventory.js',
+        'js/ui-snapshot.js',
+        'js/ui-farm.js',
+        'js/ui-player-modals.js',
+        'js/ui-monster-details.js',
+        'js/ui-battle-modals.js',
+        'js/ui-result-modals.js',
+        'js/ui-leaderboard-modals.js',
+        'js/ui-champions.js',
+        'js/ui-notes.js',
+        'js/ui-chat.js',
+        'js/ui-mailbox.js', // 【新增】載入信箱系統的JS檔案
+        'js/handlers/ui-handlers.js',
+        'js/handlers/game-interaction-handlers.js',
+        'js/handlers/drag-drop-handlers.js',
+        'js/handlers/monster-handlers.js',
+        'js/main.js'
+    ];
+
+    // 清除舊的載入邏輯
+    const oldScripts = document.querySelectorAll('script[src*="?v="]');
+    oldScripts.forEach(s => s.remove());
+
+    // 使用新的、更可靠的方式載入
+    jsFiles.forEach(path => {
+        const script = document.createElement('script');
+        script.src = `${path}?v=${gameVersion}`;
+        script.defer = true;
+        document.body.appendChild(script);
+    });
+})();

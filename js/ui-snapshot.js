@@ -77,7 +77,7 @@ function updateMonsterSnapshot(monster) {
         return;
     }
 
-    // --- 移除所有舊按鈕，以便重新定位 ---
+    // --- 【修改】移除所有舊按鈕，以便重新定位和新增 ---
     const existingMonsterBtn = DOMElements.monsterSnapshotArea.querySelector('#snapshot-monster-details-btn');
     if (existingMonsterBtn) existingMonsterBtn.remove();
     
@@ -86,43 +86,22 @@ function updateMonsterSnapshot(monster) {
     
     const existingGuideBtn = DOMElements.monsterSnapshotArea.querySelector('#snapshot-guide-btn');
     if (existingGuideBtn) existingGuideBtn.remove();
-
-    const existingMailBtn = DOMElements.monsterSnapshotArea.querySelector('#snapshot-mail-btn');
-    if (existingMailBtn) existingMailBtn.remove();
     
+    // 移除舊的排行榜按鈕，並用新的 selection-modal-btn 取代
     const existingLeaderboardBtn = DOMElements.monsterSnapshotArea.querySelector('#snapshot-combined-leaderboard-btn');
     if (existingLeaderboardBtn) existingLeaderboardBtn.remove();
     const existingSelectionBtn = DOMElements.monsterSnapshotArea.querySelector('#snapshot-selection-modal-btn');
     if (existingSelectionBtn) existingSelectionBtn.remove();
-    // --- 移除結束 ---
+    // --- 【修改結束】 ---
 
-    // --- 【核心修改處 START】 ---
-
-    // 右側按鈕 (信箱)
-    const mailBtn = document.createElement('button');
-    mailBtn.id = 'snapshot-mail-btn';
-    mailBtn.title = '信箱';
-    mailBtn.innerHTML = '✉️<span id="mail-notification-dot" class="notification-dot" style="display: none;"></span>';
-    mailBtn.classList.add('corner-button');
-    mailBtn.style.position = 'absolute';
-    mailBtn.style.bottom = '44px'; // 與玩家資訊按鈕對齊
-    mailBtn.style.right = '8px';
-    mailBtn.style.width = '32px';
-    mailBtn.style.height = '32px';
-    mailBtn.style.fontSize = '0.9rem';
-    mailBtn.style.zIndex = '5';
-    // mailBtn.onclick = () => { showModal('mailbox-modal'); }; // 未來會開啟信箱
-    DOMElements.monsterSnapshotArea.appendChild(mailBtn);
-
-    // 左側按鈕堆疊
-    // 玩家資訊按鈕 (左側第2個)
+    // 玩家資訊按鈕 (第2個)
     const playerBtn = document.createElement('button');
     playerBtn.id = 'snapshot-player-details-btn';
     playerBtn.title = '查看玩家資訊';
     playerBtn.innerHTML = '📑';
     playerBtn.classList.add('corner-button');
     playerBtn.style.position = 'absolute';
-    playerBtn.style.bottom = '44px'; 
+    playerBtn.style.bottom = '44px'; // 向上移動一個位置
     playerBtn.style.left = '8px';
     playerBtn.style.width = '32px';
     playerBtn.style.height = '32px';
@@ -136,14 +115,14 @@ function updateMonsterSnapshot(monster) {
     };
     DOMElements.monsterSnapshotArea.appendChild(playerBtn);
 
-    // 新手上路按鈕 (左側第3個)
+    // 新手上路按鈕 (第3個)
     const guideBtn = document.createElement('button');
     guideBtn.id = 'snapshot-guide-btn';
     guideBtn.title = '新手上路';
     guideBtn.innerHTML = '🔰';
     guideBtn.classList.add('corner-button');
     guideBtn.style.position = 'absolute';
-    guideBtn.style.bottom = '80px'; 
+    guideBtn.style.bottom = '80px'; // 向上移動一個位置
     guideBtn.style.left = '8px';
     guideBtn.style.width = '32px';
     guideBtn.style.height = '32px';
@@ -160,14 +139,14 @@ function updateMonsterSnapshot(monster) {
     };
     DOMElements.monsterSnapshotArea.appendChild(guideBtn);
 
-    // 綜合選單按鈕 (左側第4個)
+    // 綜合選單按鈕 (第4個)
     const selectionBtn = document.createElement('button');
     selectionBtn.id = 'snapshot-selection-modal-btn';
     selectionBtn.title = '綜合選單';
     selectionBtn.innerHTML = '🪜';
     selectionBtn.classList.add('corner-button');
     selectionBtn.style.position = 'absolute';
-    selectionBtn.style.bottom = '116px'; 
+    selectionBtn.style.bottom = '116px'; // 向上移動一個位置
     selectionBtn.style.left = '8px';
     selectionBtn.style.width = '32px';
     selectionBtn.style.height = '32px';
@@ -182,8 +161,12 @@ function updateMonsterSnapshot(monster) {
     if (monster && monster.id) {
         const rarityKey = monster.rarity ? (rarityMap[monster.rarity] || 'common') : 'common';
         DOMElements.monsterSnapshotBodySilhouette.style.display = 'block';
-        
+
+        // --- 核心修改處 START ---
+        // 使用新的共用函式來取代原本重複的邏輯
         const elementNickname = getMonsterDisplayName(monster, gameState.gameConfigs);
+        // --- 核心修改處 END ---
+        
         const achievement = monster.title || '新秀';
         
         DOMElements.snapshotNickname.textContent = elementNickname;
@@ -285,7 +268,7 @@ function updateMonsterSnapshot(monster) {
         DOMElements.monsterSnapshotArea.style.boxShadow = `0 0 10px -2px ${rarityColorVar}, inset 0 0 15px -5px color-mix(in srgb, ${rarityColorVar} 30%, transparent)`;
         gameState.selectedMonsterId = monster.id;
 
-        // 怪獸詳細資訊按鈕 (左側第1個)
+        // 怪獸詳細資訊按鈕 (第1個)
         const monsterBtn = document.createElement('button');
         monsterBtn.id = 'snapshot-monster-details-btn';
         monsterBtn.title = '查看怪獸詳細資訊';
@@ -293,8 +276,8 @@ function updateMonsterSnapshot(monster) {
         
         monsterBtn.classList.add('corner-button');
         monsterBtn.style.position = 'absolute';
-        monsterBtn.style.bottom = '8px';
-        monsterBtn.style.left = '8px';   
+        monsterBtn.style.bottom = '8px'; // 放在最下面
+        monsterBtn.style.left = '8px';   // 與其他按鈕對齊
         monsterBtn.style.width = '32px';
         monsterBtn.style.height = '32px';
         monsterBtn.style.fontSize = '0.9rem';

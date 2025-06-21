@@ -263,7 +263,7 @@ async function getMonsterLeaderboard(topN = 10) {
 }
 
 /**
- * 獲取冠軍殿堂排行榜
+ * 【新增】獲取冠軍殿堂排行榜
  * @returns {Promise<Array<object>>} 冠軍殿堂怪獸列表 (固定4個位置)
  */
 async function getChampionsLeaderboard() {
@@ -308,7 +308,7 @@ async function getFriendsStatuses(friendIds) {
 }
 
 /**
- * 與怪獸進行物理互動
+ * 【新增】與怪獸進行物理互動
  * @param {string} monsterId 怪獸的 ID
  * @param {'punch' | 'pat' | 'kiss'} action 互動的類型
  * @returns {Promise<object>} 包含 AI 回應的物件
@@ -321,7 +321,7 @@ async function interactWithMonster(monsterId, action) {
 }
 
 /**
- * 請求切換技能的開關狀態
+ * 【新增】請求切換技能的開關狀態
  * @param {string} monsterId 怪獸的 ID
  * @param {string} skillName 技能的名稱
  * @param {boolean} targetState 想要的狀態 (true 為開啟, false 為關閉)
@@ -334,38 +334,6 @@ async function toggleSkillActiveState(monsterId, skillName, targetState) {
             skill_name: skillName,
             target_state: targetState
         }),
-    });
-}
-
-// --- 【新增】信箱系統 API ---
-
-/**
- * 獲取當前玩家的所有信件
- * @returns {Promise<Array<object>>} 信件列表
- */
-async function getMailbox() {
-    return fetchAPI('/mailbox/');
-}
-
-/**
- * 將一封信標記為已讀
- * @param {string} mailId 信件 ID
- * @returns {Promise<object>} 操作結果
- */
-async function markMailAsRead(mailId) {
-    return fetchAPI(`/mailbox/${mailId}/read`, {
-        method: 'POST',
-    });
-}
-
-/**
- * 刪除一封信
- * @param {string} mailId 信件 ID
- * @returns {Promise<object>} 操作結果
- */
-async function deleteMail(mailId) {
-    return fetchAPI(`/mailbox/${mailId}`, {
-        method: 'DELETE',
     });
 }
 

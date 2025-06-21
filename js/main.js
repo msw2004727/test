@@ -1,17 +1,11 @@
 // js/main.js
 
-/**
- * 清除暫存，在使用者關閉或刷新頁面時執行。
- */
 function clearGameCacheOnExitOrRefresh() {
     console.log("正在清除遊戲暫存...");
     sessionStorage.clear();
     localStorage.removeItem('announcementShown_v1');
 }
 
-/**
- * 初始化 Firebase 應用。
- */
 function initializeFirebaseApp() {
     if (typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined') {
         try {
@@ -33,9 +27,6 @@ function initializeFirebaseApp() {
     }
 }
 
-/**
- * 載入並顯示遊戲公告。
- */
 async function loadAndDisplayAnnouncement() {
     try {
         const response = await fetch('./announcement.json');
@@ -80,9 +71,6 @@ async function loadAndDisplayAnnouncement() {
     }
 }
 
-/**
- * 初始化整個遊戲。
- */
 async function initializeGame() {
     console.log("Initializing game...");
     showFeedbackModal('遊戲載入中...', '正在準備您的怪獸異世界...', true);
@@ -154,10 +142,6 @@ async function initializeGame() {
     }
 }
 
-/**
- * Firebase 驗證狀態改變時的處理函數。
- * @param {firebase.User | null} user - 當前的 Firebase 使用者物件，或 null。
- */
 async function onAuthStateChangedHandler(user) {
     if (Object.keys(DOMElements).length === 0) {
         setTimeout(() => onAuthStateChangedHandler(user), 100);
@@ -186,18 +170,16 @@ async function onAuthStateChangedHandler(user) {
     }
 }
 
-// --- 程式進入點 (已修改) ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM 已載入，開始直接初始化...");
     try {
-        // 直接依序執行所有初始化函數
         initializeDOMElements();
         initializeTheme();
         initializeFirebaseApp();
         RosterAuthListener(onAuthStateChangedHandler);
 
-        // 初始化所有事件監聽器
-        initializeUIEventHandlers();
+        // 【修改】呼叫新的、不會衝突的初始化函數
+        initializeUIEventHandlers_NEW(); 
         initializeGameInteractionEventHandlers();
         initializeDragDropEventHandlers();
         initializeMonsterEventHandlers();
@@ -205,10 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeChatSystem();
         initializeMailboxSystem(); 
 
-        // 啟動計時器
         setInterval(updateAllTimers, 1000);
 
-        // 預設顯示第一個分頁
         if (DOMElements.dnaFarmTabs && DOMElements.dnaFarmTabs.querySelector('.tab-button[data-tab-target="dna-inventory-content"]')) {
             switchTabContent('dna-inventory-content', DOMElements.dnaFarmTabs.querySelector('.tab-button[data-tab-target="dna-inventory-content"]'));
         }

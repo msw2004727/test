@@ -13,7 +13,7 @@
 
     <script>
         // 當您更新遊戲檔案後，只需要修改這個版本號，就能強制所有玩家更新
-        const gameVersion = '0.3.9'; // 例如從 '1.0.0' 改為 '1.0.1'
+        const gameVersion = '0.3.9'; 
 
         const cssFiles = [
             'css/theme.css',
@@ -22,9 +22,7 @@
             'css/components.css',
             'css/modals.css',
             'css/champions.css',
-            // --- 核心修改處 START ---
-            'css/mailbox.css' // 新增信箱的樣式表
-            // --- 核心修改處 END ---
+            'css/mailbox.css'
         ];
         
         cssFiles.forEach(path => {
@@ -556,6 +554,7 @@
             </div>
         </div>
     </div>
+    
     <script>
         (function() {
             const gameVersion = '0.3.9'; 
@@ -581,6 +580,9 @@
                 'js/ui-champions.js',
                 'js/ui-notes.js',
                 'js/ui-chat.js',
+                // --- 核心修改處 START ---
+                'js/ui-mailbox.js', // 新增對信箱UI腳本的引用
+                // --- 核心修改處 END ---
                 'js/handlers/ui-handlers.js',
                 'js/handlers/game-interaction-handlers.js',
                 'js/handlers/drag-drop-handlers.js',

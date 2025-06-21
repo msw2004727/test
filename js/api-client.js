@@ -263,6 +263,14 @@ async function getMonsterLeaderboard(topN = 10) {
 }
 
 /**
+ * 【新增】獲取冠軍殿堂排行榜
+ * @returns {Promise<Array<object>>} 冠軍殿堂怪獸列表 (固定4個位置)
+ */
+async function getChampionsLeaderboard() {
+    return fetchAPI('/champions');
+}
+
+/**
  * 獲取玩家排行榜
  * @param {number} topN 需要的排行數量
  * @returns {Promise<Array<object>>} 玩家排行榜列表
@@ -309,6 +317,23 @@ async function interactWithMonster(monsterId, action) {
     return fetchAPI(`/monster/${monsterId}/interact`, {
         method: 'POST',
         body: JSON.stringify({ action: action }),
+    });
+}
+
+/**
+ * 【新增】請求切換技能的開關狀態
+ * @param {string} monsterId 怪獸的 ID
+ * @param {string} skillName 技能的名稱
+ * @param {boolean} targetState 想要的狀態 (true 為開啟, false 為關閉)
+ * @returns {Promise<object>} 包含怪獸是否同意及 AI 回應的物件
+ */
+async function toggleSkillActiveState(monsterId, skillName, targetState) {
+    return fetchAPI(`/monster/${monsterId}/toggle-skill`, {
+        method: 'POST',
+        body: JSON.stringify({
+            skill_name: skillName,
+            target_state: targetState
+        }),
     });
 }
 

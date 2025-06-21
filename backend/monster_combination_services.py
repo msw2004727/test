@@ -4,7 +4,7 @@
 import random
 import time
 import logging
-from typing import List, Dict, Optional, Union, Tuple, Literal, Any
+from typing import List, Dict, Optional, Union, Tuple, Any
 from collections import Counter
 import copy # 用於深拷貝怪獸數據
 
@@ -27,7 +27,7 @@ from .utils_services import generate_monster_full_nickname, calculate_exp_to_nex
 
 monster_combination_services_logger = logging.getLogger(__name__)
 
-# --- 預設遊戲設定 (用於輔助函式或測試，避免循環導入 GameConfigs) ---
+# --- 預設遊戲設定 (用於輔助函式或測試，避免循環導入) ---
 DEFAULT_GAME_CONFIGS_FOR_COMBINATION: GameConfigs = {
     "dna_fragments": [], 
     "rarities": {"COMMON": {"name": "普通", "textVarKey":"c", "statMultiplier":1.0, "skillLevelBonus":0, "resistanceBonus":1, "value_factor":10}}, # type: ignore
@@ -73,6 +73,45 @@ def _generate_combination_key(dna_template_ids: List[str]) -> str:
     sorted_ids = sorted(dna_template_ids)
     return "_".join(sorted_ids)
 
+def _calculate_final_resistances(base_resistances: Dict[str, int], game_configs: GameConfigs) -> Dict[str, int]:
+    """
+    根據克制關係計算最終的元素抗性。
+    實現「正正相抵」和「正負相加」的邏輯。
+    """
+    chart = game_configs.get("elemental_advantage_chart", {})
+    final_res = base_resistances.copy()
+
+    # 建立一個克制關係列表，例如 [('水', '火'), ('火', '木'), ...]
+    counter_pairs = []
+    for attacker, defender_map in chart.items():
+        for defender, multiplier in defender_map.items():
+            if multiplier > 1.0: # 如果 A 對 B 的傷害 > 1，則 A 剋 B
+                counter_pairs.append((attacker, defender))
+
+    # 進行兩輪計算以處理連鎖反應
+    for _ in range(2):
+        for stronger, weaker in counter_pairs:
+            res_strong = final_res.get(stronger, 0)
+            res_weak = final_res.get(weaker, 0)
+
+            # 規則2: 正負相加 (利用自身抗性反轉弱點)
+            if res_strong > 0 and res_weak < 0:
+                bonus = abs(res_weak)
+                final_res[stronger] = res_strong + bonus
+                final_res[weaker] = 0
+                # 更新數值以供後續計算
+                res_strong = final_res[stronger]
+                res_weak = 0
+
+            # 規則1: 正正相抵 (正抗性之間抵銷)
+            if res_strong > 0 and res_weak > 0:
+                cancellation = min(res_strong, res_weak)
+                final_res[stronger] = res_strong - cancellation
+                final_res[weaker] = res_weak - cancellation
+
+    # 清理掉值為 0 的抗性
+    return {k: v for k, v in final_res.items() if v != 0}
+
 
 # --- DNA 組合與怪獸生成服務 ---
 def combine_dna_service(dna_objects_from_request: List[Dict[str, Any]], game_configs: GameConfigs, player_data: PlayerGameData, player_id: str) -> Optional[Dict[str, Any]]:
@@ -93,12 +132,11 @@ def combine_dna_service(dna_objects_from_request: List[Dict[str, Any]], game_con
     combined_dnas_data: List[DNAFragment] = []
     constituent_dna_template_ids: List[str] = []
 
-    # ----- BUG 修正邏輯 START -----
-    # 使用更安全的列表推導式來過濾無效的 DNA 物件
     valid_dna_objects = [dna for dna in dna_objects_from_request if dna and isinstance(dna, dict)]
     
     for dna_obj in valid_dna_objects:
-        template_id = dna_obj.get("baseId") or dna_obj.get("id")
+        # 【修改】只使用 `baseId` 來查找模板，不再備援使用 `id`
+        template_id = dna_obj.get("baseId")
         
         if template_id and isinstance(template_id, str):
             dna_template = next((f for f in game_configs.get("dna_fragments", []) if f.get("id") == template_id), None)
@@ -108,12 +146,13 @@ def combine_dna_service(dna_objects_from_request: List[Dict[str, Any]], game_con
             else:
                  monster_combination_services_logger.warning(f"在組合槽中發現一個ID為 '{template_id}' 的DNA，但在遊戲設定中找不到對應的模板資料，已跳過。")
         else:
-            monster_combination_services_logger.warning(f"在組合槽的 DNA 物件中找不到有效的 'baseId' 或 'id'，已跳過。DNA 物件: {dna_obj}")
+            # 【修改】提供更精確的日誌訊息
+            monster_combination_services_logger.warning(f"在組合槽的 DNA 物件中找不到有效的 'baseId'，已跳過。DNA 物件: {dna_obj}")
     
-    if len(combined_dnas_data) < 2:
-        monster_combination_services_logger.error(f"經過濾後，有效的 DNA 數量不足 (剩下 {len(combined_dnas_data)} 個)，無法組合。")
-        return {"success": False, "error": "有效的 DNA 數量不足，無法組合。"}
-    # ----- BUG 修正邏輯 END -----
+    # 遊戲規則要求必須放滿5個DNA
+    if len(combined_dnas_data) < 5:
+        monster_combination_services_logger.error(f"經過濾後，有效的 DNA 數量為 {len(combined_dnas_data)} 個，不足 5 個，無法組合。")
+        return {"success": False, "error": "有效的 DNA 數量不足 5 個，無法組合。"}
 
     gmt8 = timezone(timedelta(hours=8))
     now_gmt8_str = datetime.now(gmt8).strftime("%Y-%m-%d %H:%M:%S")
@@ -147,6 +186,7 @@ def combine_dna_service(dna_objects_from_request: List[Dict[str, Any]], game_con
         for skill in new_monster_instance.get("skills", []):
             skill["current_exp"] = 0
             skill["exp_to_next_level"] = calculate_exp_to_next_level(skill.get("level", 1), game_configs.get("cultivation_config", {}).get("skill_exp_base_multiplier", 100))
+            skill["is_active"] = True # 新增：確保舊配方的技能也是開啟狀態
         new_monster_instance["hp"] = new_monster_instance.get("initial_max_hp", 1)
         new_monster_instance["mp"] = new_monster_instance.get("initial_max_mp", 1)
         new_monster_instance["resume"] = {"wins": 0, "losses": 0}
@@ -195,6 +235,7 @@ def combine_dna_service(dna_objects_from_request: List[Dict[str, Any]], game_con
                 new_skill = get_effective_skill_with_level(template, initial_level)
                 new_skill['current_exp'] = 0
                 new_skill['exp_to_next_level'] = calculate_exp_to_next_level(initial_level, cultivation_cfg.get("skill_exp_base_multiplier", 100))
+                new_skill['is_active'] = True # 新增：確保新技能預設為開啟
                 generated_skills.append(new_skill)
 
         if not generated_skills:
@@ -208,6 +249,7 @@ def combine_dna_service(dna_objects_from_request: List[Dict[str, Any]], game_con
                 new_skill = get_effective_skill_with_level(default_skill_template, initial_level)
                 new_skill['current_exp'] = 0
                 new_skill['exp_to_next_level'] = calculate_exp_to_next_level(initial_level, cultivation_cfg.get("skill_exp_base_multiplier", 100))
+                new_skill['is_active'] = True # 新增：確保新技能預設為開啟
                 generated_skills.append(new_skill)
             else:
                 monster_combination_services_logger.error("連預設的'無'屬性技能都找不到，怪獸將沒有技能！")
@@ -275,13 +317,16 @@ def combine_dna_service(dna_objects_from_request: List[Dict[str, Any]], game_con
             "interaction_stats": default_interaction_stats,
         }
         
-        base_resistances = Counter()
+        initial_resistances = Counter()
         for dna_frag in combined_dnas_data:
-            base_resistances.update(dna_frag.get("resistances", {}))
+            initial_resistances.update(dna_frag.get("resistances", {}))
+        
         resistance_bonus = monster_rarity_data.get("resistanceBonus", 0)
         for el in elements_present:
-            base_resistances[el] = base_resistances.get(el, 0) + resistance_bonus
-        standard_monster_data["resistances"] = dict(base_resistances)
+            initial_resistances[el] = initial_resistances.get(el, 0) + resistance_bonus
+
+        final_resistances = _calculate_final_resistances(dict(initial_resistances), game_configs)
+        standard_monster_data["resistances"] = final_resistances
         
         ai_details = generate_monster_ai_details(standard_monster_data)
         standard_monster_data.update(ai_details)

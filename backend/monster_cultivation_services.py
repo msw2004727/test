@@ -70,7 +70,6 @@ def _generate_story_from_library(
     learned_new_skill_template: Optional[Skill],
     training_location: str
 ) -> str:
-    # ... (此函式內容不變)
     story_library = game_configs.get("cultivation_stories", {})
     if not story_library:
         return f"{monster_name} 結束了一次紮實的修煉，感覺自己又變強了一些。"
@@ -101,7 +100,15 @@ def _generate_story_from_library(
     final_story = " ".join(story_parts)
     item_list_str = "、".join([item.get('name', '神秘碎片') for item in items_obtained]) if items_obtained else "神秘物品"
     new_skill_name_str = learned_new_skill_template.get('name', '神秘技能') if learned_new_skill_template else "新招式"
-    trained_skills_list = [log.split("'")[1] for log in skill_updates_log if "技能" in log and "領悟" not in log]
+    
+    # --- 核心修改處 START ---
+    # 新增一個更安全的寫法來提取技能名稱
+    trained_skills_list = [
+        parts[1] for log in skill_updates_log 
+        if "技能" in log and "領悟" not in log and len(parts := log.split("'")) > 1
+    ]
+    # --- 核心修改處 END ---
+    
     trained_skills_str = "、".join(trained_skills_list) or "各種技巧"
     return final_story.format(
         monster_name=monster_name,
@@ -199,10 +206,7 @@ def complete_cultivation_service(
         for skill in current_skills:
             if skill.get("level", 1) >= max_skill_lvl: continue
             
-            # ----- BUG 修正邏輯 START -----
-            # 將秒數加成從 /10 調整為 /60，大幅降低時長帶來的經驗加成
             exp_gained = int((random.randint(exp_gain_min, exp_gain_max) + int(duration_seconds / 60)) * diminishing_multiplier)
-            # ----- BUG 修正邏輯 END -----
 
             if exp_gained > 0:
                 skill["current_exp"] = skill.get("current_exp", 0) + exp_gained
@@ -387,6 +391,7 @@ def replace_monster_skill_service(
         "skill_category": new_skill_template_data.get("skill_category", "其他"),
         "current_exp": 0,
         "exp_to_next_level": calculate_exp_to_next_level(1, game_configs.get("cultivation_config", {}).get("skill_exp_base_multiplier", 100)),
+        "is_active": True,
         "effect": new_skill_template_data.get("effect"),
         "stat": new_skill_template_data.get("stat"),
         "amount": new_skill_template_data.get("amount"),

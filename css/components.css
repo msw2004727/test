@@ -978,3 +978,87 @@ body.light-theme .leaderboard-table tr:hover td {
     left: 50%;
     transform: translate(-50%, -50%); /* 確保圖片絕對置中 */
 }
+
+/* --- 新增：確認出戰彈窗的狀態條 --- */
+.confirm-stat-bar-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px; /* 與上方文字的間距 */
+    width: 100%;
+}
+
+.confirm-stat-bar {
+    height: 8px;
+    background-color: var(--bg-slot);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    padding: 1px;
+}
+
+.confirm-stat-bar-fill {
+    height: 100%;
+    width: 0%; /* Default width */
+    border-radius: 2px;
+    transition: width 0.4s ease-in-out;
+}
+
+.confirm-stat-bar.hp .confirm-stat-bar-fill {
+    background-color: var(--success-color);
+}
+
+.confirm-stat-bar.mp .confirm-stat-bar-fill {
+    background-color: var(--accent-color);
+}
+
+/* --- 玩家貨幣面板樣式 (已修改) --- */
+.player-currency-panel {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    padding: 2px 10px; /* 減少垂直padding，讓欄位變細 */
+    background-color: var(--bg-slot);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    max-width: 180px;
+    margin-left: auto;
+    margin-right: 5px;
+    margin-top: -12px; /* 負外距，使其向上移動，拉近與上方元素的距離 */
+    margin-bottom: -8px; /* 負外距，拉近與下方元素的距離 */
+    position: relative;
+    z-index: 5;
+}
+
+.player-currency-panel .currency-icon {
+    font-size: 1rem; /* 調整圖示大小 */
+    margin-left: 4px;
+}
+
+#player-currency-amount {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--rarity-legendary-text);
+    letter-spacing: 0.5px;
+    font-family: 'Inter', monospace;
+}
+
+/* --- 新增：怪獸快照頭部呼吸動畫 --- */
+@keyframes head-breath {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.10);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+#monster-part-head .monster-part-image.active {
+  animation: head-breath 2s infinite alternate ease-in-out;
+  transform-origin: center bottom; /* 讓縮放中心在底部中間，看起來更像在呼吸 */
+}
+}

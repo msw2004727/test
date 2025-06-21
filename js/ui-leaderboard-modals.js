@@ -50,20 +50,17 @@ function updateLeaderboardTable(tableType, data, containerId) {
 
     let headersConfig;
     if (tableType === 'monster') {
-        // ----- BUG 修正邏輯 START -----
-        // 新增「頭像」欄位
         headersConfig = [
             { text: '排名', key: 'rank', align: 'center' },
-            { text: '頭像', key: 'avatar', align: 'center' }, // 新增
+            { text: '頭像', key: 'avatar', align: 'center' },
             { text: '怪獸', key: 'nickname' },
-            { text: '元素', key: 'elements', align: 'center' },
+            { text: '最終抗性', key: 'elements', align: 'center' },
             { text: '稀有度', key: 'rarity', align: 'center' },
             { text: '總評價', key: 'score', align: 'center' },
             { text: '勝/敗', key: 'resume', align: 'center' },
             { text: '擁有者', key: 'owner_nickname' },
             { text: '操作', key: 'actions', align: 'center' }
         ];
-        // ----- BUG 修正邏輯 END -----
     } else { // player
         headersConfig = [
             { text: '排名', key: 'rank', align: 'center' },
@@ -97,15 +94,15 @@ function updateLeaderboardTable(tableType, data, containerId) {
         if (tableType === 'monster') {
             const isTraining = item.farmStatus?.isTraining || false;
             const isBattling = item.farmStatus?.isBattling || false;
+            // 【新增】檢查此怪獸是否為冠軍
+            const isChampion = gameState.champions.some(champ => champ && champ.id === item.id);
 
             const rankCell = row.insertCell();
             rankCell.textContent = index + 1;
             rankCell.style.textAlign = 'center';
 
-            // ----- BUG 修正邏輯 START -----
-            // 渲染頭像欄位
             const avatarCell = row.insertCell();
-            avatarCell.className = 'leaderboard-avatar-cell'; // 套用新的 CSS class
+            avatarCell.className = 'leaderboard-avatar-cell'; 
 
             const headInfo = item.head_dna_info || { type: '無', rarity: '普通' };
             const imagePath = getMonsterPartImagePath('head', headInfo.type, headInfo.rarity);
@@ -119,7 +116,6 @@ function updateLeaderboardTable(tableType, data, containerId) {
             }
             avatarContainer.appendChild(avatarImage);
             avatarCell.appendChild(avatarContainer);
-            // ----- BUG 修正邏輯 END -----
 
             const nicknameCell = row.insertCell();
             const rarityKey = item.rarity ? (rarityMap[item.rarity] || 'common') : 'common';
@@ -153,13 +149,17 @@ function updateLeaderboardTable(tableType, data, containerId) {
             
             nicknameCell.appendChild(link);
 
-
             const elementsCell = row.insertCell();
             elementsCell.style.textAlign = 'center';
-            if(item.elements && Array.isArray(item.elements)) {
-                elementsCell.innerHTML = item.elements.map(el =>
+            const finalResistances = item.resistances || {};
+            const resistanceElements = Object.keys(finalResistances).filter(el => finalResistances[el] !== 0);
+            
+            if (resistanceElements.length > 0) {
+                elementsCell.innerHTML = resistanceElements.map(el =>
                     `<span class="text-xs text-element-${getElementCssClassKey(el)} font-bold mr-2">${el}</span>`
                 ).join('');
+            } else {
+                elementsCell.innerHTML = `<span class="text-xs text-element-無 font-bold">無</span>`;
             }
 
             const rarityCell = row.insertCell();
@@ -188,7 +188,15 @@ function updateLeaderboardTable(tableType, data, containerId) {
             const actionButton = document.createElement('button');
             actionButton.className = 'button primary text-xs py-1 px-2';
 
-            if (item.owner_id === gameState.playerId) {
+            // 【修改】將 isChampion 的判斷放在最前面
+            if (isChampion) {
+                actionButton.textContent = '在位中';
+                actionButton.disabled = true;
+                actionButton.style.color = 'var(--rarity-legendary-text)';
+                actionButton.style.backgroundColor = 'var(--button-secondary-bg)';
+                actionButton.style.cursor = 'not-allowed';
+                actionButton.style.fontWeight = 'bold';
+            } else if (item.owner_id === gameState.playerId) {
                 actionButton.textContent = '我的怪獸';
                 actionButton.disabled = true;
                 actionButton.style.cursor = 'not-allowed';
@@ -229,7 +237,7 @@ function updateLeaderboardTable(tableType, data, containerId) {
             rankCell.style.textAlign = 'center';
             
             const titlesCell = row.insertCell();
-            let equippedTitleName = '新手'; // 預設稱號
+            let equippedTitleName = '新手'; 
             if (item.titles && item.titles.length > 0) {
                 const equippedId = item.equipped_title_id;
                 let equippedTitle = null;

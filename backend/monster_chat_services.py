@@ -7,16 +7,16 @@ import requests
 import random
 import time
 import math
+import json # 導入 json 模組
+import re # 導入 re 模組
 
 # 從專案的其他模組導入必要的模型
-from .MD_models import PlayerGameData, Monster, GameConfigs, ChatHistoryEntry
+from .MD_models import PlayerGameData, Monster, GameConfigs, ChatHistoryEntry, Skill
 from .player_services import get_player_data_service
-# --- 核心修改處 START ---
 # 從共用函式庫導入感情值計算工具
 from .utils_services import update_bond_with_diminishing_returns
-# --- 核心修改處 END ---
 
-# --- 【新增】從 MD_ai_services 導入必要的變數與函式 ---
+# 從 MD_ai_services 導入必要的變數與函式
 from .MD_ai_services import (
     DEEPSEEK_API_KEY, DEEPSEEK_MODEL, DEEPSEEK_API_URL, 
     DEFAULT_CHAT_REPLY, _get_world_knowledge_context, ai_logger
@@ -31,15 +31,107 @@ CHAT_HISTORY_LIMIT = 20
 def _get_bond_level_tone_instruction(bond_points: int) -> str:
     """根據感情值，決定AI的語氣指示。"""
     if bond_points <= -76:
-        return "你的語氣必須充滿敵意和不耐煩。你可能會直接拒絕回答問題，或者用簡短、尖銳的詞語來回應。"
+        return "你和主人的關係極度惡劣，充滿了敵意和不耐煩。你可能會直接拒絕回答問題，或者用簡短、尖銳的詞語來回應。"
     elif bond_points <= -11:
-        return "你的語氣必須非常冷淡和疏遠。你會用『喔』、『嗯』、『隨便』這類詞語，字裡行間透露出不感興趣。"
+        return "你和主人的關係非常冷淡和疏遠。你會用『喔』、『嗯』、『隨便』這類詞語，字裡行間透露出不感興趣。"
     elif bond_points <= 10:
-        return "你的語氣是中立的，主要根據你的天生個性來回應。"
+        return "你和主人的關係很普通，主要根據你的天生個性來回應。"
     elif bond_points <= 75:
-        return "你的語氣必須是友善且熱心的。你會更願意分享資訊，在句末可能會加上一些溫和的表情符號。"
+        return "你和主人的關係相當不錯，語氣友善且熱心。你會更願意分享資訊，在句末可能會加上一些溫和的表情符號。"
     else:  # bond_points >= 76
-        return "你的語氣必須非常親密和熱情。你會稱呼玩家為『摯友』或『夥伴』，並在回答中充滿信任感和依賴感。"
+        return "你和主人的關係非常親密，充滿了信任感和熱情。你會稱呼玩家為『摯友』或『夥伴』，並在回答中充滿依賴感。"
+
+def handle_skill_toggle_request_service(
+    player_id: str,
+    monster_id: str,
+    skill_name: str,
+    target_state: bool,
+    game_configs: GameConfigs
+) -> Optional[Dict[str, Any]]:
+    """
+    處理切換技能開關的請求，讓 AI 根據情境自行決定是否同意。
+    """
+    player_data, _ = get_player_data_service(player_id, None, game_configs)
+    if not player_data:
+        return {"success": False, "error": "找不到玩家資料。"}
+
+    monster = next((m for m in player_data.get("farmedMonsters", []) if m.get("id") == monster_id), None)
+    if not monster:
+        return {"success": False, "error": "找不到指定的怪獸。"}
+
+    skill_to_toggle = next((s for s in monster.get("skills", []) if s.get("name") == skill_name), None)
+    if not skill_to_toggle:
+        return {"success": False, "error": "找不到指定的技能。"}
+
+    interaction_stats = monster.get("interaction_stats", {})
+    bond_points = interaction_stats.get("bond_points", 0)
+    bond_description = _get_bond_level_tone_instruction(bond_points)
+    personality_name = monster.get("personality", {}).get("name", "標準的")
+    personality_desc = monster.get("personality", {}).get("description", "你很普通")
+    action_text = "開啟" if target_state else "關閉"
+
+    system_prompt = f"""
+你將扮演一隻名為「{monster.get('element_nickname_part') or monster.get('nickname', '怪獸')}」的怪獸，並根據以下情境做出決定與回應。
+
+# 你的角色設定
+- **個性:** {personality_name} ({personality_desc})
+- **與主人的關係:** {bond_description}
+
+# 當前情境
+你的主人「{player_data.get('nickname', '訓練師')}」請求你「{action_text}」你的技能「{skill_name}」。
+
+# 你的任務
+1.  **自行決策:** 根據你的個性和與主人的關係，決定你是否「同意」這個請求。例如，忠誠或關係好的怪獸更容易同意；傲慢或關係差的則更容易拒絕。
+2.  **角色扮演回應:** 用你的角色口吻，說出一句簡短且符合你個性和決定的心裡話。
+3.  **嚴格的輸出格式:** 你的最終輸出必須是一個 JSON 物件，其中包含兩個鍵：`agreed` (布林值 true 或 false) 和 `reply` (你的回應文字)。
+
+**範例輸出:**
+如果決定同意: `{{"agreed": true, "reply": "好的，主人，我相信您的判斷！"}}`
+如果決定拒絕: `{{"agreed": false, "reply": "哼，我的招式輪不到你來指指點點！"}}`
+
+請現在開始你的角色扮演。
+"""
+    
+    payload = {
+        "model": DEEPSEEK_MODEL,
+        "messages": [{"role": "system", "content": system_prompt}],
+        "temperature": 1.0, 
+        "max_tokens": 150,
+        "response_format": {"type": "json_object"} 
+    }
+    headers = {"Authorization": f"Bearer {DEEPSEEK_API_KEY}", "Content-Type": "application/json"}
+
+    try:
+        response = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers, timeout=20)
+        response.raise_for_status()
+        response_data = response.json()
+        
+        content_str = response_data["choices"][0]["message"].get("content", "{}")
+        parsed_content = json.loads(content_str)
+
+        agreed = parsed_content.get("agreed", False)
+        ai_reply = parsed_content.get("reply", "...")
+
+    except Exception as e:
+        ai_logger.error(f"為技能切換請求生成AI決策時出錯: {e}")
+        agreed = random.random() < 0.5 
+        ai_reply = "好的..." if agreed else "我不要！"
+
+    if agreed:
+        skill_to_toggle['is_active'] = target_state
+        update_bond_with_diminishing_returns(interaction_stats, "negotiation", 1)
+
+    user_log = f"（你請求{action_text}技能「{skill_name}」）"
+    monster.setdefault("chatHistory", []).append({"role": "user", "content": user_log})
+    monster["chatHistory"].append({"role": "assistant", "content": ai_reply})
+    monster["chatHistory"] = monster["chatHistory"][-CHAT_HISTORY_LIMIT:]
+    
+    return {
+        "success": True,
+        "agreed": agreed,
+        "ai_reply": ai_reply,
+        "updated_player_data": player_data
+    }
 
 def generate_monster_interaction_response_service(
     player_id: str,
@@ -64,10 +156,7 @@ def generate_monster_interaction_response_service(
     interaction_stats["touch_count"] = interaction_stats.get("touch_count", 0) + 1
 
     if action_type in ['pat', 'kiss']:
-        # --- 核心修改處 START ---
-        # 改為呼叫共用的函式
         update_bond_with_diminishing_returns(interaction_stats, "touch", 5)
-        # --- 核心修改處 END ---
     elif action_type == 'punch':
         current_bond = interaction_stats.get("bond_points", 0)
         interaction_stats["bond_points"] = max(-100, current_bond - 10)
@@ -141,7 +230,8 @@ def generate_monster_interaction_response_service(
         chat_logger.error(f"生成互動回應時發生錯誤: {e}", exc_info=True)
         return None
 
-
+# --- 核心修改處 START ---
+# 將這個被遺漏的函式加回來
 def generate_monster_chat_response_service(
     player_id: str,
     monster_id: str,
@@ -164,10 +254,7 @@ def generate_monster_chat_response_service(
     interaction_stats = monster_to_chat.setdefault("interaction_stats", {})
     interaction_stats["chat_count"] = interaction_stats.get("chat_count", 0) + 1
     
-    # --- 核心修改處 START ---
-    # 改為呼叫共用的函式
     update_bond_with_diminishing_returns(interaction_stats, "chat", 2)
-    # --- 核心修改處 END ---
 
     chat_history: List[ChatHistoryEntry] = monster_to_chat.get("chatHistory", [])
 
@@ -197,7 +284,7 @@ def generate_monster_chat_response_service(
     
     chat_logger.info(f"成功為怪獸 {monster_id} 生成聊天回應。")
     return result
-
+# --- 核心修改處 END ---
 
 def get_ai_chat_completion(
     monster_data: Monster,
@@ -317,7 +404,7 @@ def get_ai_chat_completion(
             {"role": "user", "content": user_content}
         ],
         "temperature": 0.85, 
-        "max_tokens": 150,
+        "max_tokens": 300,
     }
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",

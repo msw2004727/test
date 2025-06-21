@@ -2,6 +2,31 @@
 
 // 注意：此檔案依賴 gameState, DOMElements, API client 函數, UI 更新函數等
 
+// --- 【新增】檢查並顯示新稱號的專用函式 ---
+function checkAndShowNewTitleModal(playerData) {
+    // 檢查後端回傳的資料中是否包含 newly_awarded_titles 欄位
+    if (playerData && playerData.newly_awarded_titles && playerData.newly_awarded_titles.length > 0) {
+        const newTitle = playerData.newly_awarded_titles[0]; // 暫時先只顯示第一個獲得的
+        if (typeof showFeedbackModal === 'function') {
+            showFeedbackModal(
+                '榮譽加身！',
+                '', 
+                false,
+                null,
+                [{ text: '開啟我的冒險！', class: 'success' }],
+                {
+                    type: 'title',
+                    name: newTitle.name,
+                    description: newTitle.description,
+                    buffs: newTitle.buffs,
+                    bannerUrl: gameState.assetPaths.images.modals.titleAward
+                }
+            );
+        }
+    }
+}
+
+
 /**
  * 將 DNA 移動到指定的組合槽，或在組合槽之間交換 DNA。
  * @param {object} draggedDnaObject - 被拖曳的 DNA 物件。
@@ -15,7 +40,6 @@ function moveDnaToCombinationSlot(draggedDnaObject, sourceSlotIndexIfFromCombina
         return;
     }
     
-    // 修改：從新的 gameState.playerData 中讀取組合槽
     const combinationSlots = gameState.playerData?.dnaCombinationSlots;
     if (!combinationSlots) {
         console.error("moveDnaToCombinationSlot: 玩家資料中的組合槽未定義。");
@@ -75,7 +99,6 @@ function handleDnaMoveIntoInventory(dnaToMove, sourceInfo, targetInventoryIndex,
              currentOwnedDna[sourceInfo.originalInventoryIndex] = null;
         }
     } else if (sourceInfo.type === 'combination') {
-        // 修改：從新的 gameState.playerData 中清空組合槽
         if (gameState.playerData?.dnaCombinationSlots) {
             gameState.playerData.dnaCombinationSlots[sourceInfo.id] = null;
         }
@@ -190,9 +213,7 @@ async function handleEndCultivationClick(event, monsterId, trainingStartTime, tr
     const totalDurationSeconds = trainingDuration / 1000;
 
     if (elapsedTimeSeconds < totalDurationSeconds) {
-        // --- 核心修改處 START ---
         const displayName = getMonsterDisplayName(monster, gameState.gameConfigs);
-        // --- 核心修改處 END ---
 
         showConfirmationModal(
             '提前結束修煉',
@@ -548,41 +569,72 @@ async function handleDeployMonsterClick(monsterId) {
         console.error("handleDeployMonsterClick: 無效的怪獸ID或玩家資料不存在。");
         return;
     }
-
-    const monster = gameState.playerData.farmedMonsters.find(m => m.id === monsterId);
-    if (!monster) {
-         console.error(`handleDeployMonsterClick: 在農場中找不到ID為 ${monsterId} 的怪獸。`);
-         return;
+    
+    const newMonsterToDeploy = gameState.playerData.farmedMonsters.find(m => m.id === monsterId);
+    if (!newMonsterToDeploy) {
+        console.error(`handleDeployMonsterClick: 在農場中找不到ID為 ${monsterId} 的怪獸。`);
+        return;
     }
 
-    if (monster.farmStatus?.isTraining) {
+    if (newMonsterToDeploy.farmStatus?.isTraining) {
         showFeedbackModal('提示', '該怪獸正在修煉中，需要先召回才可以指派出戰。');
         return;
     }
     
-    // 【新增】檢查瀕死狀態
-    if (monster.hp < monster.initial_max_hp * 0.25) {
-        showFeedbackModal('無法出戰', '瀕死狀態下無法出戰，請先治療您的怪獸。');
+    if (newMonsterToDeploy.hp < newMonsterToDeploy.initial_max_hp * 0.25) {
+        showFeedbackModal('無法出戰', '瀕死狀態無法出戰，請先治療您的怪獸。');
         return;
     }
 
-    gameState.selectedMonsterId = monsterId;
-    gameState.playerData.selectedMonsterId = monsterId;
+    const currentSelectedId = gameState.selectedMonsterId;
+    if (currentSelectedId === monsterId) {
+        return;
+    }
+
+    const proceedWithDeployment = async () => {
+        gameState.selectedMonsterId = monsterId;
+        gameState.playerData.selectedMonsterId = monsterId;
+        
+        if (typeof updateMonsterSnapshot === 'function') {
+            updateMonsterSnapshot(newMonsterToDeploy);
+        }
+        if (typeof renderMonsterFarm === 'function') {
+            renderMonsterFarm();
+        }
+
+        try {
+            await savePlayerData(gameState.playerId, gameState.playerData);
+            console.log(`玩家 ${gameState.playerId} 已將怪獸 ${monsterId} 設為出戰並儲存。`);
+        } catch (error) {
+            console.error("設置出戰怪獸並儲存時發生錯誤:", error);
+            showFeedbackModal('錯誤', `設置出戰怪獸失敗: ${error.message}`);
+        }
+    };
     
-    if (typeof updateMonsterSnapshot === 'function') {
-        updateMonsterSnapshot(monster);
-    }
-    if (typeof renderMonsterFarm === 'function') {
-        renderMonsterFarm();
-    }
+    if (currentSelectedId) {
+        showFeedbackModal('怪獸交接中...', '主人請稍候...🐾', true);
+        try {
+            const championsData = await getChampionsLeaderboard();
+            hideModal('feedback-modal');
+            
+            const isCurrentChampion = championsData.some(champ => champ && champ.id === currentSelectedId);
 
-    try {
-        await savePlayerData(gameState.playerId, gameState.playerData);
-        console.log(`玩家 ${gameState.playerId} 已將怪獸 ${monsterId} 設為出戰並儲存。`);
-
-    } catch (error) {
-        console.error("設置出戰怪獸並儲存時發生錯誤:", error);
-        showFeedbackModal('錯誤', `設置出戰怪獸失敗: ${error.message}`);
+            if (isCurrentChampion) {
+                showConfirmationModal(
+                    '確認更換出戰',
+                    '您目前出戰的怪獸正位於冠軍殿堂中。更換出戰怪獸將會自動放棄目前的冠軍席位。您確定要更換嗎？',
+                    proceedWithDeployment, 
+                    { confirmButtonClass: 'danger', confirmButtonText: '確定更換' }
+                );
+            } else {
+                await proceedWithDeployment(); 
+            }
+        } catch (error) {
+            hideModal('feedback-modal');
+            showFeedbackModal('錯誤', '檢查冠軍席位時發生錯誤，請稍後再試。');
+        }
+    } else {
+        await proceedWithDeployment(); 
     }
 }
 
@@ -617,6 +669,12 @@ async function refreshPlayerData() {
             renderMonsterFarm();
             const currentSelectedMonster = getSelectedMonster() || getDefaultSelectedMonster();
             updateMonsterSnapshot(currentSelectedMonster);
+            
+            // --- 【新增】刷新資料後，檢查是否有新稱號要顯示 ---
+            if (typeof checkAndShowNewTitleModal === 'function') {
+                checkAndShowNewTitleModal(playerData);
+            }
+
             console.log("玩家資料已刷新並同步至 gameState。");
         } else {
             console.warn("refreshPlayerData: 從後端獲取的玩家數據為空或無效。");

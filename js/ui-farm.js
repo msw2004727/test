@@ -2,25 +2,36 @@
 // 這個檔案專門處理「怪獸農場」頁籤的UI渲染與相關更新。
 
 /**
- * 【新增】處理點擊怪獸卡片上的「治療」按鈕。
+ * 處理點擊怪獸卡片上的「治療」按鈕。
  * @param {string} monsterId - 要治療的怪獸 ID。
  */
 async function handleHealClick(monsterId) {
     if (!monsterId) return;
     
-    // --- 核心修改處 START ---
-    const HEAL_COST = 10;
-    const currentGold = gameState.playerData?.playerStats?.gold || 0;
     const monster = gameState.playerData.farmedMonsters.find(m => m.id === monsterId);
     if (!monster) return;
 
-    // 1. 在呼叫 API 前，先在前端檢查金幣是否足夠
+    // --- 核心修改處 START ---
+    // 檢查怪獸是否真的需要治療
+    const needsHealing = (monster.hp < monster.initial_max_hp) || 
+                         (monster.mp < monster.initial_max_mp) ||
+                         (monster.healthConditions && monster.healthConditions.length > 0);
+
+    if (!needsHealing) {
+        showFeedbackModal('無需治療', `「${getMonsterDisplayName(monster, gameState.gameConfigs)}」的狀態極好，不需要治療！`);
+        return;
+    }
+
+    const HEAL_COST = 10;
+    const currentGold = gameState.playerData?.playerStats?.gold || 0;
+
+    // 檢查金幣是否足夠
     if (currentGold < HEAL_COST) {
         showFeedbackModal('金幣不足', `治療需要花費 ${HEAL_COST} 🪙，您目前沒有足夠的金幣。`);
         return;
     }
 
-    // 2. 修改確認視窗的提示文字
+    // 修改確認視窗的提示文字
     const monsterDisplayName = getMonsterDisplayName(monster, gameState.gameConfigs);
     showConfirmationModal(
         '治療怪獸',
@@ -30,11 +41,9 @@ async function handleHealClick(monsterId) {
             try {
                 const result = await healMonster(monsterId, 'full_restore');
                 if (result) {
-                    // 後端扣款成功後，刷新前端所有資料
                     await refreshPlayerData();
                     showFeedbackModal('成功', '怪獸已完全恢復！');
                 } else {
-                    // 如果後端因故 (例如再次驗證金幣) 返回失敗，則顯示錯誤
                     hideModal('feedback-modal');
                     showFeedbackModal('治療失敗', '後端驗證失敗，可能是金幣數量不同步。');
                 }

@@ -44,16 +44,12 @@ async function loadAndDisplayAnnouncement() {
         if (titleElement && contentContainer && adBannerContainer) {
             titleElement.textContent = announcementData.title || "📢 遊戲官方公告";
             
-            // --- 核心修改處 START ---
-            // 1. 移除舊的 data-asset-key 寫法
-            // 2. 直接從 gameState 讀取圖片路徑並設定 src
             const bannerUrl = gameState.assetPaths?.images?.modals?.officialAnnouncement;
             if (bannerUrl) {
                 adBannerContainer.innerHTML = `<img src="${bannerUrl}" alt="官方公告橫幅" style="max-width: 100%; max-height: 100%; border-radius: 4px;">`;
             } else {
-                adBannerContainer.style.display = 'none'; // 如果沒有設定路徑，則隱藏橫幅
+                adBannerContainer.style.display = 'none'; 
             }
-            // --- 核心修改處 END ---
             
             let contentHtml = `<p>${announcementData.greeting || '親愛的'}<span id="announcement-player-name" class="font-bold text-[var(--accent-color)]">玩家</span>您好，</p>`;
 
@@ -244,7 +240,7 @@ function attemptToInitializeApp() {
         'initializeDOMElements', 'RosterAuthListener', 'initializeUIEventHandlers',
         'initializeGameInteractionEventHandlers', 'initializeDragDropEventHandlers',
         'initializeMonsterEventHandlers', 'initializeNoteHandlers', 'initializeChatSystem',
-        'initializeMailboxEventHandlers'
+        'initializeMailboxEventHandlers', 'initializeAdventureHandlers' // 新增：將冒險島的 handler 初始化函式加入檢查列表
     ];
     
     const undefinedFunctions = requiredFunctions.filter(fnName => typeof window[fnName] !== 'function');
@@ -263,6 +259,7 @@ function attemptToInitializeApp() {
         initializeNoteHandlers();
         initializeChatSystem();
         initializeMailboxEventHandlers();
+        initializeAdventureHandlers(); // 新增：呼叫冒險島的 handler 初始化函式
 
         setInterval(updateAllTimers, 1000);
 
@@ -284,7 +281,7 @@ window.addEventListener('beforeunload', clearGameCacheOnExitOrRefresh);
 console.log("Main.js script loaded.");
 
 (function() {
-    const gameVersion = '0.3.9'; 
+    const gameVersion = '0.4.0.2'; 
 
     const jsFiles = [
         'js/firebase-config.js',
@@ -308,10 +305,12 @@ console.log("Main.js script loaded.");
         'js/ui-notes.js',
         'js/ui-chat.js',
         'js/ui-mailbox.js',
+        'js/ui-adventure.js',
         'js/handlers/ui-handlers.js',
         'js/handlers/game-interaction-handlers.js',
         'js/handlers/drag-drop-handlers.js',
         'js/handlers/monster-handlers.js',
+        'js/handlers/adventure-handlers.js',
         'js/main.js'
     ];
 

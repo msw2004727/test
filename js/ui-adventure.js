@@ -15,16 +15,20 @@ function initializeAdventureUI() {
     // 清空現有內容
     adventureTabContent.innerHTML = '';
 
-    // 建立一個同時作為背景和網格的單一容器
-    const gridContainer = document.createElement('div');
-    gridContainer.className = 'adventure-grid-container';
+    // 步驟 1: 建立一個外層 Wrapper 來做置中
+    const wrapper = document.createElement('div');
+    wrapper.className = 'adventure-wrapper';
 
-    // 產生 5x5 = 25 個格子
+    // 步驟 2: 建立一個內層 Content Area 來維持長寬比，並放置背景和網格
+    const contentArea = document.createElement('div');
+    contentArea.className = 'adventure-content-area';
+
+    // 步驟 3: 產生 25 個格子並直接放入 Content Area 中
     for (let i = 0; i < 25; i++) {
         const cell = document.createElement('div');
         cell.className = 'adventure-grid-cell';
 
-        // 在每個格子中都放入一個按鈕
+        // 在每個格子中都先放入一個預設的按鈕
         const nodeButton = document.createElement('button');
         nodeButton.className = 'adventure-node-btn';
         nodeButton.dataset.nodeIndex = i; // 標記按鈕的索引
@@ -36,9 +40,10 @@ function initializeAdventureUI() {
         nodeButton.title = "探索此區域";
 
         cell.appendChild(nodeButton);
-        gridContainer.appendChild(cell);
+        contentArea.appendChild(cell);
     }
 
-    // 將完整的容器放進頁籤內容區
-    adventureTabContent.appendChild(gridContainer);
+    // 組合結構並放入頁籤
+    wrapper.appendChild(contentArea);
+    adventureTabContent.appendChild(wrapper);
 }

@@ -19,11 +19,11 @@
             'css/theme.css',
             'css/layout.css',
             'css/buttons.css',
-            'css/components.css',
+            'css/game-components.css', /* 【核心修改】替換為新的組件樣式表 */
             'css/modals.css',
             'css/champions.css',
             'css/mailbox.css',
-            'css/adventure.css' /* 新增：引入冒險島的樣式表 */
+            'css/adventure.css'
         ];
         
         cssFiles.forEach(path => {
@@ -586,14 +586,12 @@
                 'js/ui-notes.js',
                 'js/ui-chat.js',
                 'js/ui-mailbox.js',
-                /* --- 核心修改處 START --- */
                 'js/ui-adventure.js', // 引入冒險島的UI渲染腳本
                 'js/handlers/ui-handlers.js',
                 'js/handlers/game-interaction-handlers.js',
                 'js/handlers/drag-drop-handlers.js',
                 'js/handlers/monster-handlers.js',
                 'js/handlers/adventure-handlers.js', // 引入冒險島的事件處理腳本
-                /* --- 核心修改處 END --- */
                 'js/main.js'
             ];
 

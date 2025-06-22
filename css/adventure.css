@@ -3,46 +3,31 @@
 
 /* 當冒險島頁籤處於活動狀態時，進行特殊佈局設定 */
 #guild-content.active {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    min-height: 0;
-    position: relative; 
+    display: flex; /* 讓子元素可以填滿 */
     padding: 0; 
-    overflow: hidden; 
 }
 
-/* 冒險島地圖的容器 */
-.adventure-island-container {
-    height: 100%;
+/* 【全新單層佈局】同時作為背景和網格的容器 */
+.adventure-grid-container {
     width: 100%;
+    height: 100%;
+    
+    /* 背景樣式 */
     background-image: url('https://github.com/msw2004727/MD/blob/main/images/islands001.png?raw=true');
     background-size: cover;
     background-position: center;
-    position: relative;
-}
-
-/* 【核心修改】覆蓋在地圖上的網格容器 - 從 grid 改為 flex 佈局 */
-.adventure-grid-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;       /* 使用 flex 佈局 */
-    flex-wrap: wrap;     /* 允許子元素換行 */
-    align-content: stretch; /* 讓行在交叉軸上伸展以填滿空間 */
-    padding: 2px; /* 給一個微小的邊距 */
+    
+    /* 網格佈局樣式 */
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 4px;
+    padding: 4px;
     box-sizing: border-box;
 }
 
-/* 【核心修改】單一的網格儲存格 - 修改為 flex item */
+/* 單一的網格儲存格 */
 .adventure-grid-cell {
-    /* 設定每個格子的尺寸，5個格子，考慮到間隙 */
-    flex-basis: calc(20% - 4px); /* 基礎寬度為20%，再減去gap */
-    flex-grow: 1;
-    margin: 2px; /* 使用 margin 來製造間隙 */
-    
     border: 1px dashed rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     transition: background-color 0.3s, border-color 0.3s;
@@ -64,7 +49,7 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    font-size: 1.5rem; /* 圖示大小 */
+    font-size: 1.5rem;
     cursor: pointer;
     display: flex;
     align-items: center;

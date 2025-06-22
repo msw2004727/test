@@ -8,7 +8,7 @@
     box-sizing: border-box;
 }
 
-/* 外層 Wrapper，用於置中 */
+/* 外層 Wrapper，用於將內容置中 */
 .adventure-wrapper {
     width: 100%;
     height: 100%;
@@ -17,7 +17,7 @@
     align-items: center;
 }
 
-/* 內容區，維持固定的長寬比，並作為定位的基準 */
+/* 內容區，維持固定的長寬比 */
 .adventure-content-area {
     width: 100%;
     max-width: 100%;
@@ -29,10 +29,17 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    position: relative; /* 【重要】讓子元素可以對它進行絕對定位 */
     
-    /* 預設載入窄版圖片 (手機優先) */
-    background-image: url('https://github.com/msw2004727/MD/blob/main/images/islands003.png?raw=true');
+    /* --- 網格佈局樣式 --- */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 【修改】改為 3 欄 */
+    grid-template-rows: repeat(3, 1fr);    /* 【修改】改為 3 列 */
+    gap: 4px;
+    padding: 4px;
+    box-sizing: border-box;
+
+    /* --- 背景圖設定 (手機優先) --- */
+    background-image: url('https://github.com/msw2004727/MD/blob/main/images/islands004.png?raw=true');
     aspect-ratio: 9 / 16; /* 窄版圖片的長寬比 */
 }
 
@@ -40,69 +47,32 @@
 @media (min-width: 768px) {
     .adventure-content-area {
         /* 自動切換為寬版圖片 */
-        background-image: url('https://github.com/msw2004727/MD/blob/main/images/islands002.png?raw=true');
+        background-image: url('https://github.com/msw2004727/MD/blob/main/images/islands005.png?raw=true');
         aspect-ratio: 16 / 9; /* 寬版圖片的長寬比 */
     }
 }
 
-/* --- 按鈕精準定位區 --- */
-
-/* 格子的通用樣式 */
+/* 單一的網格儲存格 */
 .adventure-grid-cell {
-    position: absolute; /* 【重要】使用絕對定位 */
-    width: 12%;  /* 按鈕格子的寬度，您可以微調 */
-    height: 9%; /* 按鈕格子的高度，您可以微調 */
-    transform: translate(-50%, -50%); /* 讓 top/left 的座標是格子的中心點，更容易對齊 */
+    border: 2px dashed rgba(255, 255, 255, 0.4); /* 【修改】使用更明顯的虛線 */
+    border-radius: 8px;
+    transition: background-color 0.3s, border-color 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-/* 格子內的按鈕樣式 */
-.adventure-node-btn {
-    background-color: rgba(13, 17, 23, 0.6);
-    border: 1px solid var(--border-color);
-    width: 100%;
-    height: 100%;
-    max-width: 48px;
-    max-height: 48px;
-    border-radius: 50%;
-    font-size: 1.5rem;
     cursor: pointer;
-    /* ...其他樣式不變... */
 }
 
-/* 【請您手動修改】
-  底下是 25 個格子的位置，請您親自修改每一個格子的 top 和 left 百分比值。
-  top: 0% 是最頂端，100% 是最底端。
-  left: 0% 是最左邊，100% 是最右邊。
-*/
-#grid-cell-0  { top: 15%; left: 12%; }
-#grid-cell-1  { top: 15%; left: 32%; }
-#grid-cell-2  { top: 15%; left: 52%; }
-#grid-cell-3  { top: 15%; left: 72%; }
-#grid-cell-4  { top: 15%; left: 92%; }
+.adventure-grid-cell:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.8);
+}
 
-#grid-cell-5  { top: 32%; left: 12%; }
-#grid-cell-6  { top: 32%; left: 32%; }
-#grid-cell-7  { top: 32%; left: 52%; }
-#grid-cell-8  { top: 32%; left: 72%; }
-#grid-cell-9  { top: 32%; left: 92%; }
-
-#grid-cell-10 { top: 50%; left: 12%; }
-#grid-cell-11 { top: 50%; left: 32%; }
-#grid-cell-12 { top: 50%; left: 52%; }
-#grid-cell-13 { top: 50%; left: 72%; }
-#grid-cell-14 { top: 50%; left: 92%; }
-
-#grid-cell-15 { top: 68%; left: 12%; }
-#grid-cell-16 { top: 68%; left: 32%; }
-#grid-cell-17 { top: 68%; left: 52%; }
-#grid-cell-18 { top: 68%; left: 72%; }
-#grid-cell-19 { top: 68%; left: 92%; }
-
-#grid-cell-20 { top: 85%; left: 12%; }
-#grid-cell-21 { top: 85%; left: 32%; }
-#grid-cell-22 { top: 85%; left: 52%; }
-#grid-cell-23 { top: 85%; left: 72%; }
-#grid-cell-24 { top: 85%; left: 92%; }
+/* 【新增】格子內的座標文字樣式 */
+.adventure-coordinate-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 5px black, 0 0 5px black; /* 加強文字陰影，使其在複雜背景上更清晰 */
+    pointer-events: none; /* 讓點擊可以穿透文字，直接點到格子本身 */
+}

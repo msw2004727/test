@@ -16,9 +16,65 @@
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--rarity-legendary-text);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem; /* 縮小與下方獎勵欄的間距 */
     text-shadow: 0 0 10px var(--rarity-legendary-text);
     letter-spacing: 2px;
+}
+
+/* --- 核心修改處 START --- */
+/* 每日獎勵資訊欄容器 - 新增最大寬度並置中 */
+.champion-rewards-container {
+    padding: 0.75rem;
+    margin-bottom: 1.5rem; /* 與下方冠軍網格的間距 */
+    border: 1px dashed var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-slot);
+    max-width: 450px; /* 設定最大寬度 */
+    margin-left: auto;   /* 自動左外距 */
+    margin-right: auto;  /* 自動右外距，實現置中 */
+}
+
+/* 獎勵資訊欄標題 */
+.rewards-title {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    letter-spacing: 1px;
+}
+
+/* 獎勵網格佈局 - 從 grid 改為 flex */
+.rewards-grid {
+    display: flex;
+    flex-wrap: wrap; /* 允許項目在空間不足時換行 */
+    justify-content: space-around; /* 讓項目在容器內均勻分佈 */
+    align-items: center;
+    gap: 0.5rem 1rem;
+}
+
+/* 單個獎勵項目 */
+.reward-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    flex-basis: 80px; /* 提供一個基礎寬度，讓排版更穩定 */
+}
+/* --- 核心修改處 END --- */
+
+/* 獎勵名次文字 */
+.reward-rank {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+}
+
+/* 獎勵金額文字 */
+.reward-value {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--rarity-legendary-text); /* 使用金色來突顯獎勵 */
 }
 
 /* 放置四個名次的網格容器 */
@@ -126,7 +182,6 @@
     z-index: 5;
 }
 
-/* 【修改】調整身份容器樣式 */
 .champion-identity-container {
     display: flex;
     flex-wrap: wrap; /* 允許換行 */
@@ -137,7 +192,6 @@
     text-align: center; /* 整體文字置中 */
 }
 
-/* 【新增】玩家暱稱標籤樣式 */
 .champion-owner-tag {
     background-color: var(--accent-color);
     color: var(--button-primary-text);
@@ -149,7 +203,6 @@
     white-space: nowrap;
 }
 
-/* 【新增】怪獸名稱樣式 */
 .champion-monster-name {
     font-size: 0.9em;
 }

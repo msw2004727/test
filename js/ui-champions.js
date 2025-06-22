@@ -80,7 +80,9 @@ async function handleChampionChallengeClick(event, rankToChallenge, opponentMons
             try {
                 showFeedbackModal('戰鬥中...', '正在激烈交鋒...', true);
                 
-                const { battle_result: battleResult } = await simulateBattle({
+                // --- 核心修改處 START ---
+                // 1. 接收後端回傳的完整資料包
+                const response = await simulateBattle({
                     player_monster_data: playerMonster,
                     opponent_monster_data: finalOpponent,
                     opponent_owner_id: finalOpponent.owner_id || null, 
@@ -89,27 +91,47 @@ async function handleChampionChallengeClick(event, rankToChallenge, opponentMons
                     challenged_rank: rankToChallenge
                 });
 
+                // 2. 從回應中解構出所有需要的資料
+                const { battle_result, updated_player_data, updated_champions_data } = response;
+                
+                // 3. 使用回傳的資料直接更新前端的 gameState，不再發送額外請求
+                if (updated_player_data) {
+                    updateGameState({ playerData: updated_player_data });
+                }
+                if (updated_champions_data) {
+                    // 將後端回傳的物件轉換為前端需要的陣列格式
+                    const championsArray = [
+                        updated_champions_data.rank1,
+                        updated_champions_data.rank2,
+                        updated_champions_data.rank3,
+                        updated_champions_data.rank4
+                    ];
+                    updateGameState({ champions: championsArray });
+                    // 直接用新資料重新渲染冠軍殿堂
+                    renderChampionSlots(championsArray);
+                } else {
+                    // 如果沒有回傳冠軍資料，則保持原樣
+                    renderChampionSlots(gameState.champions);
+                }
+                
+                // 4. 更新主畫面快照與其他UI
+                updateMonsterSnapshot(getSelectedMonster());
+                
+                // 5. 隱藏載入中彈窗，並顯示戰報
                 hideModal('feedback-modal');
+                showBattleLogModal(battle_result);
 
-                // --- 【核心修改】---
-                // 在顯示戰報前，先檢查戰鬥結果中是否包含新稱號
-                if (battleResult && typeof checkAndShowNewTitleModal === 'function') {
-                    checkAndShowNewTitleModal(battleResult); // 直接將 battle_result 傳入
+                // 6. 檢查是否有新稱號 (此函式現在只負責彈窗，不獲取資料)
+                if (battle_result && typeof checkAndShowNewTitleModal === 'function') {
+                    checkAndShowNewTitleModal(battle_result); 
                 }
-
-                // 然後再刷新資料和顯示戰報
-                await refreshPlayerData(); 
-                
-                if (typeof handleMonsterLeaderboardClick === 'function') {
-                    await handleMonsterLeaderboardClick();
-                }
-                
-                showBattleLogModal(battleResult);
+                // --- 核心修改處 END ---
 
             } catch (battleError) {
+                hideModal('feedback-modal'); // 確保出錯時也關閉載入視窗
                 showFeedbackModal('戰鬥失敗', `模擬冠軍戰鬥時發生錯誤: ${battleError.message}`);
                 console.error("模擬冠軍戰鬥錯誤:", battleError);
-                await refreshPlayerData(); 
+                await refreshPlayerData(); // 出錯時還是刷新一次以防萬一
             }
         },
         { confirmButtonClass: 'primary', confirmButtonText: '開始戰鬥' }
@@ -121,11 +143,42 @@ async function handleChampionChallengeClick(event, rankToChallenge, opponentMons
  * @param {Array<object|null>} championsData - 從後端獲取的、包含四個冠軍槽位怪獸資料的陣列。
  */
 function renderChampionSlots(championsData) {
+    const section = document.querySelector('.champions-section');
     const container = document.getElementById('champions-grid-container');
-    if (!container) {
-        console.error("冠軍殿堂的容器 'champions-grid-container' 未找到。");
+    if (!container || !section) {
+        console.error("冠軍殿堂的容器 'champions-grid-container' 或 'champions-section' 未找到。");
         return;
     }
+
+    const existingRewards = section.querySelector('.champion-rewards-container');
+    if (existingRewards) {
+        existingRewards.remove();
+    }
+
+    const rewardsContainer = document.createElement('div');
+    rewardsContainer.className = 'champion-rewards-container';
+    rewardsContainer.innerHTML = `
+        <h5 class="rewards-title">每日在位獎勵</h5>
+        <div class="rewards-grid">
+            <div class="reward-item">
+                <span class="reward-rank">冠軍</span>
+                <span class="reward-value">100 🪙</span>
+            </div>
+            <div class="reward-item">
+                <span class="reward-rank">亞軍</span>
+                <span class="reward-value">30 🪙</span>
+            </div>
+            <div class="reward-item">
+                <span class="reward-rank">季軍</span>
+                <span class="reward-value">20 🪙</span>
+            </div>
+            <div class="reward-item">
+                <span class="reward-rank">殿軍</span>
+                <span class="reward-value">10 🪙</span>
+            </div>
+        </div>
+    `;
+    container.before(rewardsContainer);
 
     const playerMonster = getSelectedMonster();
     const playerId = gameState.playerId;

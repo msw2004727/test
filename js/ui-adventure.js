@@ -22,6 +22,11 @@ function renderAdventureIsland() {
         console.error("冒險島的內容容器 'guild-content' 未找到。");
         return;
     }
+    
+    // --- 核心修改處 START ---
+    // 強制將冒險島容器設定為 flex 佈局，以覆蓋舊 CSS 的 display: block;
+    adventureDOMElements.adventureTabContent.style.display = 'flex';
+    // --- 核心修改處 END ---
 
     // 清空現有內容，準備渲染新介面
     adventureDOMElements.adventureTabContent.innerHTML = '';

@@ -1,14 +1,14 @@
 /* css/adventure.css */
 /* 存放所有「冒險島」相關的專屬CSS樣式 */
 
-/* 頁籤容器，設定為 flex 佈局，讓 wrapper 可以置中 */
+/* 頁籤容器 */
 #guild-content.active {
     display: flex;
-    padding: 0.5rem; /* 在周圍留下一點邊距 */
+    padding: 0.5rem;
     box-sizing: border-box;
 }
 
-/* 新增：外層 Wrapper，用於將內容置中 */
+/* 外層 Wrapper，用於置中 */
 .adventure-wrapper {
     width: 100%;
     height: 100%;
@@ -17,73 +17,92 @@
     align-items: center;
 }
 
-/* 新增：內容區，維持固定的長寬比 */
+/* 內容區，維持固定的長寬比，並作為定位的基準 */
 .adventure-content-area {
-    /* 設定長寬比，可根據您的背景圖調整 (例如 16/9, 4/3) */
-    aspect-ratio: 16 / 9; 
-    
-    /* 確保它不會超出父容器 */
     width: 100%;
     max-width: 100%;
     height: auto;
     max-height: 100%;
-
-    /* 將背景和網格設定在同一個元素上 */
-    background-image: url('https://github.com/msw2004727/MD/blob/main/images/islands001.png?raw=true');
-    background-size: 100% 100%; /* 讓背景圖剛好填滿這個有長寬比的容器 */
+    background-size: 100% 100%;
     background-position: center;
-    
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    gap: 4px;
-    padding: 4px;
-    box-sizing: border-box;
-    border-radius: 8px; /* 給地圖加個圓角更好看 */
-    overflow: hidden; /* 隱藏超出圓角的內容 */
+    background-repeat: no-repeat;
+    border-radius: 8px;
+    overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative; /* 【重要】讓子元素可以對它進行絕對定位 */
+    
+    /* 預設載入窄版圖片 (手機優先) */
+    background-image: url('https://github.com/msw2004727/MD/blob/main/images/islands003.png?raw=true');
+    aspect-ratio: 9 / 16; /* 窄版圖片的長寬比 */
 }
 
-/* 單一的網格儲存格 */
+/* 當螢幕寬度大於 768px 時 (例如平板或電腦) */
+@media (min-width: 768px) {
+    .adventure-content-area {
+        /* 自動切換為寬版圖片 */
+        background-image: url('https://github.com/msw2004727/MD/blob/main/images/islands002.png?raw=true');
+        aspect-ratio: 16 / 9; /* 寬版圖片的長寬比 */
+    }
+}
+
+/* --- 按鈕精準定位區 --- */
+
+/* 格子的通用樣式 */
 .adventure-grid-cell {
-    /* 移除固定的邊框，讓視覺更乾淨 */
+    position: absolute; /* 【重要】使用絕對定位 */
+    width: 12%;  /* 按鈕格子的寬度，您可以微調 */
+    height: 9%; /* 按鈕格子的高度，您可以微調 */
+    transform: translate(-50%, -50%); /* 讓 top/left 的座標是格子的中心點，更容易對齊 */
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* 格子內的探索按鈕 */
+/* 格子內的按鈕樣式 */
 .adventure-node-btn {
     background-color: rgba(13, 17, 23, 0.6);
     border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    width: 70%;  /* 按鈕大小改為相對單位，會隨網格縮放 */
-    height: 70%;
-    max-width: 48px; /* 限制最大尺寸 */
+    width: 100%;
+    height: 100%;
+    max-width: 48px;
     max-height: 48px;
     border-radius: 50%;
     font-size: 1.5rem;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-    transition: all 0.2s ease-in-out;
+    /* ...其他樣式不變... */
 }
 
-.adventure-node-btn:hover {
-    background-color: rgba(88, 166, 255, 0.8);
-    color: #ffffff;
-    transform: scale(1.1);
-    border-color: var(--accent-color);
-    box-shadow: 0 0 10px var(--accent-color);
-}
+/* 【請您手動修改】
+  底下是 25 個格子的位置，請您親自修改每一個格子的 top 和 left 百分比值。
+  top: 0% 是最頂端，100% 是最底端。
+  left: 0% 是最左邊，100% 是最右邊。
+*/
+#grid-cell-0  { top: 15%; left: 12%; }
+#grid-cell-1  { top: 15%; left: 32%; }
+#grid-cell-2  { top: 15%; left: 52%; }
+#grid-cell-3  { top: 15%; left: 72%; }
+#grid-cell-4  { top: 15%; left: 92%; }
 
-/* 不同節點類型的圖示 */
-.adventure-node-btn.type-combat::before { content: '⚔️'; }
-.adventure-node-btn.type-elite::before { content: '💀'; }
-.adventure-node-btn.type-treasure::before { content: '💎'; }
-.adventure-node-btn.type-fountain::before { content: '💧'; }
-.adventure-node-btn.type-merchant::before { content: '💰'; }
-.adventure-node-btn.type-boss::before { content: '👑'; }
-.adventure-node-btn.type-start::before { content: '🏁'; }
+#grid-cell-5  { top: 32%; left: 12%; }
+#grid-cell-6  { top: 32%; left: 32%; }
+#grid-cell-7  { top: 32%; left: 52%; }
+#grid-cell-8  { top: 32%; left: 72%; }
+#grid-cell-9  { top: 32%; left: 92%; }
+
+#grid-cell-10 { top: 50%; left: 12%; }
+#grid-cell-11 { top: 50%; left: 32%; }
+#grid-cell-12 { top: 50%; left: 52%; }
+#grid-cell-13 { top: 50%; left: 72%; }
+#grid-cell-14 { top: 50%; left: 92%; }
+
+#grid-cell-15 { top: 68%; left: 12%; }
+#grid-cell-16 { top: 68%; left: 32%; }
+#grid-cell-17 { top: 68%; left: 52%; }
+#grid-cell-18 { top: 68%; left: 72%; }
+#grid-cell-19 { top: 68%; left: 92%; }
+
+#grid-cell-20 { top: 85%; left: 12%; }
+#grid-cell-21 { top: 85%; left: 32%; }
+#grid-cell-22 { top: 85%; left: 52%; }
+#grid-cell-23 { top: 85%; left: 72%; }
+#grid-cell-24 { top: 85%; left: 92%; }

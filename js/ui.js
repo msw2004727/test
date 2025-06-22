@@ -45,6 +45,10 @@ function switchTabContent(targetTabId, clickedButton, modalId = null) {
             if (typeof initializeAdventureUI === 'function') {
                 initializeAdventureUI();
             }
+        } else if (targetTabId === 'medical-content') {
+            if (typeof renderMedicalStation === 'function') {
+                renderMedicalStation();
+            }
         }
         // --- 核心修改處 END ---
     }
@@ -164,6 +168,7 @@ function initializeDOMElements() {
         snapshotBarsContainer: document.getElementById('snapshot-bars-container'),
         snapshotHpFill: document.getElementById('snapshot-hp-fill'),
         snapshotMpFill: document.getElementById('snapshot-mp-fill'),
+        adventureTabContent: document.getElementById('guild-content')
     };
     console.log("DOMElements initialized in ui.js");
 }

@@ -13,7 +13,7 @@ function initializeAdventureDOMElements() {
 }
 
 /**
- * 【最終偵錯版#2】渲染冒險島介面，將背景圖改為背景色。
+ * 【偵錯步驟 1】只渲染地圖容器，並使用背景色代替背景圖。
  */
 function renderAdventureIsland() {
     const adventureTabContent = document.getElementById('guild-content');
@@ -21,74 +21,37 @@ function renderAdventureIsland() {
         console.error("冒險島的內容容器 'guild-content' 未找到。");
         return;
     }
-    
-    adventureTabContent.style.display = 'flex';
-    adventureTabContent.style.flexDirection = 'column';
-    adventureTabContent.style.padding = '0';
-    adventureTabContent.innerHTML = '';
 
-    // --- 建立地圖容器並手動設定樣式 ---
+    // 強制設定樣式，確保容器可見
+    adventureTabContent.style.display = 'flex';
+    adventureTabContent.innerHTML = ''; // 清空
+
+    // 建立地圖容器
     const islandContainer = document.createElement('div');
+    
+    // 直接用 JS 設定樣式，模仿我們成功的藍色方塊測試
     islandContainer.style.height = '100%';
     islandContainer.style.width = '100%';
-    islandContainer.style.position = 'relative';
-    // 【核心修改】將背景圖片改為固定的背景顏色
-    islandContainer.style.backgroundColor = 'green'; 
-    islandContainer.style.overflow = 'auto';
+    islandContainer.style.backgroundColor = 'green'; // 使用純色背景來測試
+    
+    // 加入測試文字以確保容器不僅有尺寸，還有內容
+    islandContainer.textContent = '地圖容器測試'; 
+    islandContainer.style.color = 'white';
+    islandContainer.style.display = 'flex';
+    islandContainer.style.alignItems = 'center';
+    islandContainer.style.justifyContent = 'center';
+    islandContainer.style.fontSize = '2rem';
 
-    // --- 建立網格容器並手動設定樣式 ---
-    const gridOverlay = document.createElement('div');
-    gridOverlay.style.position = 'absolute';
-    gridOverlay.style.top = '0';
-    gridOverlay.style.left = '0';
-    gridOverlay.style.width = '100%';
-    gridOverlay.style.height = '100%';
-    gridOverlay.style.display = 'grid';
-    gridOverlay.style.gridTemplateColumns = 'repeat(5, 1fr)';
-    gridOverlay.style.gridTemplateRows = 'repeat(5, 1fr)';
-    gridOverlay.style.gap = '4px';
-    gridOverlay.style.padding = '4px';
-    gridOverlay.style.boxSizing = 'border-box';
-
-    // --- 產生格子與按鈕 ---
-    for (let i = 0; i < 25; i++) {
-        const cell = document.createElement('div');
-        cell.style.border = '1px dashed rgba(255, 255, 255, 0.2)';
-        cell.style.borderRadius = '8px';
-        cell.style.display = 'flex';
-        cell.style.alignItems = 'center';
-        cell.style.justifyContent = 'center';
-
-        const nodeButton = document.createElement('button');
-        nodeButton.style.backgroundColor = 'rgba(13, 17, 23, 0.6)';
-        nodeButton.style.border = '1px solid #30363d';
-        nodeButton.style.color = '#8b949e';
-        nodeButton.style.width = '48px';
-        nodeButton.style.height = '48px';
-        nodeButton.style.borderRadius = '50%';
-        nodeButton.style.fontSize = '1.5rem';
-        nodeButton.style.cursor = 'pointer';
-        nodeButton.style.display = 'flex';
-        nodeButton.style.alignItems = 'center';
-        nodeButton.style.justifyContent = 'center';
-        nodeButton.style.boxShadow = '0 2px 5px rgba(0,0,0,0.4)';
-        nodeButton.title = "探索此區域";
-
-        const nodeTypes = ['⚔️', '⚔️', '💎', '💧', '💰'];
-        nodeButton.textContent = nodeTypes[Math.floor(Math.random() * nodeTypes.length)];
-        
-        cell.appendChild(nodeButton);
-        gridOverlay.appendChild(cell);
-    }
-
-    islandContainer.appendChild(gridOverlay);
+    // 將地圖容器加入到頁籤內容中
     adventureTabContent.appendChild(islandContainer);
 
-    console.log("已使用 JavaScript 強制渲染冒險島畫面，並將背景改為綠色。");
+    console.log("偵錯步驟1：已渲染測試用的綠色地圖容器。");
 }
+
 
 /**
  * 初始化冒險島UI的總入口函式。
+ * 當玩家點擊「冒險島」頁籤時，這個函式會被觸發。
  */
 function initializeAdventureUI() {
     initializeAdventureDOMElements();

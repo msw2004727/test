@@ -22,7 +22,8 @@
             'css/components.css',
             'css/modals.css',
             'css/champions.css',
-            'css/mailbox.css'
+            'css/mailbox.css',
+            'css/adventure.css' /* 新增：引入冒險島的樣式表 */
         ];
         
         cssFiles.forEach(path => {
@@ -71,7 +72,7 @@
             <h3 class="modal-header">📢 遊戲官方公告</h3>
             <div class="modal-body">
                 <div id="announcement-ad-banner" style="background-color: var(--bg-slot); border: 1px solid var(--border-color); color: var(--text-primary); text-align: center; padding: 20px; border-radius: 6px; margin-bottom: 15px;">
-                    <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-asset-key="modals.announcement" alt="廣告橫幅" style="max-width: 100%; max-height: 100%; border-radius: 4px;">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-asset-key="modals.officialAnnouncement" alt="廣告橫幅" style="max-width: 100%; max-height: 100%; border-radius: 4px;">
                 </div>
                 <div id="announcement-content">
                     </div>
@@ -585,10 +586,14 @@
                 'js/ui-notes.js',
                 'js/ui-chat.js',
                 'js/ui-mailbox.js',
+                /* --- 核心修改處 START --- */
+                'js/ui-adventure.js', // 引入冒險島的UI渲染腳本
                 'js/handlers/ui-handlers.js',
                 'js/handlers/game-interaction-handlers.js',
                 'js/handlers/drag-drop-handlers.js',
                 'js/handlers/monster-handlers.js',
+                'js/handlers/adventure-handlers.js', // 引入冒險島的事件處理腳本
+                /* --- 核心修改處 END --- */
                 'js/main.js'
             ];
 

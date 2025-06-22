@@ -14,8 +14,9 @@
     
     /* 背景樣式 */
     background-image: url('https://github.com/msw2004727/MD/blob/main/images/islands001.png?raw=true');
-    background-size: cover;
+    background-size: contain; /* 【修改】從 cover 改為 contain */
     background-position: center;
+    background-repeat: no-repeat; /* 【新增】確保圖片不重複 */
     
     /* 網格佈局樣式 */
     display: grid;

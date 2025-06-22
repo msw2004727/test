@@ -240,7 +240,8 @@ function attemptToInitializeApp() {
         'initializeDOMElements', 'RosterAuthListener', 'initializeUIEventHandlers',
         'initializeGameInteractionEventHandlers', 'initializeDragDropEventHandlers',
         'initializeMonsterEventHandlers', 'initializeNoteHandlers', 'initializeChatSystem',
-        'initializeMailboxEventHandlers', 'initializeAdventureHandlers' // 新增：將冒險島的 handler 初始化函式加入檢查列表
+        'initializeMailboxEventHandlers',
+        'initializeAdventureHandlers' // 【核心修改】新增：將冒險島的 handler 初始化函式加入檢查列表
     ];
     
     const undefinedFunctions = requiredFunctions.filter(fnName => typeof window[fnName] !== 'function');
@@ -259,7 +260,7 @@ function attemptToInitializeApp() {
         initializeNoteHandlers();
         initializeChatSystem();
         initializeMailboxEventHandlers();
-        initializeAdventureHandlers(); // 新增：呼叫冒險島的 handler 初始化函式
+        initializeAdventureHandlers(); // 【核心修改】新增：呼叫冒險島的 handler 初始化函式
 
         setInterval(updateAllTimers, 1000);
 
@@ -280,41 +281,4 @@ window.addEventListener('beforeunload', clearGameCacheOnExitOrRefresh);
 
 console.log("Main.js script loaded.");
 
-(function() {
-    const gameVersion = '0.4.0.2'; 
-
-    const jsFiles = [
-        'js/firebase-config.js',
-        'js/config.js',
-        'js/game-state.js',
-        'js/api-client.js',
-        'js/auth.js',
-        'js/game-logic.js',
-        'js/utils.js',
-        'js/monster-part-assets.js',
-        'js/ui.js',
-        'js/ui-inventory.js',
-        'js/ui-snapshot.js',
-        'js/ui-farm.js',
-        'js/ui-player-modals.js',
-        'js/ui-monster-details.js',
-        'js/ui-battle-modals.js',
-        'js/ui-result-modals.js',
-        'js/ui-leaderboard-modals.js',
-        'js/ui-champions.js',
-        'js/ui-notes.js',
-        'js/ui-chat.js',
-        'js/ui-mailbox.js',
-        'js/ui-adventure.js',
-        'js/handlers/ui-handlers.js',
-        'js/handlers/game-interaction-handlers.js',
-        'js/handlers/drag-drop-handlers.js',
-        'js/handlers/monster-handlers.js',
-        'js/handlers/adventure-handlers.js',
-        'js/main.js'
-    ];
-
-    jsFiles.forEach(path => {
-        document.write(`<script src="${path}?v=${gameVersion}" defer><\/script>`);
-    });
-})();
+// --- 【核心修改處】移除此處的檔案載入邏輯，統一由 index.html 管理 ---

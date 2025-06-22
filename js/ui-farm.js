@@ -7,28 +7,45 @@
  */
 async function handleHealClick(monsterId) {
     if (!monsterId) return;
+    
+    // --- 核心修改處 START ---
+    const HEAL_COST = 10;
+    const currentGold = gameState.playerData?.playerStats?.gold || 0;
+    const monster = gameState.playerData.farmedMonsters.find(m => m.id === monsterId);
+    if (!monster) return;
 
-    // 顯示一個包含治療選項的彈窗，或直接執行預設治療
+    // 1. 在呼叫 API 前，先在前端檢查金幣是否足夠
+    if (currentGold < HEAL_COST) {
+        showFeedbackModal('金幣不足', `治療需要花費 ${HEAL_COST} 🪙，您目前沒有足夠的金幣。`);
+        return;
+    }
+
+    // 2. 修改確認視窗的提示文字
+    const monsterDisplayName = getMonsterDisplayName(monster, gameState.gameConfigs);
     showConfirmationModal(
         '治療怪獸',
-        '您想要如何治療這隻怪獸？',
+        `您確定要花費 <strong style="color:gold;">${HEAL_COST} 🪙</strong> 來完全治癒「${monsterDisplayName}」嗎？`,
         async () => {
             showFeedbackModal('治療中...', '正在施展治癒魔法...', true);
             try {
                 const result = await healMonster(monsterId, 'full_restore');
                 if (result) {
+                    // 後端扣款成功後，刷新前端所有資料
                     await refreshPlayerData();
                     showFeedbackModal('成功', '怪獸已完全恢復！');
                 } else {
-                    throw new Error('治療失敗或從伺服器返回無效的回應。');
+                    // 如果後端因故 (例如再次驗證金幣) 返回失敗，則顯示錯誤
+                    hideModal('feedback-modal');
+                    showFeedbackModal('治療失敗', '後端驗證失敗，可能是金幣數量不同步。');
                 }
             } catch (error) {
                 hideModal('feedback-modal');
                 showFeedbackModal('錯誤', `治療失敗: ${error.message}`);
             }
         },
-        { confirmButtonClass: 'success', confirmButtonText: '完全治癒' }
+        { confirmButtonClass: 'success', confirmButtonText: '確定治療' }
     );
+    // --- 核心修改處 END ---
 }
 
 
@@ -44,20 +61,16 @@ function updateAllTimers() {
         const totalDuration = Math.floor(duration / 1000);
         const displayTime = Math.min(elapsedTime, totalDuration);
 
-        // 找到對應的狀態文字元素 (即計時器前面的那個元素)
         const statusTextEl = timerEl.previousElementSibling;
 
         if (displayTime >= totalDuration) {
-            // 修煉時間已滿
             if (statusTextEl) {
                 statusTextEl.textContent = '已完成';
                 statusTextEl.style.color = 'var(--success-color)';
                 statusTextEl.style.fontWeight = 'bold';
             }
-            // 隱藏計時器文字
             timerEl.style.display = 'none';
         } else {
-            // 修煉仍在進行，更新計時器
             timerEl.textContent = `(${displayTime} / ${totalDuration}s)`;
         }
     });
@@ -67,7 +80,6 @@ function showMonsterInfoFromFarm(monsterId) {
     if (!monsterId) return;
     const monster = gameState.playerData.farmedMonsters.find(m => m.id === monsterId);
     if (monster) {
-        // This function is defined in ui-monster-modals.js
         if (typeof updateMonsterInfoModal === 'function') {
             updateMonsterInfoModal(monster, gameState.gameConfigs, gameState.playerData);
             showModal('monster-info-modal');
@@ -150,13 +162,11 @@ function renderMonsterFarm() {
             statusHtml = `<div class="monster-card-status">閒置中</div>`;
         }
         
-        // --- 【核心修改處】---
-        // 調整按鈕順序
         let actionsHTML = '';
         if (isDeployed) {
             actionsHTML = `
                 <button class="button danger text-xs" disabled>放生</button>
-                <button class="button text-xs" onclick="handleHealClick('${monster.id}')">治療</button>
+                <button class="button action text-xs" onclick="handleHealClick('${monster.id}')">治療</button>
                 <button class="button primary text-xs" disabled>修煉</button>
             `;
         } else if (monster.farmStatus?.isTraining) {
@@ -164,13 +174,13 @@ function renderMonsterFarm() {
             const duration = monster.farmStatus.trainingDuration || 3600000;
             actionsHTML = `
                 <button class="button danger text-xs" disabled>放生</button>
-                <button class="button text-xs" onclick="handleHealClick('${monster.id}')">治療</button>
+                <button class="button action text-xs" onclick="handleHealClick('${monster.id}')">治療</button>
                 <button class="button warning text-xs" onclick="handleEndCultivationClick(event, '${monster.id}', ${startTime}, ${duration})">召回</button>
             `;
         } else {
             actionsHTML = `
                 <button class="button danger text-xs" onclick="handleReleaseMonsterClick(event, '${monster.id}')">放生</button>
-                <button class="button text-xs" onclick="handleHealClick('${monster.id}')">治療</button>
+                <button class="button action text-xs" onclick="handleHealClick('${monster.id}')">治療</button>
                 <button class="button primary text-xs" onclick="handleCultivateMonsterClick(event, '${monster.id}')">修煉</button>
             `;
         }

@@ -101,12 +101,6 @@ async function handleAddFriend(friendUid, friendNickname) {
     }
 }
 
-// --- 核心修改處 START ---
-/**
- * 處理點擊移除好友按鈕的邏輯
- * @param {string} friendId - 要移除的好友 UID
- * @param {string} friendNickname - 要移除的好友暱稱
- */
 async function handleRemoveFriendClick(friendId, friendNickname) {
     if (!friendId || !friendNickname) return;
 
@@ -118,8 +112,10 @@ async function handleRemoveFriendClick(friendId, friendNickname) {
             try {
                 const result = await removeFriend(friendId);
                 if (result && result.success) {
-                    await refreshPlayerData(); // 從後端刷新資料
-                    renderFriendsList(); // 根據最新資料重新渲染好友列表
+                    await refreshPlayerData(); 
+                    if(typeof renderFriendsList === 'function') {
+                        renderFriendsList();
+                    }
                     hideModal('feedback-modal');
                     showFeedbackModal('成功', `已成功移除好友「${friendNickname}」。`);
                 } else {
@@ -133,7 +129,6 @@ async function handleRemoveFriendClick(friendId, friendNickname) {
         { confirmButtonClass: 'danger', confirmButtonText: '確定移除' }
     );
 }
-// --- 核心修改處 END ---
 
 function updatePlayerInfoModal(playerData, gameConfigs) {
     const body = DOMElements.playerInfoModalBody;
@@ -464,7 +459,6 @@ async function renderFriendsList() {
         console.error("無法獲取好友狀態:", error);
     }
     
-    // --- 核心修改處 START ---
     container.innerHTML = `
         <div class="friends-list-grid">
             ${friends.map(friend => {
@@ -484,11 +478,10 @@ async function renderFriendsList() {
                     </div>
                     <div class="friend-actions">
                         <button class="button secondary text-xs" title="寄信" onclick="openSendMailModal('${friend.uid}', '${friend.nickname}')">✉️</button>
-                        <button class="button danger text-xs" title="移除好友" onclick="handleRemoveFriendClick('${friend.uid}', '${friend.nickname}')">移除</button>
-                    </div>
+                        <button class="button secondary text-xs remove-friend-btn" title="移除好友" onclick="handleRemoveFriendClick('${friend.uid}', '${friend.nickname}')">❌</button>
+                        </div>
                 </div>
             `}).join('')}
         </div>
     `;
-    // --- 核心修改處 END ---
 }

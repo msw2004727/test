@@ -307,7 +307,6 @@ async function getFriendsStatuses(friendIds) {
     });
 }
 
-// --- 核心修改處 START ---
 /**
  * 發送好友請求給另一位玩家
  * @param {string} recipientId 收件人的 ID
@@ -321,7 +320,22 @@ async function sendFriendRequest(recipientId) {
         }),
     });
 }
-// --- 核心修改處 END ---
+
+/**
+ * 回應好友請求
+ * @param {string} mailId 好友請求信件的 ID
+ * @param {'accept' | 'decline'} action 玩家的操作
+ * @returns {Promise<object>} 後端的回應
+ */
+async function respondToFriendRequest(mailId, action) {
+    return fetchAPI('/friends/response', {
+        method: 'POST',
+        body: JSON.stringify({
+            mail_id: mailId,
+            action: action
+        }),
+    });
+}
 
 /**
  * 寄送一封信件給另一位玩家

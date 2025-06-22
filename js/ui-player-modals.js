@@ -1,14 +1,7 @@
 // js/ui-player-modals.js
 //這個檔案將負責處理與玩家、好友、新手指南相關的彈窗內容
 
-// --- 核心修改處 START ---
-/**
- * 開啟寄送信件的彈窗。
- * @param {string} friendUid - 收件好友的 UID。
- * @param {string} friendNickname - 收件好友的暱稱。
- */
 function openSendMailModal(friendUid, friendNickname) {
-    // 使用現有的 confirmation-modal 來建立一個輸入表單
     const mailFormHtml = `
         <div style="text-align: left; font-size: 0.9rem;">
             <p style="margin-bottom: 1rem;">正在寫信給：<strong style="color: var(--accent-color);">${friendNickname}</strong></p>
@@ -37,7 +30,6 @@ function openSendMailModal(friendUid, friendNickname) {
 
             showFeedbackModal('寄送中...', `正在將您的信件送往 ${friendNickname} 的信箱...`, true);
             try {
-                // 呼叫我們在 api-client.js 中新增的函式
                 const result = await sendMail(friendUid, title, content);
                 if (result && result.success) {
                     hideModal('feedback-modal');
@@ -53,7 +45,6 @@ function openSendMailModal(friendUid, friendNickname) {
         { confirmButtonClass: 'primary', confirmButtonText: '寄出' }
     );
 }
-// --- 核心修改處 END ---
 
 async function handleAddFriend(friendUid, friendNickname) {
     if (!friendUid || !friendNickname) {
@@ -75,13 +66,11 @@ async function handleAddFriend(friendUid, friendNickname) {
         return;
     }
 
-    // 先在本地端更新狀態以提供即時反饋
     gameState.playerData.friends.push({
         uid: friendUid,
         nickname: friendNickname
     });
 
-    // 更新UI
     if (typeof renderFriendsList === 'function') {
         renderFriendsList();
     }
@@ -95,11 +84,9 @@ async function handleAddFriend(friendUid, friendNickname) {
     }
 
     try {
-        // 呼叫後端儲存整個玩家資料
         await savePlayerData(gameState.playerId, gameState.playerData);
         showFeedbackModal('成功', `已成功將「${friendNickname}」加入您的好友列表！`);
     } catch (error) {
-        // 如果儲存失敗，則復原在本地端的變更
         gameState.playerData.friends = gameState.playerData.friends.filter(f => f.uid !== friendUid);
         renderFriendsList();
         if (searchResultsContainer) {
@@ -114,6 +101,39 @@ async function handleAddFriend(friendUid, friendNickname) {
     }
 }
 
+// --- 核心修改處 START ---
+/**
+ * 處理點擊移除好友按鈕的邏輯
+ * @param {string} friendId - 要移除的好友 UID
+ * @param {string} friendNickname - 要移除的好友暱稱
+ */
+async function handleRemoveFriendClick(friendId, friendNickname) {
+    if (!friendId || !friendNickname) return;
+
+    showConfirmationModal(
+        '確認移除好友',
+        `您確定要從好友列表中移除「${friendNickname}」嗎？`,
+        async () => {
+            showFeedbackModal('處理中...', `正在移除好友 ${friendNickname}...`, true);
+            try {
+                const result = await removeFriend(friendId);
+                if (result && result.success) {
+                    await refreshPlayerData(); // 從後端刷新資料
+                    renderFriendsList(); // 根據最新資料重新渲染好友列表
+                    hideModal('feedback-modal');
+                    showFeedbackModal('成功', `已成功移除好友「${friendNickname}」。`);
+                } else {
+                    throw new Error(result.error || '未知的錯誤');
+                }
+            } catch (error) {
+                hideModal('feedback-modal');
+                showFeedbackModal('移除失敗', `無法移除好友：${error.message}`);
+            }
+        },
+        { confirmButtonClass: 'danger', confirmButtonText: '確定移除' }
+    );
+}
+// --- 核心修改處 END ---
 
 function updatePlayerInfoModal(playerData, gameConfigs) {
     const body = DOMElements.playerInfoModalBody;
@@ -464,7 +484,7 @@ async function renderFriendsList() {
                     </div>
                     <div class="friend-actions">
                         <button class="button secondary text-xs" title="寄信" onclick="openSendMailModal('${friend.uid}', '${friend.nickname}')">✉️</button>
-                        <button class="button secondary text-xs" title="送禮" disabled>🎁</button>
+                        <button class="button danger text-xs" title="移除好友" onclick="handleRemoveFriendClick('${friend.uid}', '${friend.nickname}')">移除</button>
                     </div>
                 </div>
             `}).join('')}

@@ -43,7 +43,10 @@ function switchTabContent(targetTabId, clickedButton, modalId = null) {
             }
         } else if (targetTabId === 'guild-content') {
             if (typeof initializeAdventureUI === 'function') {
+                console.log("Switching to Adventure Island, calling initializeAdventureUI...");
                 initializeAdventureUI();
+            } else {
+                console.error("initializeAdventureUI function not found!");
             }
         } else if (targetTabId === 'medical-content') {
             if (typeof renderMedicalStation === 'function') {

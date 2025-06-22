@@ -12,34 +12,36 @@ function initializeAdventureUI() {
         return;
     }
     
+    // 清空現有內容
     adventureTabContent.innerHTML = '';
 
+    // 建立一個外層 Wrapper 來做置中
     const wrapper = document.createElement('div');
     wrapper.className = 'adventure-wrapper';
 
+    // 建立一個內層 Content Area 來維持長寬比，並放置背景和網格
     const contentArea = document.createElement('div');
     contentArea.className = 'adventure-content-area';
 
-    // 產生 25 個格子，並為每個格子加上獨立ID
-    for (let i = 0; i < 25; i++) {
+    // 【核心修改】產生 3x3 = 9 個格子
+    for (let i = 0; i < 9; i++) {
         const cell = document.createElement('div');
-        // 【核心修改】賦予 cell 兩個 class 和一個獨立的 id
         cell.className = 'adventure-grid-cell';
-        cell.id = `grid-cell-${i}`; // 例如 grid-cell-0, grid-cell-1...
+        cell.dataset.index = i; // 標記格子的索引
 
-        const nodeButton = document.createElement('button');
-        nodeButton.className = 'adventure-node-btn';
-        nodeButton.dataset.nodeIndex = i;
+        // 【核心修改】計算並顯示座標
+        const x = i % 3;
+        const y = Math.floor(i / 3);
         
-        const nodeTypes = ['combat', 'combat', 'combat', 'treasure', 'fountain'];
-        const randomType = nodeTypes[Math.floor(Math.random() * nodeTypes.length)];
-        nodeButton.classList.add(`type-${randomType}`);
-        nodeButton.title = "探索此區域";
-
-        cell.appendChild(nodeButton);
+        const coordinateText = document.createElement('div');
+        coordinateText.className = 'adventure-coordinate-text';
+        coordinateText.textContent = `(${x}, ${y})`;
+        
+        cell.appendChild(coordinateText);
         contentArea.appendChild(cell);
     }
 
+    // 組合結構並放入頁籤
     wrapper.appendChild(contentArea);
     adventureTabContent.appendChild(wrapper);
 }

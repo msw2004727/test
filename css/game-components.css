@@ -660,94 +660,169 @@ body.light-theme .leaderboard-table tr:hover td {
 .dna-attribute-box.text-element-mix { background-color: var(--element-mix-bg); }
 .dna-attribute-box.text-element-無 { background-color: var(--element-無-bg); }
 
-/* This is the OLD table style for training monsters. It will be replaced. */
-.training-monster-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.75rem;
-}
-.training-monster-table th, .training-monster-table td {
-    padding: 8px;
-    text-align: center;
-    border-bottom: 1px solid var(--border-color);
-    white-space: nowrap;
-}
-.training-monster-table th {
-    color: var(--accent-color);
-    font-weight: 500;
-}
-.training-monster-table td {
-    color: var(--text-primary);
-}
-.training-monster-table tr:last-child td {
-    border-bottom: none;
-}
-.training-monster-table tr:hover td {
-    background-color: var(--bg-slot);
-}
-.training-monster-table td:nth-child(2) {
-    text-align: left;
-}
-
 /* ==========================================================================
-   怪獸農場 (原生Table版本，固定欄寬)
+   怪獸農場 (卡片式佈局)
    ========================================================================== */
-.table-scroll-wrapper {
-    overflow-x: auto;
+.farm-card-grid {
+    display: grid;
+    /* 響應式網格，最小寬度 110px，最大 1fr，自動填充 */
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 0.75rem;
 }
 
-.farm-table {
-    table-layout: fixed;
-    min-width: 600px;
-    width: 100%;
-    border-collapse: collapse;
+.monster-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem; /* 內部元件的間距 */
+    padding: 0.75rem;
+    background-color: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    transition: all 0.2s ease-in-out;
 }
 
-.farm-table th,
-.farm-table td {
-    padding: 12px 10px;
-    border-bottom: 1px solid var(--border-color);
+.monster-card.deployed {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px -2px color-mix(in srgb, var(--accent-color) 60%, transparent);
+}
+
+.monster-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.monster-card-name {
+    font-size: 0.875rem;
+    font-weight: 600;
     text-align: center;
-    vertical-align: middle;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
 }
 
-/* 為每一欄設定精準的寬度 */
-.farm-table th:nth-child(1), .farm-table td:nth-child(1) { width: 40px; }
-.farm-table th:nth-child(2), .farm-table td:nth-child(2) { width: 80px; }
-.farm-table th:nth-child(3), .farm-table td:nth-child(3) { width: 190px; }
-.farm-table th:nth-child(4), .farm-table td:nth-child(4) { width: 70px; }
-.farm-table th:nth-child(5), .farm-table td:nth-child(5) { width: 80px; }
-.farm-table th:nth-child(6), .farm-table td:nth-child(6) { width: 140px; }
-
-/* 表頭樣式 */
-.farm-table th {
-    font-weight: 600;
-    color: var(--accent-color);
-    background-color: var(--bg-primary);
-    border-bottom-width: 2px;
-    border-bottom-color: var(--accent-color);
+.monster-card-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--bg-slot);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 2px solid var(--border-color);
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+    cursor: pointer;
 }
 
-.farm-table tbody tr:hover td {
-    background-color: var(--bg-primary);
-}
-
-.farm-table tbody tr.selected td {
-    background-color: color-mix(in srgb, var(--accent-color) 15%, transparent);
-}
-
-/* 特定欄位的文字對齊 */
-.farm-table th:nth-child(3),
-.farm-table td:nth-child(3) {
-    text-align: left;
-}
-
-/* 表格內按鈕的樣式微調 */
-.farm-table td .button {
-    margin: 0 2px;
-    padding: 6px 10px;
+.monster-card-deploy-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--button-secondary-bg);
+    color: var(--button-secondary-text);
     font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: -12px; /* 讓按鈕稍微蓋在頭像上 */
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+}
+
+.monster-card-deploy-btn:hover {
+    transform: scale(1.1);
+}
+
+.monster-card-deploy-btn.deployed {
+    background-color: var(--button-success-bg);
+    color: var(--button-success-text);
+    cursor: not-allowed;
+}
+
+.monster-card-status {
+    font-size: 0.75rem; /* xs */
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-align: center;
+    min-height: 18px; /* 避免內容變化時跳動 */
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+}
+
+.monster-card-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    margin-top: 0.25rem;
+}
+
+.monster-card-actions .button {
+    padding: 5px; 
+    font-size: 0.75rem; /* xs */
+    white-space: nowrap;
+}
+
+.friend-actions .remove-friend-btn:hover {
+    background-color: var(--danger-color);
+    color: var(--button-danger-text);
+    border-color: var(--danger-hover-dark);
+}
+
+body.light-theme .friend-actions .remove-friend-btn:hover {
+    border-color: var(--danger-hover-light);
+}
+
+@keyframes head-breath {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.10);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+#monster-part-head .monster-part-image.active {
+  animation: head-breath 2s infinite alternate ease-in-out;
+  transform-origin: center bottom; 
+}
+
+.player-currency-panel {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    padding: 2px 10px; 
+    background-color: var(--bg-slot);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    max-width: 180px;
+    margin-left: auto;
+    margin-right: 5px;
+    margin-top: -12px;
+    margin-bottom: -8px; 
+    position: relative;
+    z-index: 5;
+}
+
+.player-currency-panel .currency-icon {
+    font-size: 1rem; 
+    margin-left: 4px;
+}
+
+#player-currency-amount {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--rarity-legendary-text);
+    letter-spacing: 0.5px;
+    font-family: 'Inter', monospace;
 }

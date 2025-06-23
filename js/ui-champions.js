@@ -88,37 +88,21 @@ async function handleChampionChallengeClick(event, rankToChallenge, opponentMons
                     challenged_rank: rankToChallenge
                 });
 
-                const { battle_result, updated_player_data, updated_champions_data } = response;
-                
-                if (updated_player_data) {
-                    updateGameState({ playerData: updated_player_data });
-                }
-
                 // --- 核心修改處 START ---
-                if (updated_champions_data) {
-                    const championsArray = [
-                        updated_champions_data.rank1,
-                        updated_champions_data.rank2,
-                        updated_champions_data.rank3,
-                        updated_champions_data.rank4
-                    ];
-                    updateGameState({ champions: championsArray });
-                    // 使用最新的冠軍資料，強制重新渲染殿堂UI
-                    renderChampionSlots(championsArray);
-                } else {
-                    // 如果後端沒有回傳更新後的冠軍資料，也用現有的gameState重新渲染一次
-                    renderChampionSlots(gameState.champions);
+                // 戰鬥結束後，不再手動處理回傳的資料，
+                // 而是直接呼叫統一的排行榜刷新函式，它會處理所有後續的資料獲取和渲染。
+                await refreshPlayerData(); // 先刷新一次玩家資料
+                await handleMonsterLeaderboardClick(); // 重新載入並渲染整個排行榜+冠軍殿堂
+                
+                // 隱藏載入中彈窗，並顯示戰報
+                hideModal('feedback-modal');
+                showBattleLogModal(response.battle_result);
+
+                // 檢查是否有新稱號 (此函式現在只負責彈窗，不獲取資料)
+                if (response.battle_result && typeof checkAndShowNewTitleModal === 'function') {
+                    checkAndShowNewTitleModal(response.battle_result); 
                 }
                 // --- 核心修改處 END ---
-                
-                updateMonsterSnapshot(getSelectedMonster());
-                
-                hideModal('feedback-modal');
-                showBattleLogModal(battle_result);
-
-                if (battle_result && typeof checkAndShowNewTitleModal === 'function') {
-                    checkAndShowNewTitleModal(battle_result); 
-                }
 
             } catch (battleError) {
                 hideModal('feedback-modal');

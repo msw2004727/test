@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>足球活動報名</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Font Awesome (為了 LINE 和錢包圖標) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- 引入 Google Fonts 的 Inter 字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 自定義樣式 */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #111827; /* 深灰色背景 */
+            color: #d1d5db; /* 淺灰色文字 */
+        }
+        .card-image-placeholder, .ad-placeholder, .ad-banner-placeholder {
+            border: 2px dashed #4b5563;
+            background-color: rgba(31, 41, 55, 0.5);
+        }
+        .card-image-placeholder { min-height: 150px; }
+        .ad-placeholder { height: 300px; }
+        .btn-primary {
+            background-color: #0d9488; color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover { background-color: #0f766e; }
+        .btn-secondary {
+            background-color: #374151; color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-secondary:hover { background-color: #4b5563; }
+        .btn-line {
+            background-color: #00B900; color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-line:hover { background-color: #009d00; }
+        .hidden { display: none; }
+
+        /* 頁籤樣式 */
+        .tab-button {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: #9ca3af; /* gray-400 */
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease-in-out;
+        }
+        .tab-button:hover {
+            color: #e5e7eb; /* gray-200 */
+        }
+        .tab-button.active {
+            color: #2dd4bf; /* teal-400 */
+            border-bottom-color: #2dd4bf;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+
+    <!-- 頁首導覽列 -->
+    <header class="bg-gray-800/90 backdrop-blur-sm sticky top-0 z-40 shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#" class="text-white text-2xl font-bold tracking-wider">足球幫</a>
+                </div>
+                <nav id="auth-nav" class="flex items-center space-x-4">
+                    <div id="login-section">
+                        <button id="line-login-button" class="btn-line font-bold py-2 px-4 rounded-lg flex items-center space-x-2">
+                            <i class="fab fa-line"></i>
+                            <span>使用 LINE 登入</span>
+                        </button>
+                    </div>
+                    <!-- 登入後顯示 -->
+                    <div id="user-profile-section" class="hidden items-center space-x-3">
+                        <!-- 儲值金欄位 -->
+                        <div class="flex items-center space-x-2 mr-4 bg-gray-700 px-3 py-1.5 rounded-full">
+                            <i class="fas fa-wallet text-teal-400"></i>
+                            <span class="text-white font-medium text-sm">儲值金: $999</span>
+                        </div>
+                        <img id="user-picture" src="" alt="User Picture" class="w-10 h-10 rounded-full border-2 border-gray-600">
+                        <span id="user-name" class="text-white font-medium"></span>
+                        <button id="logout-button" class="text-gray-300 hover:text-white text-sm font-medium transition-colors">登出</button>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+
+            <!-- 左側: 近期活動列表 -->
+            <div class="w-full lg:w-2/3">
+                <h1 class="text-3xl font-bold text-white mb-4 border-l-4 border-teal-500 pl-4">近期活動</h1>
+                
+                <!-- 地區頁籤 -->
+                <div class="mb-6 border-b border-gray-700">
+                    <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
+                        <button class="tab-button" data-tab="north">北部</button>
+                        <button class="tab-button active" data-tab="central">中部</button>
+                        <button class="tab-button" data-tab="south">南部</button>
+                        <button class="tab-button" data-tab="east">東部</button>
+                        <button class="tab-button" data-tab="island">外島</button>
+                    </nav>
+                </div>
+
+                <!-- 頁籤內容 -->
+                <div>
+                    <!-- 北部活動 -->
+                    <div id="tab-north" class="tab-content space-y-6">
+                        <!-- 北部活動卡片 1 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">台北平日下班團</h2><p class="text-gray-400 mt-1">地點：台北田徑場</p><p class="text-gray-400 mt-1">日期：2025年7月21日 (一) 19:00 - 21:00</p><p class="text-teal-400 font-semibold mt-2">尚餘名額: 5</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=C" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">陳教練</p><p class="text-xs text-gray-400">A級教練證照</p></div></div></div></div><button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button></div></div></div>
+                        <!-- 北部活動卡片 2 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">新竹科學園區足球社</h2><p class="text-gray-400 mt-1">地點：竹科運動中心</p><p class="text-gray-400 mt-1">日期：2025年7月23日 (三) 18:30 - 20:30</p><p class="text-yellow-500 font-semibold mt-2">即將額滿</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=L" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">李教練</p><p class="text-xs text-gray-400">前企業甲組球員</p></div></div></div></div><button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button></div></div></div>
+                        <!-- 北部活動卡片 3 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden opacity-60"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">基隆雨中足球</h2><p class="text-gray-400 mt-1">地點：基隆市立體育場</p><p class="text-gray-400 mt-1">日期：2025年7月26日 (六) 10:00 - 12:00</p><p class="text-red-500 font-semibold mt-2">已額滿</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=H" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">黃教練</p><p class="text-xs text-gray-400">專長兒童足球</p></div></div></div></div><button class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end" disabled>無法報名</button></div></div></div>
+                    </div>
+                    <!-- 中部活動 -->
+                    <div id="tab-central" class="tab-content active space-y-6">
+                        <!-- 中部活動卡片 1 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">週末友誼賽 - 5人制</h2><p class="text-gray-400 mt-1">地點：台中市區足球場</p><p class="text-gray-400 mt-1">日期：2025年7月19日 (六) 14:00 - 16:00</p><p class="text-teal-400 font-semibold mt-2">尚餘名額: 3</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=W" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">王教練</p><p class="text-xs text-gray-400">10年職業聯賽經驗</p></div></div></div></div><button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button></div></div></div>
+                        <!-- 中部活動卡片 2 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">彰化八卦山腳下練球</h2><p class="text-gray-400 mt-1">地點：彰化縣立體育場</p><p class="text-gray-400 mt-1">日期：2025年7月20日 (日) 09:00 - 11:00</p><p class="text-teal-400 font-semibold mt-2">尚餘名額: 8</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=Z" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">張教練</p><p class="text-xs text-gray-400">體能訓練專家</p></div></div></div></div><button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button></div></div></div>
+                        <!-- 中部活動卡片 3 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">苗栗山城足球營</h2><p class="text-gray-400 mt-1">地點：苗栗縣立體育公園</p><p class="text-gray-400 mt-1">日期：2025年8月2日 (六) 15:00 - 17:00</p><p class="text-yellow-500 font-semibold mt-2">即將額滿</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=Y" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">楊教練</p><p class="text-xs text-gray-400">戰術分析師</p></div></div></div></div><button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button></div></div></div>
+                    </div>
+                    <!-- 南部活動 -->
+                    <div id="tab-south" class="tab-content space-y-6">
+                        <!-- 南部活動卡片 1 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">台南古都夜踢</h2><p class="text-gray-400 mt-1">地點：台南市立足球場</p><p class="text-gray-400 mt-1">日期：2025年7月25日 (五) 20:00 - 22:00</p><p class="text-teal-400 font-semibold mt-2">尚餘名額: 6</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=T" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">蔡教練</p><p class="text-xs text-gray-400">控球技巧指導</p></div></div></div></div><button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button></div></div></div>
+                        <!-- 南部活動卡片 2 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">高雄港都盃前哨戰</h2><p class="text-gray-400 mt-1">地點：高雄國家體育場</p><p class="text-gray-400 mt-1">日期：2025年7月27日 (日) 16:00 - 18:00</p><p class="text-yellow-500 font-semibold mt-2">即將額滿</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=K" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">郭教練</p><p class="text-xs text-gray-400">旅外歸國球星</p></div></div></div></div><button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button></div></div></div>
+                        <!-- 南部活動卡片 3 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">屏東陽光沙灘足球</h2><p class="text-gray-400 mt-1">地點：墾丁南灣</p><p class="text-gray-400 mt-1">日期：2025年8月3日 (日) 16:00 - 18:00</p><p class="text-teal-400 font-semibold mt-2">尚餘名額: 10</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=S" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">孫教練</p><p class="text-xs text-gray-400">沙灘足球專家</p></div></div></div></div><button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button></div></div></div>
+                    </div>
+                    <!-- 東部活動 -->
+                    <div id="tab-east" class="tab-content space-y-6">
+                         <!-- 東部活動卡片 1 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">花蓮縱谷親子足球日</h2><p class="text-gray-400 mt-1">地點：花蓮德興運動場</p><p class="text-gray-400 mt-1">日期：2025年7月26日 (六) 15:00 - 17:00</p><p class="text-teal-400 font-semibold mt-2">尚餘名額: 12</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=A" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">阿美教練</p><p class="text-xs text-gray-400">在地足球推廣者</p></div></div></div></div><button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button></div></div></div>
+                        <!-- 東部活動卡片 2 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">台東鐵花村旁球敘</h2><p class="text-gray-400 mt-1">地點：台東縣立體育場</p><p class="text-gray-400 mt-1">日期：2025年8月9日 (六) 16:00 - 18:00</p><p class="text-teal-400 font-semibold mt-2">尚餘名額: 7</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=B" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">巴奈教練</p><p class="text-xs text-gray-400">原住民足球好手</p></div></div></div></div><button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button></div></div></div>
+                    </div>
+                    <!-- 外島活動 -->
+                    <div id="tab-island" class="tab-content space-y-6">
+                         <!-- 外島活動卡片 1 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">澎湖灣友誼賽</h2><p class="text-gray-400 mt-1">地點：澎湖縣立體育場</p><p class="text-gray-400 mt-1">日期：2025年8月16日 (六) 17:00 - 19:00</p><p class="text-teal-400 font-semibold mt-2">尚餘名額: 9</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=P" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">澎教練</p><p class="text-xs text-gray-400">在地資深球員</p></div></div></div></div><button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button></div></div></div>
+                        <!-- 外島活動卡片 2 -->
+                        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden"><div class="p-5 flex flex-col md:flex-row gap-5"><div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div><div class="w-full md:w-2/3 flex flex-col"><div class="flex-grow"><h2 class="text-xl font-bold text-white">金門高粱足球賽</h2><p class="text-gray-400 mt-1">地點：金門縣立運動場</p><p class="text-gray-400 mt-1">日期：2025年8月23日 (六) 16:00 - 18:00</p><p class="text-yellow-500 font-semibold mt-2">即將額滿</p><div class="mt-4 pt-3 border-t border-gray-700"><h4 class="text-sm font-semibold text-gray-300 mb-2">本場教練</h4><div class="flex items-center space-x-3"><img src="https://placehold.co/40x40/64748b/FFF?text=K" alt="教練照片" class="w-10 h-10 rounded-full"><div><p class="font-medium text-white">金教練</p><p class="text-xs text-gray-400">戰地足球傳奇</p></div></div></div></div><button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button></div></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側: 廣告與聯繫方式 -->
+            <aside class="w-full lg:w-1/3 space-y-8 lg:mt-24">
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-4">贊助商廣告</h3>
+                    <div class="ad-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-400">廣告版位</span></div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-4">需要幫忙嗎？</h3>
+                    <button class="btn-secondary font-bold py-3 px-4 rounded-lg w-full">聯繫版主</button>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="bg-gray-800 mt-12">
+        <div class="container mx-auto py-4 px-5 text-center">
+            <p class="text-gray-400 text-sm">&copy; 2025 足球幫. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 彈跳廣告視窗 -->
+    <div id="ad-modal-overlay" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 transition-opacity duration-300">
+        <div id="ad-modal-content" class="bg-gray-800 p-5 rounded-lg shadow-xl relative w-11/12 md:w-1/2 lg:w-1/3 transform transition-transform duration-300 scale-100">
+            <button id="close-modal-button" class="absolute top-2 right-3 text-gray-400 hover:text-white text-3xl font-light leading-none">&times;</button>
+            <h3 class="text-lg font-bold text-white mb-4 text-center">特別活動</h3>
+            <div class="ad-banner-placeholder w-full h-64 rounded-lg flex items-center justify-center">
+                <span class="text-gray-400">廣告 Banner</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入 LINE Front-end Framework (LIFF) SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    
+    <!-- 網站主要邏輯 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- LIFF 登入邏輯 ---
+            liff.init({ liffId: 'YOUR_LINE_CHANNEL_ID' }) // 請替換成您的 LIFF ID
+                .then(() => {
+                    console.log('LIFF 初始化成功');
+                    if (liff.isLoggedIn()) {
+                        displayUserProfile();
+                    } else {
+                        document.getElementById('login-section').classList.remove('hidden');
+                    }
+                })
+                .catch((err) => {
+                    console.error('LIFF 初始化失敗', err);
+                    document.getElementById('login-section').classList.remove('hidden');
+                });
+
+            document.getElementById('line-login-button').addEventListener('click', () => {
+                if (!liff.isLoggedIn()) { liff.login(); }
+            });
+
+            document.getElementById('logout-button').addEventListener('click', () => {
+                if (liff.isLoggedIn()) {
+                    liff.logout();
+                    window.location.reload();
+                }
+            });
+
+            // --- 彈跳視窗邏輯 ---
+            const adModalOverlay = document.getElementById('ad-modal-overlay');
+            const closeModalButton = document.getElementById('close-modal-button');
+            function closeModal() { adModalOverlay.classList.add('hidden'); }
+            closeModalButton.addEventListener('click', closeModal);
+            adModalOverlay.addEventListener('click', (event) => {
+                if (event.target === adModalOverlay) { closeModal(); }
+            });
+
+            // --- 頁籤切換邏輯 ---
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const targetTab = button.getAttribute('data-tab');
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(`tab-${targetTab}`).classList.add('active');
+                });
+            });
+        });
+
+        // 顯示使用者資訊的函式
+        function displayUserProfile() {
+            liff.getProfile()
+                .then(profile => {
+                    document.getElementById('user-name').textContent = profile.displayName;
+                    const userPicture = document.getElementById('user-picture');
+                    userPicture.src = profile.pictureUrl || 'https://placehold.co/40x40/64748b/FFF?text=U';
+                    
+                    document.getElementById('login-section').classList.add('hidden');
+                    const profileSection = document.getElementById('user-profile-section');
+                    profileSection.classList.remove('hidden');
+                    profileSection.classList.add('flex');
+                    
+                    console.log('Access Token:', liff.getAccessToken()); 
+                })
+                .catch((err) => {
+                    console.error('獲取使用者資料失敗', err);
+                });
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>足球活動報名</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Font Awesome (為了 LINE 圖標) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- 引入 Google Fonts 的 Inter 字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 自定義樣式 */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #111827; /* 深灰色背景 */
+            color: #d1d5db; /* 淺灰色文字 */
+        }
+        .card-image-placeholder {
+            border: 2px dashed #4b5563;
+            min-height: 150px;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .ad-placeholder {
+            border: 2px dashed #4b5563;
+            background-color: #1f2937;
+            height: 300px;
+        }
+        /* 新增：彈跳視窗廣告橫幅佔位符 */
+        .ad-banner-placeholder {
+            border: 2px dashed #4b5563;
+            background-color: #1f2937;
+        }
+        .btn-primary {
+            background-color: #0d9488;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #0f766e;
+        }
+        .btn-secondary {
+            background-color: #374151;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        /* LINE 登入按鈕樣式 */
+        .btn-line {
+            background-color: #00B900;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-line:hover {
+            background-color: #009d00;
+        }
+        /* 用於隱藏/顯示元素的輔助 class */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+
+    <!-- 頁首導覽列 -->
+    <header class="bg-gray-800/90 backdrop-blur-sm sticky top-0 z-40 shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- 網站標題/Logo -->
+                <div class="flex-shrink-0">
+                    <a href="#" class="text-white text-2xl font-bold tracking-wider">足球幫</a>
+                </div>
+                <!-- 導覽連結 (登入/使用者資訊) -->
+                <nav id="auth-nav" class="flex items-center space-x-4">
+                    <!-- 登入前顯示 -->
+                    <div id="login-section">
+                        <button id="line-login-button" class="btn-line font-bold py-2 px-4 rounded-lg flex items-center space-x-2">
+                            <i class="fab fa-line"></i>
+                            <span>使用 LINE 登入</span>
+                        </button>
+                    </div>
+                    <!-- 登入後顯示 -->
+                    <div id="user-profile-section" class="hidden items-center space-x-3">
+                        <img id="user-picture" src="" alt="User Picture" class="w-10 h-10 rounded-full border-2 border-gray-600">
+                        <span id="user-name" class="text-white font-medium"></span>
+                        <button id="logout-button" class="text-gray-300 hover:text-white text-sm font-medium transition-colors">登出</button>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+
+            <!-- 左側: 近期活動列表 -->
+            <div class="w-full lg:w-2/3">
+                <h1 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-500 pl-4">近期活動</h1>
+                
+                <div class="space-y-6">
+                    <!-- 活動卡片 1 -->
+                    <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
+                        <div class="p-5">
+                            <div class="flex flex-col md:flex-row gap-5">
+                                <div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div>
+                                <div class="w-full md:w-2/3 flex flex-col justify-between">
+                                    <div>
+                                        <h2 class="text-xl font-bold text-white">週末友誼賽 - 5人制</h2>
+                                        <p class="text-gray-400 mt-1">地點：台中市區足球場</p>
+                                        <p class="text-gray-400 mt-1">日期：2025年7月19日 (六) 14:00 - 16:00</p>
+                                        <p class="text-teal-400 font-semibold mt-2">尚餘名額: 3</p>
+                                    </div>
+                                    <button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 活動卡片 2 -->
+                    <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
+                        <div class="p-5">
+                            <div class="flex flex-col md:flex-row gap-5">
+                                <div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div>
+                                <div class="w-full md:w-2/3 flex flex-col justify-between">
+                                    <div>
+                                        <h2 class="text-xl font-bold text-white">夜間暢踢 - 8人制練習賽</h2>
+                                        <p class="text-gray-400 mt-1">地點：城市運動公園</p>
+                                        <p class="text-gray-400 mt-1">日期：2025年7月25日 (五) 19:00 - 21:00</p>
+                                        <p class="text-yellow-500 font-semibold mt-2">即將額滿</p>
+                                    </div>
+                                    <button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 活動卡片 3 (已額滿) -->
+                    <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden opacity-60">
+                        <div class="p-5">
+                            <div class="flex flex-col md:flex-row gap-5">
+                                <div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-500">活動照片</span></div>
+                                <div class="w-full md:w-2/3 flex flex-col justify-between">
+                                    <div>
+                                        <h2 class="text-xl font-bold text-white">新手教學體驗營</h2>
+                                        <p class="text-gray-400 mt-1">地點：陽光河濱公園</p>
+                                        <p class="text-gray-400 mt-1">日期：2025年8月2日 (六) 09:00 - 11:00</p>
+                                        <p class="text-red-500 font-semibold mt-2">已額滿</p>
+                                    </div>
+                                    <button class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end" disabled>無法報名</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 右側: 廣告與聯繫方式 -->
+            <aside class="w-full lg:w-1/3 space-y-8 lg:mt-16">
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-4">贊助商廣告</h3>
+                    <div class="ad-placeholder rounded-lg flex items-center justify-center"><span class="text-gray-400">廣告版位</span></div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-4">需要幫忙嗎？</h3>
+                    <button class="btn-secondary font-bold py-3 px-4 rounded-lg w-full">聯繫版主</button>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="bg-gray-800 mt-12">
+        <div class="container mx-auto py-4 px-5 text-center">
+            <p class="text-gray-400 text-sm">&copy; 2025 足球幫. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 新增：彈跳廣告視窗 -->
+    <div id="ad-modal-overlay" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 transition-opacity duration-300">
+        <div id="ad-modal-content" class="bg-gray-800 p-5 rounded-lg shadow-xl relative w-11/12 md:w-1/2 lg:w-1/3 transform transition-transform duration-300 scale-100">
+            <!-- 關閉按鈕 -->
+            <button id="close-modal-button" class="absolute top-2 right-3 text-gray-400 hover:text-white text-3xl font-light leading-none">&times;</button>
+            
+            <!-- 廣告 Banner -->
+            <h3 class="text-lg font-bold text-white mb-4 text-center">特別活動</h3>
+            <div class="ad-banner-placeholder w-full h-64 rounded-lg flex items-center justify-center">
+                <span class="text-gray-400">廣告 Banner</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 引入 LINE Front-end Framework (LIFF) SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    
+    <!-- 網站主要邏輯 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- LIFF 登入邏輯 ---
+            // 1. 初始化 LIFF
+            // *重要*：請將 'YOUR_LINE_CHANNEL_ID' 換成您在 LINE Developers Console 取得的 Channel ID
+            liff.init({ liffId: 'YOUR_LINE_CHANNEL_ID' })
+                .then(() => {
+                    console.log('LIFF 初始化成功');
+                    if (liff.isLoggedIn()) {
+                        displayUserProfile();
+                    } else {
+                        document.getElementById('login-section').classList.remove('hidden');
+                    }
+                })
+                .catch((err) => {
+                    console.error('LIFF 初始化失敗', err);
+                    document.getElementById('login-section').classList.remove('hidden');
+                });
+
+            // 2. 綁定登入按鈕事件
+            document.getElementById('line-login-button').addEventListener('click', () => {
+                if (!liff.isLoggedIn()) { liff.login(); }
+            });
+
+            // 3. 綁定登出按鈕事件
+            document.getElementById('logout-button').addEventListener('click', () => {
+                if (liff.isLoggedIn()) {
+                    liff.logout();
+                    window.location.reload();
+                }
+            });
+
+            // --- 彈跳視窗邏輯 ---
+            const adModalOverlay = document.getElementById('ad-modal-overlay');
+            const closeModalButton = document.getElementById('close-modal-button');
+
+            function closeModal() {
+                adModalOverlay.classList.add('hidden');
+            }
+
+            // 點擊 'X' 按鈕關閉視窗
+            closeModalButton.addEventListener('click', closeModal);
+
+            // 點擊背景遮罩關閉視窗
+            adModalOverlay.addEventListener('click', function(event) {
+                if (event.target === adModalOverlay) {
+                    closeModal();
+                }
+            });
+        });
+
+        // 顯示使用者資訊的函式
+        function displayUserProfile() {
+            liff.getProfile()
+                .then(profile => {
+                    document.getElementById('user-name').textContent = profile.displayName;
+                    const userPicture = document.getElementById('user-picture');
+                    userPicture.src = profile.pictureUrl || 'https://placehold.co/40x40/64748b/FFF?text=U';
+                    
+                    document.getElementById('login-section').classList.add('hidden');
+                    const profileSection = document.getElementById('user-profile-section');
+                    profileSection.classList.remove('hidden');
+                    profileSection.classList.add('flex');
+                    
+                    const accessToken = liff.getAccessToken();
+                    console.log('Access Token:', accessToken); 
+                })
+                .catch((err) => {
+                    console.error('獲取使用者資料失敗', err);
+                });
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>足球幫 - 後台管理系統</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- 引入 Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #111827; /* 深灰藍背景 */
+            color: #d1d5db;
+        }
+        /* 自定義滾動條樣式 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+        /* 切換開關樣式 */
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .4s; border-radius: 28px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #10b981; } /* 綠色 */
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* 側邊欄導航項目樣式 */
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            color: #9ca3af;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+            font-weight: 500;
+        }
+        .sidebar-link:hover {
+            background-color: #374151;
+            color: #ffffff;
+        }
+        .sidebar-link.active {
+            background-color: #0d9488;
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .sidebar-link i {
+            width: 1.5rem; /* 固定圖標寬度 */
+        }
+    </style>
+</head>
+<body class="flex h-screen">
+
+    <!-- 左側邊欄 -->
+    <aside class="w-64 bg-gray-800 p-4 flex flex-col flex-shrink-0">
+        <div class="flex items-center mb-8">
+            <i class="fas fa-shield-halved text-teal-400 text-3xl mr-3"></i>
+            <h1 class="text-white text-xl font-bold">足球幫後台</h1>
+        </div>
+        <nav class="flex-grow space-y-2">
+            <a href="#" class="sidebar-link active" onclick="showSection('dashboard')"><i class="fas fa-tachometer-alt fa-fw mr-3"></i>總覽</a>
+            <a href="#" class="sidebar-link" onclick="showSection('events')"><i class="fas fa-calendar-alt fa-fw mr-3"></i>活動管理</a>
+            <a href="#" class="sidebar-link" onclick="showSection('users')"><i class="fas fa-users fa-fw mr-3"></i>使用者管理</a>
+            <a href="#" class="sidebar-link" onclick="showSection('ads')"><i class="fas fa-bullhorn fa-fw mr-3"></i>廣告設定</a>
+            <a href="#" class="sidebar-link" onclick="showSection('settings')"><i class="fas fa-cog fa-fw mr-3"></i>系統設定</a>
+        </nav>
+        <div class="mt-auto">
+            <a href="#" class="sidebar-link"><i class="fas fa-sign-out-alt fa-fw mr-3"></i>登出系統</a>
+        </div>
+    </aside>
+
+    <!-- 右側主內容區 -->
+    <main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+        <!-- 總覽區塊 -->
+        <section id="dashboard">
+            <h2 class="text-3xl font-bold text-white mb-6">總覽</h2>
+            <!-- 數據卡片 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-gray-800 p-5 rounded-lg shadow-lg flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">今日報名人數</p>
+                        <p class="text-3xl font-bold text-white">128</p>
+                    </div>
+                    <i class="fas fa-user-plus text-teal-500 text-3xl"></i>
+                </div>
+                <div class="bg-gray-800 p-5 rounded-lg shadow-lg flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">進行中活動</p>
+                        <p class="text-3xl font-bold text-white">15</p>
+                    </div>
+                    <i class="fas fa-futbol text-green-500 text-3xl"></i>
+                </div>
+                <div class="bg-gray-800 p-5 rounded-lg shadow-lg flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">總使用者數</p>
+                        <p class="text-3xl font-bold text-white">3,450</p>
+                    </div>
+                    <i class="fas fa-users text-sky-500 text-3xl"></i>
+                </div>
+                <div class="bg-gray-800 p-5 rounded-lg shadow-lg flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">本月營收</p>
+                        <p class="text-3xl font-bold text-white">$12,380</p>
+                    </div>
+                    <i class="fas fa-dollar-sign text-amber-500 text-3xl"></i>
+                </div>
+            </div>
+            <!-- 圖表 -->
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div class="lg:col-span-3 bg-gray-800 p-5 rounded-lg shadow-lg">
+                    <h3 class="font-bold text-white mb-4">近期活動報名趨勢</h3>
+                    <canvas id="signupTrendChart"></canvas>
+                </div>
+                <div class="lg:col-span-2 bg-gray-800 p-5 rounded-lg shadow-lg">
+                    <h3 class="font-bold text-white mb-4">各地區活動比例</h3>
+                    <canvas id="regionDistributionChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 活動管理區塊 -->
+        <section id="events" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-white">活動管理</h2>
+                <button class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg flex items-center"><i class="fas fa-plus mr-2"></i>新增活動</button>
+            </div>
+            <div class="bg-gray-800 rounded-lg shadow-lg overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-300">
+                    <thead class="text-xs text-gray-400 uppercase bg-gray-700">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">活動名稱</th>
+                            <th scope="col" class="px-6 py-3">地區</th>
+                            <th scope="col" class="px-6 py-3">日期</th>
+                            <th scope="col" class="px-6 py-3">報名/總額</th>
+                            <th scope="col" class="px-6 py-3">狀態</th>
+                            <th scope="col" class="px-6 py-3">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-700 hover:bg-gray-700/50">
+                            <td class="px-6 py-4 font-medium text-white">週末友誼賽 - 5人制</td>
+                            <td class="px-6 py-4">中部</td>
+                            <td class="px-6 py-4">2025-07-19</td>
+                            <td class="px-6 py-4">17 / 20</td>
+                            <td class="px-6 py-4"><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                            <td class="px-6 py-4 space-x-2">
+                                <button class="text-sky-400 hover:text-sky-300"><i class="fas fa-pencil-alt"></i></button>
+                                <button class="text-red-500 hover:text-red-400"><i class="fas fa-trash-alt"></i></button>
+                            </td>
+                        </tr>
+                        <!-- 其他活動列... -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 使用者管理區塊 -->
+        <section id="users" class="hidden">
+            <h2 class="text-3xl font-bold text-white mb-6">使用者管理</h2>
+            <div class="bg-gray-800 rounded-lg shadow-lg overflow-x-auto">
+                 <table class="w-full text-sm text-left text-gray-300">
+                    <thead class="text-xs text-gray-400 uppercase bg-gray-700">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">使用者</th>
+                            <th scope="col" class="px-6 py-3">註冊日期</th>
+                            <th scope="col" class="px-6 py-3">儲值金</th>
+                            <th scope="col" class="px-6 py-3">狀態</th>
+                            <th scope="col" class="px-6 py-3">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-700 hover:bg-gray-700/50">
+                            <td class="px-6 py-4 font-medium text-white flex items-center">
+                                <img src="https://placehold.co/40x40/7c3aed/FFF?text=U" class="w-8 h-8 rounded-full mr-3" alt="User">
+                                <span>範例使用者A</span>
+                            </td>
+                            <td class="px-6 py-4">2025-06-15</td>
+                            <td class="px-6 py-4">$999</td>
+                            <td class="px-6 py-4"><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                            <td class="px-6 py-4 space-x-2">
+                                <button class="text-sky-400 hover:text-sky-300"><i class="fas fa-pencil-alt"></i></button>
+                                <button class="text-yellow-400 hover:text-yellow-300"><i class="fas fa-comment-dots"></i></button>
+                            </td>
+                        </tr>
+                        <!-- 其他使用者列... -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 廣告設定區塊 -->
+        <section id="ads" class="hidden">
+            <h2 class="text-3xl font-bold text-white mb-6">廣告設定</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 彈跳視窗廣告設定 -->
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold text-white mb-4">彈跳視窗廣告</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <label for="popup-ad-switch" class="font-medium text-gray-300">啟用彈跳視窗</label>
+                        <label class="switch"><input id="popup-ad-switch" type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-gray-300">上傳廣告橫幅</label>
+                            <input type="file" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"/>
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-gray-300">廣告連結</label>
+                            <input type="url" placeholder="https://example.com" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-2.5 focus:ring-teal-500 focus:border-teal-500">
+                        </div>
+                    </div>
+                </div>
+                <!-- 側邊欄廣告設定 -->
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold text-white mb-4">側邊欄廣告</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <label for="sidebar-ad-switch" class="font-medium text-gray-300">啟用側邊欄廣告</label>
+                        <label class="switch"><input id="sidebar-ad-switch" type="checkbox"><span class="slider"></span></label>
+                    </div>
+                     <div class="space-y-4">
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-gray-300">上傳廣告橫幅</label>
+                            <input type="file" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100"/>
+                        </div>
+                        <div>
+                            <label class="block mb-2 text-sm font-medium text-gray-300">廣告連結</label>
+                            <input type="url" placeholder="https://example.com" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-2.5 focus:ring-teal-500 focus:border-teal-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-8 text-right">
+                <button class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-6 rounded-lg">儲存設定</button>
+            </div>
+        </section>
+
+        <!-- 系統設定區塊 -->
+        <section id="settings" class="hidden">
+            <h2 class="text-3xl font-bold text-white mb-6">系統設定</h2>
+             <div class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-2xl">
+                <h3 class="text-xl font-bold text-white mb-6">主要設定</h3>
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <label for="maintenance-switch" class="font-medium text-gray-300">啟用網站維護模式</label>
+                        <label class="switch"><input id="maintenance-switch" type="checkbox"><span class="slider"></span></label>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <label for="new-user-reg-switch" class="font-medium text-gray-300">開放新使用者註冊</label>
+                        <label class="switch"><input id="new-user-reg-switch" type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div>
+                        <label for="default-fee" class="block mb-2 font-medium text-gray-300">預設活動報名費</label>
+                        <div class="relative">
+                             <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">$</span>
+                             <input id="default-fee" type="number" value="150" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-2.5 pl-7 focus:ring-teal-500 focus:border-teal-500">
+                        </div>
+                    </div>
+                </div>
+                 <div class="mt-8 text-right">
+                    <button class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-6 rounded-lg">儲存設定</button>
+                </div>
+             </div>
+        </section>
+    </main>
+
+<script>
+    // 區塊切換邏輯
+    function showSection(sectionId) {
+        // 隱藏所有區塊
+        document.querySelectorAll('main > section').forEach(section => {
+            section.classList.add('hidden');
+        });
+        // 顯示目標區塊
+        document.getElementById(sectionId).classList.remove('hidden');
+
+        // 更新側邊欄連結的 active 狀態
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
+    }
+
+    // Chart.js 圖表渲染
+    document.addEventListener('DOMContentLoaded', function() {
+        // 報名趨勢圖
+        const signupCtx = document.getElementById('signupTrendChart').getContext('2d');
+        new Chart(signupCtx, {
+            type: 'bar',
+            data: {
+                labels: ['週一', '週二', '週三', '週四', '週五', '週六', '週日'],
+                datasets: [{
+                    label: '報名人數',
+                    data: [65, 59, 80, 81, 56, 105, 128],
+                    backgroundColor: 'rgba(20, 184, 166, 0.6)',
+                    borderColor: 'rgba(13, 148, 136, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 地區分佈圖
+        const regionCtx = document.getElementById('regionDistributionChart').getContext('2d');
+        new Chart(regionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['北部', '中部', '南部', '東部', '外島'],
+                datasets: [{
+                    label: '活動數量',
+                    data: [12, 19, 8, 3, 2],
+                    backgroundColor: ['#3b82f6', '#10b981', '#f97316', '#8b5cf6', '#ef4444'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

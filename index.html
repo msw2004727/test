@@ -1,604 +1,257 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant" class=""> <!-- 'dark' class will be toggled here -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>怪獸異世界</title>
+    <title>足球活動報名網</title>
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <!-- 引入 Google Fonts 的 Inter 字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入 ionicons 圖標庫 -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <style>
+        /* 使用 Noto Sans TC 作為主要字體以獲得更好的中文顯示效果 */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            @apply bg-gray-100 text-gray-800 transition-colors duration-500;
+        }
+        /* --- 深色模式樣式 --- */
+        .dark body {
+            @apply bg-gray-900 text-gray-200;
+        }
+        .dark header {
+            @apply bg-gray-800/80 border-b border-gray-700;
+        }
+        .dark .card {
+            @apply bg-gray-800 shadow-lg shadow-black/20;
+        }
+        .dark .card h2 { @apply text-white; }
+        .dark .card p { @apply text-gray-300; }
+        .dark .tab-container {
+            @apply bg-gray-800;
+        }
+        .dark .tab-button {
+            @apply text-gray-400;
+        }
+        .dark .tab-button:not(.active):hover {
+            @apply text-indigo-400 border-indigo-700;
+        }
+        .dark .tab-button.active {
+            @apply text-indigo-400 border-indigo-400 bg-gray-900;
+        }
+        .dark .side-panel {
+            @apply bg-gray-800;
+        }
+        .dark .side-panel h3 { @apply text-white; }
 
-    <script>
-        // 當您更新遊戲檔案後，只需要修改這個版本號，就能強制所有玩家更新
-        const gameVersion = '0.4.0.5'; 
+        /* --- 按鈕樣式與動畫 --- */
+        .btn {
+            @apply font-bold py-2 px-5 rounded-full shadow-lg transition-all duration-300 ease-in-out transform;
+        }
+        .btn-primary {
+            @apply btn bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:shadow-xl hover:-translate-y-1;
+        }
+        .btn-secondary {
+            @apply btn bg-gradient-to-r from-gray-600 to-gray-800 text-white hover:shadow-xl hover:-translate-y-1;
+        }
 
-        const cssFiles = [
-            'css/theme.css',
-            'css/layout.css',
-            'css/buttons.css',
-            'css/components.css',
-            'css/modals.css',
-            'css/champions.css',
-            'css/mailbox.css',
-            'css/adventure.css'
-        ];
+        /* --- 卡片樣式與動畫 --- */
+        .card {
+            @apply bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-500 ease-in-out transform hover:-translate-y-2 hover:shadow-2xl;
+        }
         
-        cssFiles.forEach(path => {
-            document.write(`<link rel="stylesheet" href="${path}?v=${gameVersion}">`);
-        });
-    </script>
+        /* --- 輪播動畫 --- */
+        .carousel-item {
+            transition: transform 0.8s ease-in-out;
+        }
+
+        /* --- 頁籤樣式 (加大、置中) --- */
+        .tab-button {
+            @apply px-6 py-3 text-lg font-semibold text-gray-600 rounded-lg transition-all duration-300 ease-in-out border-b-4 border-transparent;
+        }
+        .tab-button.active {
+            @apply text-indigo-600 border-indigo-600 bg-white shadow-md;
+        }
+        .tab-button:not(.active):hover {
+            @apply text-indigo-500;
+        }
+
+        /* --- 內容面板動畫 --- */
+        .tab-panel {
+            display: none; /* 預設隱藏 */
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        .tab-panel.active {
+            display: block; /* 僅顯示 active 的面板 */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
-    <div id="auth-screen">
-        <div class="auth-container">
-            <h1 class="auth-title">怪獸異世界</h1>
-            <button id="show-login-form-btn" class="auth-button primary">使用暱稱/密碼登入</button>
-            <button id="show-register-form-btn" class="auth-button secondary highlighted-register">重新開始遊戲 (創建帳號)</button>
-        </div>
-    </div>
 
-    <div id="register-modal" class="modal">
-        <div class="modal-content" style="max-width: 420px;">
-            <span class="modal-close" data-modal-id="register-modal">&times;</span> 
-            <h3 class="modal-header">創建您的訓獸師帳號</h3>
-            <div class="modal-body">
-                <input type="text" id="register-nickname" class="auth-input" placeholder="請輸入您的暱稱" required>
-                <input type="password" id="register-password" class="auth-input" placeholder="請設定您的密碼" required>
-                <div id="register-error" class="auth-error-message"></div>
-                <button id="register-submit-btn" class="auth-button success">創建並進入異世界</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="login-modal" class="modal">
-        <div class="modal-content" style="max-width: 420px;">
-            <span class="modal-close" data-modal-id="login-modal">&times;</span> 
-            <h3 class="modal-header">訓獸師登入</h3>
-            <div class="modal-body">
-                <input type="text" id="login-nickname" class="auth-input" placeholder="您的暱稱" required>
-                <input type="password" id="login-password" class="auth-input" placeholder="您的密碼" required>
-                <div id="login-error" class="auth-error-message"></div>
-                <button id="login-submit-btn" class="auth-button primary">登入異世界</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="official-announcement-modal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <span class="modal-close" data-modal-id="official-announcement-modal" id="official-announcement-close-x">&times;</span>
-            <h3 class="modal-header">📢 遊戲官方公告</h3>
-            <div class="modal-body">
-                <div id="announcement-ad-banner" style="background-color: var(--bg-slot); border: 1px solid var(--border-color); color: var(--text-primary); text-align: center; padding: 20px; border-radius: 6px; margin-bottom: 15px;">
-                    <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-asset-key="modals.announcement" alt="廣告橫幅" style="max-width: 100%; max-height: 100%; border-radius: 4px;">
+    <!-- Header / Navigation Bar -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-md sticky top-0 z-50 transition-colors duration-500">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center">
+                        <span>⚽</span>
+                        <span class="ml-2">足跡</span>
+                    </a>
                 </div>
-                <div id="announcement-content">
-                    </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="game-container" style="display: none; width:100%; display:flex; flex-direction:column; align-items:center;">
-        <div class="main-container">
-            <button id="main-logout-btn" class="corner-button top-left-button" title="登出">🚪</button>
-            <button id="theme-switcher" class="corner-button top-right-button" title="切換主題">
-                <span id="theme-icon">🌙</span>
-            </button>
-
-            <div class="monster-snapshot-panel panel">
-                <div id="monster-snapshot-area" class="monster-snapshot-area">
-                    <img id="monster-snapshot-base-bg" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-asset-key="snapshot.background" alt="怪獸快照背景">
-                    
-                    <img id="monster-snapshot-body-silhouette" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-asset-key="snapshot.bodySilhouette" alt="怪獸全身輪廓">
-
-                    <div id="monster-parts-container">
-                        <div id="monster-part-head" class="monster-part">
-                            <div class="monster-part-overlay"><span class="dna-name-text"></span></div>
-                            <img class="monster-part-image" src="" alt="">
-                        </div>
-                        <div id="monster-part-left-arm" class="monster-part">
-                            <div class="monster-part-overlay"><span class="dna-name-text"></span></div>
-                            <img class="monster-part-image" src="" alt="">
-                        </div>
-                        <div id="monster-part-right-arm" class="monster-part">
-                            <div class="monster-part-overlay"><span class="dna-name-text"></span></div>
-                            <img class="monster-part-image" src="" alt="">
-                        </div>
-                        <div id="monster-part-left-leg" class="monster-part">
-                            <div class="monster-part-overlay"><span class="dna-name-text"></span></div>
-                            <img class="monster-part-image" src="" alt="">
-                        </div>
-                        <div id="monster-part-right-leg" class="monster-part">
-                            <div class="monster-part-overlay"><span class="dna-name-text"></span></div>
-                            <img class="monster-part-image" src="" alt="">
-                        </div>
-                    </div>
-
-                    <div id="snapshot-main-content" class="snapshot-main-content">
-                        <span id="snapshot-achievement-title">初出茅廬</span>
-                        <span id="snapshot-nickname">-</span>
-                    </div>
-                    
-                    <div id="snapshot-win-loss" class="snapshot-win-loss">
-                        <span>勝: 0</span>
-                        <span>敗: 0</span>
-                    </div>
-
-                    <div id="snapshot-bars-container">
-                        <div class="snapshot-bar snapshot-hp-bar"><div id="snapshot-hp-fill" class="snapshot-bar-fill"></div></div>
-                        <div class="snapshot-bar snapshot-mp-bar"><div id="snapshot-mp-fill" class="snapshot-bar-fill"></div></div>
-                    </div>
-                    
-                    <div class="snapshot-info-overlay">
-                        <div class="snapshot-info-left">
-                        </div>
-                        <div class="snapshot-info-right">
-                            <span id="snapshot-evaluation">總評價: 0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="player-currency-panel" class="player-currency-panel">
-                <span id="player-currency-amount">0</span>
-                <span class="currency-icon">🪙</span>
-            </div>
-
-            <div class="panel">
-                <div class="tab-buttons" id="dna-farm-tabs">
-                    <button class="tab-button active" data-tab-target="dna-inventory-content">🧬 DNA管理</button>
-                    <button class="tab-button" data-tab-target="monster-farm-content">🏡 怪獸農場</button>
-                    <button class="tab-button" data-tab-target="friends-list-content">🧑‍🤝‍🧑 好友列表</button>
-                    <button class="tab-button" data-tab-target="tournament-content">🥋 武道大會</button>
-                    <button class="tab-button" data-tab-target="medical-content">🚑 醫療站</button>
-                    <button class="tab-button" data-tab-target="training-ground-content">🏋️ 訓練場</button> 
-                    <button class="tab-button" data-tab-target="exchange-content">⚖️ 交易所</button>
-                    <button class="tab-button" data-tab-target="homestead-content">🏰 秘密基地</button>
-                    <button class="tab-button" data-tab-target="guild-content">🏝️ 冒險島</button>
-                    </div>
-
-                <div id="dna-inventory-content" class="tab-content active">
-                    <div id="dna-combination-panel-wrapper" class="panel mb-4">
-                        <h2 class="panel-title dna-panel-title">🧬 DNA組合</h2>
-                        <div id="dna-combination-slots" class="dna-combination-grid mt-2"></div>
-                        <div class="action-buttons-grid dual-buttons mt-3">
-                            <button id="combine-button" class="success action-button-main button" disabled>怪獸合成</button>
-                            <button id="dna-draw-button" class="primary action-button-main button">抽取DNA</button>
-                        </div>
-                    </div>
-                    <div class="panel-title-container" style="border-bottom: none; margin-bottom: 5px;">
-                         <h2 class="panel-title dna-panel-title">🔬 DNA碎片</h2>
-                         <button id="inventory-guide-button" title="說明" style="background: var(--button-secondary-bg); border: 1px solid var(--border-color); border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">🔰</button>
-                    </div>
-                    <div id="inventory-items" class="inventory-grid mt-2"></div>
-                    <div class="mt-4">
-                        <h3 class="panel-title dna-panel-title text-sm mb-2">🎒 臨時背包（退出就會清空欄位）</h3>
-                        <div id="temporary-backpack-items" class="temp-backpack-grid"></div>
-                    </div>
-                </div>
-
-                <div id="monster-farm-content" class="tab-content">
-                    <div class="panel-title-container" style="border-bottom: none; margin-bottom: 5px;">
-                         <h2 class="panel-title dna-panel-title">🏡 怪獸農場</h2>
-                         <span class="panel-title-hint dna-panel-hint">※最多收納10隻怪獸</span>
-                    </div>
-                    <div id="farm-table-wrapper" style="overflow-x: auto; padding-bottom: 5px;">
-                        <div id="farm-headers" class="farm-header-grid mt-2">
-                        </div>
-                        <div id="farmed-monsters-list">
-                            <p class="text-center text-sm text-[var(--text-secondary)] py-4 col-span-full">農場空空如也，快去組合怪獸吧！</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="friends-list-content" class="tab-content">
-                    <div class="panel-title-container" style="border-bottom: 1px solid var(--border-color); margin-bottom: 10px; padding-bottom: 10px;">
-                        <h2 class="panel-title dna-panel-title">🔎 搜尋玩家</h2>
-                    </div>
-                    <input type="text" id="friends-tab-search-input" placeholder="輸入玩家暱稱進行搜尋..." class="mb-3" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-primary); color: var(--text-primary);">
-                    <div id="friends-search-results-area" class="mb-4">
-                        </div>
-                    
-                    <div class="panel-title-container" style="display: flex; align-items: center; gap: 0.5rem; justify-content: flex-start; border-bottom: none; margin-bottom: 5px;">
-                         <h2 class="panel-title dna-panel-title">🧑‍🤝‍🧑 好友列表</h2>
-                         <button id="refresh-friends-list-btn" class="button secondary text-xs" title="刷新列表" style="padding: 4px 8px; line-height: 1; font-size: 1rem; min-width: auto;" onclick="if(typeof renderFriendsList === 'function') renderFriendsList()">🔄</button>
-                    </div>
-                    <div id="friends-list-display-area" class="mt-2">
-                        <p class="text-center text-sm text-[var(--text-secondary)] py-4">好友列表空空如也，快去搜尋並新增好友吧！</p>
-                    </div>
-                </div>
-
-                <div id="tournament-content" class="tab-content">
-                    <p class="text-center text-lg text-[var(--text-secondary)] py-10">🥋 武道大會正在激烈籌備中，敬請期待！</p>
-                </div>
-                <div id="medical-content" class="tab-content">
-                    <p class="text-center text-lg text-[var(--text-secondary)] py-10">🚑 正在招募醫護人員中，敬請期待！</p>
-                </div>
-                
-                <div id="training-ground-content" class="tab-content">
-                    <p class="text-center text-lg text-[var(--text-secondary)] py-10">🏋️ 訓練場器材進駐中，敬請期待！</p>
-                </div>
-
-                <div id="exchange-content" class="tab-content">
-                    <p class="text-center text-lg text-[var(--text-secondary)] py-10">⚖️ 交易所搭建中，敬請期待！</p>
-                </div>
-                <div id="homestead-content" class="tab-content">
-                    <p class="text-center text-lg text-[var(--text-secondary)] py-10">🏰 秘密基地建設中，敬請期待！</p>
-                </div>
-                <div id="guild-content" class="tab-content">
-                    <p class="text-center text-lg text-[var(--text-secondary)] py-10">🏝️ 港口尚未開放，敬請期待！</p>
-                </div>
-
-                </div>
-        </div>
-    </div>
-
-    <div id="confirmation-modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" id="confirmation-modal-close-x" data-modal-id="confirmation-modal">&times;</span>
-            <h3 id="confirmation-modal-title" class="modal-header text-center">⚠️ 提示</h3> 
-            <div id="confirmation-modal-body" class="modal-body">
-                <div id="release-monster-image-placeholder" style="display:none; width:120px; height:90px; margin:10px auto;">
-                    <img id="release-monster-img-preview" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-asset-key="placeholders.monsterPartDefault" alt="預覽">
-                </div>
-            </div>
-            <div class="modal-footer" style="justify-content: center;"> 
-                <button id="confirm-action-btn" class="button danger">✔️ 確定</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="monster-leaderboard-modal" class="modal">
-        <div class="modal-content large">
-            <span class="modal-close" data-modal-id="monster-leaderboard-modal">&times;</span>
-            <div class="modal-header-container">
-                <h3 class="modal-header">怪獸排行榜</h3>
-                <button id="refresh-monster-leaderboard-btn" class="button secondary text-xs" title="刷新列表">🔄</button>
-            </div>
-            
-            <div class="champions-section">
-                <h4 class="champions-section-title">冠軍殿堂</h4>
-                <div class="champions-grid" id="champions-grid-container">
-                    <div class="champion-slot" data-rank="1">
-                        <div class="champion-avatar-container">
-                            <span class="champion-crown">👑</span>
-                            <div class="champion-avatar" id="champion-avatar-1"></div>
-                            <div class="champion-reign-duration" id="champion-reign-duration-1"></div>
-                        </div>
-                        <span class="champion-name" id="champion-name-1">冠軍</span>
-                        <button class="champion-challenge-btn button secondary text-xs" id="champion-challenge-btn-1" disabled>挑戰</button>
-                    </div>
-                    <div class="champion-slot" data-rank="2">
-                        <div class="champion-avatar-container">
-                            <div class="champion-avatar" id="champion-avatar-2"></div>
-                            <div class="champion-reign-duration" id="champion-reign-duration-2"></div>
-                        </div>
-                        <span class="champion-name" id="champion-name-2">亞軍</span>
-                        <button class="champion-challenge-btn button secondary text-xs" id="champion-challenge-btn-2" disabled>挑戰</button>
-                    </div>
-                    <div class="champion-slot" data-rank="3">
-                        <div class="champion-avatar-container">
-                            <div class="champion-avatar" id="champion-avatar-3"></div>
-                            <div class="champion-reign-duration" id="champion-reign-duration-3"></div>
-                        </div>
-                        <span class="champion-name" id="champion-name-3">季軍</span>
-                        <button class="champion-challenge-btn button secondary text-xs" id="champion-challenge-btn-3" disabled>挑戰</button>
-                    </div>
-                    <div class="champion-slot" data-rank="4">
-                        <div class="champion-avatar-container">
-                            <div class="champion-avatar" id="champion-avatar-4"></div>
-                            <div class="champion-reign-duration" id="champion-reign-duration-4"></div>
-                        </div>
-                        <span class="champion-name" id="champion-name-4">殿軍</span>
-                        <button class="champion-challenge-btn button secondary text-xs" id="champion-challenge-btn-4" disabled>挑戰</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="monster-leaderboard-table-container" class="modal-body">
-                <table id="monster-leaderboard-table" class="leaderboard-table"></table>
-            </div>
-        </div>
-    </div>
-
-    <div id="player-leaderboard-modal" class="modal">
-        <div class="modal-content large">
-            <span class="modal-close" data-modal-id="player-leaderboard-modal">&times;</span>
-            <h3 class="modal-header">玩家英雄榜</h3>
-            <div id="player-leaderboard-table-container" class="modal-body">
-                <table id="player-leaderboard-table" class="leaderboard-table"></table>
-            </div>
-        </div>
-    </div>
-
-    <div id="monster-info-modal" class="modal">
-        <div class="modal-content large"> 
-            <span class="modal-close" data-modal-id="monster-info-modal">&times;</span>
-            <div id="monster-info-modal-header-content" class="monster-info-header"></div>
-            <div class="tab-buttons" id="monster-info-tabs">
-                <button class="tab-button active" data-tab-target="monster-details-tab" data-parent-modal="monster-info-modal">📜 詳細資訊</button>
-                <button class="tab-button" data-tab-target="monster-logs-tab" data-parent-modal="monster-info-modal">🐾 活動紀錄</button>
-                <button class="tab-button" data-tab-target="monster-notes-tab" data-parent-modal="monster-info-modal">📝 備註</button>
-                <button class="tab-button" data-tab-target="monster-chat-tab" data-parent-modal="monster-info-modal">💬 對話</button>
-            </div>
-            <div id="monster-details-tab" class="tab-content active modal-body"></div>
-            <div id="monster-logs-tab" class="tab-content modal-body">
-                <div id="monster-activity-logs" class="max-h-[300px] overflow-y-auto">
-                    <p class="text-center text-sm text-[var(--text-secondary)] py-4">尚無活動紀錄。</p>
-                </div>
-            </div>
-            <div id="monster-notes-tab" class="tab-content modal-body">
-                <div id="monster-notes-display" class="max-h-[250px] overflow-y-auto mb-3 p-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-primary)]">
-                    <p class="text-center text-sm text-[var(--text-secondary)]">尚無備註。</p>
-                </div>
-                <textarea id="monster-note-input" class="w-full p-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-primary)] text-[var(--text-primary)]" rows="4" placeholder="為這隻怪獸寫下一些筆記..." maxlength="100"></textarea>
-                <button id="save-monster-note-btn" class="button primary w-full mt-2">儲存備註</button>
-            </div>
-            <div id="monster-chat-tab" class="tab-content modal-body">
-                <div id="chat-log-area" style="height: 350px; overflow-y: auto; display: flex; flex-direction: column-reverse; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-primary);">
-                </div>
-                <div id="chat-interaction-buttons" class="chat-interaction-buttons" style="display: flex; justify-content: flex-start; gap: 10px; margin: 10px 0;">
-                    <button id="interact-punch-btn" class="chat-interact-btn" title="揍">👊</button>
-                    <button id="interact-pat-btn" class="chat-interact-btn" title="摸">👋</button>
-                    <button id="interact-kiss-btn" class="chat-interact-btn" title="親">😘</button>
-                </div>
-                <div class="chat-input-container" style="display: flex; gap: 10px;">
-                    <input type="text" id="chat-input" class="auth-input" style="flex-grow: 1; margin-bottom: 0;" placeholder="跟牠說點什麼...">
-                    <button id="send-chat-btn" class="button primary" style="white-space: nowrap;">發送</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="player-info-modal" class="modal">
-        <div class="modal-content large"> 
-            <span class="modal-close" data-modal-id="player-info-modal">&times;</span>
-            <h3 class="modal-header">👤 玩家資訊</h3>
-            <div id="player-info-modal-body" class="modal-body"></div>
-        </div>
-    </div>
-
-    <div id="feedback-modal" class="modal">
-        <div class="modal-content feedback-wide"> 
-            <span id="feedback-modal-close-x" class="modal-close" data-modal-id="feedback-modal">&times;</span>
-            <h3 id="feedback-modal-title" class="modal-header text-center">處理中...</h3>
-            <div id="feedback-modal-body-content" class="modal-body" style="position: relative;">
-                 <div id="feedback-modal-spinner" class="loading-spinner" style="display: none;"></div>
-                 <img id="feedback-modal-breathing-icon" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-asset-key="logos.loadingIcon" alt="Loading..." style="display: none;">
-                 <div id="feedback-modal-message"></div>
-                 <div id="feedback-monster-details" style="display:none;" class="mt-3"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="cultivation-setup-modal" class="modal">
-        <div class="modal-content large">
-            <span class="modal-close" id="cultivation-modal-close-x" data-modal-id="cultivation-setup-modal">&times;</span>
-            <h3 id="cultivation-setup-modal-title" class="modal-header">🌱 怪獸養成計畫</h3>
-            <div class="modal-body py-4">
-                <div class="text-center">
-                    <p class="mb-2 text-base">正在為 <strong id="cultivation-monster-name" class="text-[var(--accent-color)]"></strong> 選擇修煉場所。</p>
-                    <p class="text-sm text-[var(--text-secondary)]">不同的場所有不同的元素加成，請謹慎選擇！</p>
-                </div>
-                <p class="text-center font-bold my-2" style="color: var(--rarity-legendary-text);">點擊卡片前往修練</p>
-                
-                <div class="cultivation-locations-container">
-                    <button class="cultivation-location-card" id="location-gaia" data-location="gaia">
-                        <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-asset-key="cultivation.locationGaia" alt="蓋亞的搖籃">
-                        <h5>蓋亞的搖籃 (自然系)</h5>
-                        <p>充滿生命氣息的原始叢林，適合木、水、土、毒屬性的怪獸。</p>
-                    </button>
-                    <button class="cultivation-location-card" id="location-sky" data-location="sky">
-                         <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-asset-key="cultivation.locationSky" alt="天空的怒火">
-                        <h5>天空的怒火 (能量系)</h5>
-                        <p>時而烈日曝曬、時而狂風呼嘯的高地，適合火、風、光屬性的怪獸。</p>
-                    </button>
-                    <button class="cultivation-location-card" id="location-crystal" data-location="crystal">
-                         <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-asset-key="cultivation.locationCrystal" alt="人智的結晶">
-                        <h5>人智的結晶 (法則系)</h5>
-                        <p>被遺棄的古代鍊金都市，充滿了人造與形而上的法則元素，適合金、暗、混屬性。</p>
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium px-3 py-2 rounded-md text-sm transition-colors">登入</a>
+                    <a href="#" class="bg-green-500 text-white hover:bg-green-600 font-medium px-4 py-2 rounded-full text-sm shadow-sm transition-colors">註冊</a>
+                    <!-- 深色/淺色模式切換按鈕 -->
+                    <button id="theme-toggle" class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+                        <ion-icon name="moon-outline" class="text-2xl block dark:hidden"></ion-icon>
+                        <ion-icon name="sunny-outline" class="text-2xl hidden dark:block"></ion-icon>
                     </button>
                 </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 lg:p-8">
+
+        <!-- 精彩照片輪播 -->
+        <section id="photo-carousel" class="mb-12 rounded-2xl shadow-2xl overflow-hidden relative">
+            <div id="carousel-inner" class="relative w-full h-56 md:h-96 whitespace-nowrap">
+                <div class="carousel-item inline-block w-full h-full" style="transform: translateX(0%);">
+                    <img src="https://placehold.co/1200x600/3498db/ffffff?text=精彩射門瞬間" class="w-full h-full object-cover" alt="精彩照片1">
+                </div>
+                <div class="carousel-item inline-block w-full h-full" style="transform: translateX(0%);">
+                    <img src="https://placehold.co/1200x600/e74c3c/ffffff?text=團隊慶祝時刻" class="w-full h-full object-cover" alt="精彩照片2">
+                </div>
+                <div class="carousel-item inline-block w-full h-full" style="transform: translateX(0%);">
+                    <img src="https://placehold.co/1200x600/2ecc71/ffffff?text=激烈攻防對抗" class="w-full h-full object-cover" alt="精彩照片3">
+                </div>
+            </div>
+            <button id="prevBtn" class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black bg-opacity-40 text-white p-2 rounded-full hover:bg-opacity-60 transition-all z-10"><ion-icon name="chevron-back-outline" class="text-2xl"></ion-icon></button>
+            <button id="nextBtn" class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black bg-opacity-40 text-white p-2 rounded-full hover:bg-opacity-60 transition-all z-10"><ion-icon name="chevron-forward-outline" class="text-2xl"></ion-icon></button>
+        </section>
+
+
+        <div class="flex flex-col lg:flex-row lg:space-x-8">
+            <!-- 主要內容 (左欄) -->
+            <div class="w-full lg:w-2/3">
                 
-                <p class="cultivation-hint text-xs mt-3 text-center" style="line-height: 1.7;">修煉時長上限為 <span id="max-cultivation-time">3600</span> 秒。修煉期間，怪獸將無法放生或出戰。</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="training-results-modal" class="modal">
-        <div class="modal-content large">
-            <span class="modal-close" id="close-training-results-btn" data-modal-id="training-results-modal">&times;</span>
-            <h3 id="training-results-modal-title" class="modal-header">🎉 修煉成果 🎉</h3>
-            <div class="modal-body">
-                <div class="training-result-section">
-                    <h5>📜 冒險故事</h5>
-                    <p id="training-story-result"></p>
+                <!-- 地區頁籤 (置中) -->
+                <div class="mb-8 tab-container bg-gray-200/60 rounded-lg p-1 flex justify-center space-x-2">
+                    <button class="tab-button active" data-tab="north">北部</button>
+                    <button class="tab-button" data-tab="central">中部</button>
+                    <button class="tab-button" data-tab="south">南部</button>
                 </div>
-                <div class="training-result-section">
-                    <h5>📈 成長紀錄</h5>
-                    <div id="training-growth-result"></div>
-                </div>
-                <div class="training-result-section">
-                    <h5>💎 拾獲物品</h5>
-                    <div id="training-items-result" class="mb-2"></div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div id="newbie-guide-modal" class="modal">
-        <div class="modal-content large">
-            <span class="modal-close" data-modal-id="newbie-guide-modal">&times;</span>
-            <h3 class="modal-header">📖 新手上路指南</h3>
-            <div class="modal-body">
-                <input type="text" id="newbie-guide-search-input" placeholder="搜尋指南內容..." class="mb-4">
-                <div id="newbie-guide-content-area" class="max-h-[50vh] overflow-y-auto"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="reminder-modal" class="modal">
-        <div class="modal-content" style="max-width: 380px;">
-            <h3 id="reminder-modal-title" class="modal-header text-center">溫馨提醒</h3>
-            <div id="reminder-modal-body" class="modal-body text-center">
-                <p>您有尚未加入背包的修煉拾獲物品，確定要關閉嗎？關閉後未加入的物品將會消失。</p>
-            </div>
-            <div class="modal-footer">
-                <button id="reminder-confirm-close-btn" class="danger button">仍要關閉</button>
-                <button id="reminder-cancel-btn" class="secondary button" data-modal-id="reminder-modal">返回查看</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="friends-list-modal" class="modal">
-        <div class="modal-content large">
-            <span class="modal-close" data-modal-id="friends-list-modal">&times;</span>
-            <h3 class="modal-header">🧑‍🤝‍🧑 好友名單</h3>
-            <div class="modal-body">
-                <input type="text" id="friends-list-search-input" placeholder="搜尋玩家暱稱..." class="mb-3">
-                <div id="friends-list-container">
-                    <p class="text-center text-sm text-[var(--text-secondary)]">輸入暱稱搜尋其他玩家。</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="battle-log-modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" data-modal-id="battle-log-modal">&times;</span>
-            <h3 class="modal-header">⚔️ 戰鬥記錄 ⚔️</h3>
-            <div id="battle-log-area" class="modal-body"></div>
-            <div class="modal-footer">
-                <button id="close-battle-log-btn" class="secondary button" data-modal-id="battle-log-modal">關閉</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="dna-draw-modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" data-modal-id="dna-draw-modal">&times;</span>
-            <h3 class="modal-header">🧬 DNA 抽取結果</h3>
-            <div class="modal-body">
-                <div id="dna-draw-results-grid"></div>
-                <p class="text-sm text-[var(--text-secondary)] mt-3 text-center">點擊物品可將其加入臨時背包。</p>
-            </div>
-            <div class="modal-footer">
-                <button id="close-dna-draw-btn" class="secondary button" data-modal-id="dna-draw-modal">關閉</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="selection-modal" class="modal">
-        <div class="modal-content large">
-            <span class="modal-close" data-modal-id="selection-modal">&times;</span>
-            <h3 id="selection-modal-title" class="modal-header">天梯-排行榜</h3>
-            <div class="modal-body">
-                <div class="selection-container">
-                    <div id="open-monster-leaderboard-from-selection" class="selection-column" style="cursor: pointer;">
-                        <img class="selection-banner-placeholder" style="object-fit: cover;" data-asset-key="selectionBanners.monsterLeaderboard" alt="怪獸排行榜橫幅">
-                        <div class="selection-description-box" style="display: flex; align-items: center; justify-content: center;">
-                            <p class="text-lg font-bold" style="color: var(--rarity-legendary-text); text-align: center;">怪獸排行榜</p>
-                        </div>
+                <!-- 頁籤內容面板 -->
+                <div id="tab-content">
+                    <div id="north" class="tab-panel active">
+                        <div class="card mb-6"><img class="w-full h-48 object-cover" src="https://placehold.co/600x400/8e44ad/ffffff?text=台北週末聯賽" alt="北部活動"><div class="p-6"><h2 class="text-2xl font-bold mb-2">台北週末足球聯賽</h2><p class="mb-4">📍 <span class="font-medium">地點:</span> 台北市立大學體育場</p><button class="btn-primary w-full">查看詳情</button></div></div>
                     </div>
-                    <div id="open-player-leaderboard-from-selection" class="selection-column" style="cursor: pointer;">
-                        <img class="selection-banner-placeholder" style="object-fit: cover;" data-asset-key="selectionBanners.playerLeaderboard" alt="玩家英雄榜橫幅">
-                        <div class="selection-description-box" style="display: flex; align-items: center; justify-content: center;">
-                            <p class="text-lg font-bold" style="color: var(--rarity-legendary-text); text-align: center;">玩家英雄榜</p>
-                        </div>
+                    <div id="central" class="tab-panel">
+                         <div class="card mb-6"><img class="w-full h-48 object-cover" src="https://placehold.co/600x400/3498db/ffffff?text=台中友誼賽" alt="中部活動"><div class="p-6"><h2 class="text-2xl font-bold mb-2">週末七人制足球友誼賽</h2><p class="mb-4">📍 <span class="font-medium">地點:</span> 台中市區足球場</p><button class="btn-primary w-full">立即報名</button></div></div>
+                         <div class="card mb-6"><img class="w-full h-48 object-cover" src="https://placehold.co/600x400/f1c40f/ffffff?text=彰化親子足球日" alt="中部活動"><div class="p-6"><h2 class="text-2xl font-bold mb-2">彰化親子足球日</h2><p class="mb-4">📍 <span class="font-medium">地點:</span> 彰化體育公園</p><button class="btn-primary w-full">活動花絮</button></div></div>
+                    </div>
+                    <div id="south" class="tab-panel">
+                        <div class="card mb-6"><img class="w-full h-48 object-cover" src="https://placehold.co/600x400/e67e22/ffffff?text=高雄港都盃" alt="南部活動"><div class="p-6"><h2 class="text-2xl font-bold mb-2">高雄港都盃五人制錦標賽</h2><p class="mb-4">📍 <span class="font-medium">地點:</span> 高雄國家體育場</p><button class="btn-primary w-full">立即組隊</button></div></div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div id="banner-modal" class="modal">
-        <div class="modal-content banner-only">
-            <button class="banner-close-button modal-close" data-modal-id="banner-modal">&times;</button>
-            <div id="banner-modal-content" class="banner-placeholder">
-                </div>
-        </div>
-    </div>
-
-    <div id="mailbox-modal" class="modal">
-        <div class="modal-content large">
-            <span class="modal-close" data-modal-id="mailbox-modal">&times;</span>
-            <div class="modal-header-container">
-                <h3 class="modal-header">📬 我的信箱</h3>
-                <button id="refresh-mailbox-btn" class="button secondary text-xs" title="刷新信箱">🔄</button>
-            </div>
-            <div class="modal-body" id="mailbox-list-container">
-                <p class="text-center text-sm text-[var(--text-secondary)] py-10">信箱空空如也...</p>
-            </div>
-            <div class="modal-footer">
-                <button id="delete-read-mails-btn" class="button danger text-sm">刪除已讀</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="mail-reader-modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close system-notification-close-btn" data-modal-id="mail-reader-modal">&times;</span>
-            <h3 id="mail-reader-title" class="modal-header">信件標題</h3>
-            <div id="mail-reader-meta" class="text-sm text-secondary text-center my-2">
-                <span>寄件人: <strong id="mail-reader-sender">系統</strong></span> | 
-                <span>時間: <span id="mail-reader-timestamp"></span></span>
-            </div>
-            <div id="mail-reader-body" class="modal-body">
-                <div class="mail-content-text">
+            <!-- 側邊欄 (右欄) -->
+            <aside class="w-full lg:w-1/3 mt-8 lg:mt-0">
+                <div class="sticky top-24 space-y-8">
+                    <div class="side-panel bg-white p-6 rounded-2xl shadow-lg text-center">
+                        <h3 class="text-xl font-bold mb-4">廣告贊助</h3>
+                        <div class="bg-gray-200 dark:bg-gray-700 w-full h-48 rounded-lg flex items-center justify-center"><p class="text-gray-500 dark:text-gray-400">廣告版位 (300x250)</p></div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">歡迎各大廠商洽談合作</p>
                     </div>
-                <div id="mail-reader-attachments" class="mt-4" style="display: none;">
-                    <h5 class="details-section-title">附件</h5>
-                    <div id="mail-attachments-container" class="mt-2">
-                        </div>
+                    <div class="side-panel bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold mb-4">需要幫忙嗎？</h3>
+                        <p class="mb-4">對於活動有任何疑問，或是有合作提案，請隨時聯繫我們。</p>
+                        <button class="btn-secondary w-full">聯繫版主</button>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="button secondary" data-modal-id="mail-reader-modal">關閉</button>
-            </div>
+            </aside>
         </div>
-    </div>
-    
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12 dark:bg-gray-900 border-t dark:border-gray-700">
+        <div class="container mx-auto py-6 px-5 text-center"><p>&copy; 2025 足跡足球網. All Rights Reserved.</p></div>
+    </footer>
+
     <script>
-        (function() {
-            const gameVersion = '0.4.0.5'; 
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- 深色/淺色模式切換功能 ---
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const htmlEl = document.documentElement;
 
-            const jsFiles = [
-                'js/firebase-config.js',
-                'js/config.js',
-                'js/game-state.js',
-                'js/api-client.js',
-                'js/auth.js',
-                'js/game-logic.js',
-                'js/utils.js',
-                'js/monster-part-assets.js',
-                'js/ui.js',
-                'js/ui-inventory.js',
-                'js/ui-snapshot.js',
-                'js/ui-farm.js',
-                'js/ui-player-modals.js',
-                'js/ui-monster-details.js',
-                'js/ui-battle-modals.js',
-                'js/ui-result-modals.js',
-                'js/ui-leaderboard-modals.js',
-                'js/ui-champions.js',
-                'js/ui-notes.js',
-                'js/ui-chat.js',
-                'js/ui-mailbox.js',
-                'js/ui-adventure.js',
-                'js/handlers/ui-handlers.js',
-                'js/handlers/game-interaction-handlers.js',
-                'js/handlers/drag-drop-handlers.js',
-                'js/handlers/monster-handlers.js',
-                'js/handlers/adventure-handlers.js',
-                'js/main.js'
-            ];
+            // 頁面加載時檢查 localStorage
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                htmlEl.classList.add('dark');
+            } else {
+                htmlEl.classList.remove('dark');
+            }
 
-            jsFiles.forEach(path => {
-                document.write(`<script src="${path}?v=${gameVersion}" defer><\/script>`);
+            themeToggleBtn.addEventListener('click', function() {
+                htmlEl.classList.toggle('dark');
+                // 將用戶選擇存儲在 localStorage
+                if (htmlEl.classList.contains('dark')) {
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                }
             });
-        })();
+
+            // --- 輪播功能 ---
+            const carouselInner = document.getElementById('carousel-inner');
+            const items = carouselInner.getElementsByClassName('carousel-item');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            let currentIndex = 0;
+            const totalItems = items.length;
+            let autoPlayInterval;
+
+            function updateCarousel() {
+                const offset = -currentIndex * 100;
+                for (let i = 0; i < items.length; i++) {
+                    items[i].style.transform = `translateX(${offset}%)`;
+                }
+            }
+            function showNext() { currentIndex = (currentIndex + 1) % totalItems; updateCarousel(); }
+            function showPrev() { currentIndex = (currentIndex - 1 + totalItems) % totalItems; updateCarousel(); }
+            function startAutoPlay() { autoPlayInterval = setInterval(showNext, 4000); }
+            function stopAutoPlay() { clearInterval(autoPlayInterval); }
+
+            nextBtn.addEventListener('click', () => { showNext(); stopAutoPlay(); startAutoPlay(); });
+            prevBtn.addEventListener('click', () => { showPrev(); stopAutoPlay(); startAutoPlay(); });
+            carouselInner.addEventListener('mouseenter', stopAutoPlay);
+            carouselInner.addEventListener('mouseleave', startAutoPlay);
+            startAutoPlay();
+
+            // --- 頁籤功能 ---
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const targetTab = button.getAttribute('data-tab');
+                    tabPanels.forEach(panel => { panel.classList.remove('active'); });
+                    document.getElementById(targetTab).classList.add('active');
+                });
+            });
+        });
     </script>
+
 </body>
 </html>

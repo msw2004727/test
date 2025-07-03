@@ -3,175 +3,435 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>足球活動報名</title>
-    <!-- 引入 Tailwind CSS -->
+    <title>全台足球場報名系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Google Fonts 的 Inter 字體 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
+    <script>
+        // 設定 Tailwind CSS 深色模式策略
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <style>
         /* 自定義樣式 */
         body {
-            font-family: 'Inter', 'Noto Sans TC', sans-serif;
-            background-color: #111827; /* 深灰色背景 */
-            color: #d1d5db; /* 淺灰色文字 */
+            font-family: 'Noto Sans TC', sans-serif;
         }
-        .card-image-placeholder {
-            /* 圖片佔位符的樣式 */
-            border: 2px dashed #4b5563; /* 虛線邊框 */
-            min-height: 150px;
-            background-color: rgba(255, 255, 255, 0.05);
+        /* 為了更好的深色模式體驗，自定義滾動條 */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        .ad-placeholder {
-            /* 廣告佔位符的樣式 */
-            border: 2px dashed #4b5563;
-            background-color: #1f2937;
-            height: 300px;
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
-        .btn-primary {
-            /* 主要按鈕樣式 */
-            background-color: #0d9488; /* 藍綠色 */
-            color: white;
-            transition: background-color 0.3s ease;
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
         }
-        .btn-primary:hover {
-            background-color: #0f766e; /* 滑鼠懸停時的深藍綠色 */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
-        .btn-secondary {
-            /* 次要按鈕樣式 */
-            background-color: #374151;
-            color: white;
-            transition: background-color 0.3s ease;
+        .dark ::-webkit-scrollbar-track {
+            background: #2d3748;
         }
-        .btn-secondary:hover {
-            background-color: #4b5563;
+        .dark ::-webkit-scrollbar-thumb {
+            background: #718096;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+        
+        /* 標籤顏色 (更新為亮色系) */
+        .tag-beginner { background-color: #67e8f9; color: #0e7490; } /* 初心者 (亮藍) */
+        .tag-leisure { background-color: #a7f3d0; color: #047857; } /* 休閒組 (亮綠) */
+        .tag-competitive { background-color: #fde047; color: #a16207; } /* 競技組 (亮黃) */
+        .tag-challenge { background-color: #f9a8d4; color: #9d174d; } /* 挑戰組 (亮粉) */
+        .tag-hell { background-color: #fca5a5; color: #991b1b; } /* 地獄組 (亮紅) */
+        .tag-pro { background-color: #c4b5fd; color: #5b21b6; } /* 職業賽 (亮紫) */
+        
+        .dark .tag-beginner { background-color: #06b6d4; color: #ecfeff; }
+        .dark .tag-leisure { background-color: #10b981; color: #d1fae5; }
+        .dark .tag-competitive { background-color: #eab308; color: #fefce8; }
+        .dark .tag-challenge { background-color: #ec4899; color: #fdf2f8; }
+        .dark .tag-hell { background-color: #ef4444; color: #fee2e2; }
+        .dark .tag-pro { background-color: #8b5cf6; color: #f5f3ff; }
+
+        /* 修正：將標籤基礎樣式移至此處，確保顏色能正確應用 */
+        .tag-label {
+            padding: 0.25rem 0.75rem; /* py-1 px-3 */
+            font-size: 0.75rem; /* text-xs */
+            font-weight: 700; /* font-bold */
+            border-radius: 9999px; /* rounded-full */
+            white-space: nowrap;
+        }
+
+        .event-card-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
     </style>
 </head>
-<body class="bg-gray-900">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-    <!-- 頁首導覽列 -->
-    <header class="bg-gray-800/90 backdrop-blur-sm sticky top-0 z-50 shadow-md">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- 網站標題/Logo -->
-                <div class="flex-shrink-0">
-                    <a href="#" class="text-white text-2xl font-bold tracking-wider">足球幫</a>
-                </div>
-                <!-- 導覽連結 (註冊/登入) -->
-                <nav class="flex items-center space-x-4">
-                    <a href="#" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">註冊</a>
-                    <a href="#" class="bg-teal-600 text-white hover:bg-teal-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">登入</a>
-                </nav>
+    <!-- 彈出式歡迎/公告視窗 -->
+    <div id="welcome-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg transform transition-all duration-300 scale-95 opacity-0" id="welcome-modal-content">
+            <!-- 公告圖片 Banner -->
+            <div class="h-48 bg-gray-200 dark:bg-gray-700 rounded-t-2xl overflow-hidden">
+                <img src="https://github.com/msw2004727/test/blob/main/8de27089-c26d-4d93-95cd-619029396aa2.png?raw=true" alt="[圖片：足球場]" class="w-full h-full object-cover">
+            </div>
+            <div class="p-6">
+                <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">歡迎來到全台足球場報名系統！</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">夏日足球季開跑！立即報名參加全台各地的精彩賽事，與球友們一同揮灑汗水！</p>
+                <button onclick="closeModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300">
+                    開始探索
+                </button>
             </div>
         </div>
-    </header>
+    </div>
 
-    <!-- 主要內容區 -->
-    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
-        <div class="flex flex-col lg:flex-row gap-8">
+    <!-- 主容器 -->
+    <div id="app-container" class="min-h-screen">
+        <!-- 頁首 -->
+        <header class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-40 shadow-sm">
+            <div class="container mx-auto px-4">
+                <div class="flex items-center justify-between h-16">
+                    <!-- Logo & 網站標題 -->
+                    <div class="flex items-center space-x-2">
+                         <i class="las la-futbol text-3xl text-blue-600"></i>
+                        <a href="#" class="text-xl font-bold text-gray-900 dark:text-white">踢球趣</a>
+                    </div>
 
-            <!-- 左側: 近期活動列表 -->
-            <div class="w-full lg:w-2/3">
-                <h1 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-500 pl-4">近期活動</h1>
+                    <!-- 中間導航 (寬版) -->
+                    <nav class="hidden md:flex items-center space-x-2">
+                        <button class="tab-btn active" data-tab="north">北部</button>
+                        <button class="tab-btn" data-tab="central">中部</button>
+                        <button class="tab-btn" data-tab="south">南部</button>
+                        <button class="tab-btn" data-tab="east">東部</button>
+                    </nav>
+
+                    <!-- 右側功能區 -->
+                    <div class="flex items-center space-x-4">
+                        <!-- 深淺模式切換 -->
+                        <label for="dark-mode-toggle" class="cursor-pointer">
+                            <input type="checkbox" id="dark-mode-toggle" class="hidden peer">
+                            <div class="w-12 h-6 bg-gray-300 rounded-full peer-checked:bg-blue-600 transition-colors duration-300 relative">
+                                <div class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 peer-checked:translate-x-full transition-transform duration-300 flex items-center justify-center">
+                                     <i class="las la-sun text-yellow-500 hidden dark:inline"></i>
+                                     <i class="las la-moon text-blue-800 dark:hidden"></i>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- 登入狀態 -->
+                        <div id="auth-section">
+                            <!-- 未登入狀態 -->
+                            <button id="login-btn" onclick="handleLineLogin()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 transition-colors duration-300">
+                                <i class="lab la-line text-2xl"></i>
+                                <span>LINE 登入</span>
+                            </button>
+                            <!-- 已登入狀態 (預設隱藏) -->
+                            <div id="user-profile" class="hidden items-center space-x-2">
+                                <div class="text-right">
+                                    <p class="text-sm font-bold">
+                                        <span class="text-blue-500 dark:text-blue-400">初心者</span>
+                                        <span id="user-nickname">熱血足球員</span>
+                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">積分: <span id="user-points">1,234</span></p>
+                                </div>
+                                <img src="https://placehold.co/40x40/E2E8F0/4A5568?text=P" alt="頭像" class="w-10 h-10 rounded-full border-2 border-blue-400">
+                            </div>
+                        </div>
+                        
+                        <!-- 漢堡選單 (窄版) -->
+                        <button id="menu-btn" class="md:hidden text-2xl text-gray-700 dark:text-gray-300">
+                            <i class="las la-bars"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- 窄版導航選單 -->
+            <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                <a href="#" class="block py-3 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 tab-btn-mobile active" data-tab="north">北部</a>
+                <a href="#" class="block py-3 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 tab-btn-mobile" data-tab="central">中部</a>
+                <a href="#" class="block py-3 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 tab-btn-mobile" data-tab="south">南部</a>
+                <a href="#" class="block py-3 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 tab-btn-mobile" data-tab="east">東部</a>
+            </div>
+        </header>
+
+        <!-- 主內容區 -->
+        <main class="container mx-auto p-4">
+            <div class="lg:flex lg:space-x-8">
+                <!-- 左側: 活動列表 -->
+                <div class="lg:w-2/3">
+                    <div id="north" class="tab-content"></div>
+                    <div id="central" class="tab-content hidden"></div>
+                    <div id="south" class="tab-content hidden"></div>
+                    <div id="east" class="tab-content hidden"></div>
+                </div>
                 
-                <!-- 活動卡片列表 -->
-                <div class="space-y-6">
-                    <!-- 活動卡片 1 -->
-                    <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
-                        <div class="p-5">
-                            <div class="flex flex-col md:flex-row gap-5">
-                                <!-- 圖片位置示意 -->
-                                <div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center">
-                                    <span class="text-gray-500">活動照片</span>
+                <!-- 右側: 邊欄 -->
+                <div class="lg:w-1/3 space-y-6 mt-6 lg:mt-0">
+                    <!-- 裝備販售 -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                        <h4 class="font-bold mb-3 text-gray-900 dark:text-white">熱門足球裝備</h4>
+                        <div class="space-y-3">
+                            <a href="#" class="flex items-center space-x-3 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md">
+                                <div class="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-md flex items-center justify-center">
+                                    <i class="las la-tshirt text-2xl"></i>
                                 </div>
-                                <!-- 活動資訊 -->
-                                <div class="w-full md:w-2/3 flex flex-col justify-between">
-                                    <div>
-                                        <h2 class="text-xl font-bold text-white">週末友誼賽 - 5人制</h2>
-                                        <p class="text-gray-400 mt-1">地點：台中市區足球場</p>
-                                        <p class="text-gray-400 mt-1">日期：2025年7月19日 (六) 14:00 - 16:00</p>
-                                        <p class="text-teal-400 font-semibold mt-2">尚餘名額: 3</p>
-                                    </div>
-                                    <button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button>
+                                <div>
+                                    <p class="font-semibold text-sm">最新款國家隊球衣</p>
+                                    <p class="text-xs text-blue-500">點此查看 &rarr;</p>
                                 </div>
-                            </div>
+                            </a>
+                             <a href="#" class="flex items-center space-x-3 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md">
+                                <div class="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-md flex items-center justify-center">
+                                     <i class="las la-shoe-prints text-2xl" style="transform: rotate(-30deg);"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-sm">專業級足球釘鞋</p>
+                                    <p class="text-xs text-blue-500">點此查看 &rarr;</p>
+                                </div>
+                            </a>
                         </div>
                     </div>
-
-                    <!-- 活動卡片 2 -->
-                    <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
-                        <div class="p-5">
-                            <div class="flex flex-col md:flex-row gap-5">
-                                <!-- 圖片位置示意 -->
-                                <div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center">
-                                    <span class="text-gray-500">活動照片</span>
-                                </div>
-                                <!-- 活動資訊 -->
-                                <div class="w-full md:w-2/3 flex flex-col justify-between">
-                                    <div>
-                                        <h2 class="text-xl font-bold text-white">夜間暢踢 - 8人制練習賽</h2>
-                                        <p class="text-gray-400 mt-1">地點：城市運動公園</p>
-                                        <p class="text-gray-400 mt-1">日期：2025年7月25日 (五) 19:00 - 21:00</p>
-                                        <p class="text-yellow-500 font-semibold mt-2">即將額滿</p>
-                                    </div>
-                                    <button class="btn-primary font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end">立即報名</button>
-                                </div>
-                            </div>
-                        </div>
+                    
+                    <!-- 廣告欄位 -->
+                    <div class="bg-gray-200 dark:bg-gray-700 rounded-lg shadow h-48 flex items-center justify-center text-gray-500 dark:text-gray-400 overflow-hidden">
+                        <img src="https://github.com/msw2004727/test/blob/main/S__15228932.jpg?raw=true" alt="[圖片：運動廣告]" class="w-full h-full object-cover">
                     </div>
-
-                    <!-- 活動卡片 3 (已額滿) -->
-                    <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden opacity-60">
-                        <div class="p-5">
-                            <div class="flex flex-col md:flex-row gap-5">
-                                <!-- 圖片位置示意 -->
-                                <div class="w-full md:w-1/3 h-40 card-image-placeholder rounded-lg flex items-center justify-center">
-                                    <span class="text-gray-500">活動照片</span>
-                                </div>
-                                <!-- 活動資訊 -->
-                                <div class="w-full md:w-2/3 flex flex-col justify-between">
-                                    <div>
-                                        <h2 class="text-xl font-bold text-white">新手教學體驗營</h2>
-                                        <p class="text-gray-400 mt-1">地點：陽光河濱公園</p>
-                                        <p class="text-gray-400 mt-1">日期：2025年8月2日 (六) 09:00 - 11:00</p>
-                                        <p class="text-red-500 font-semibold mt-2">已額滿</p>
-                                    </div>
-                                    <button class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg mt-4 w-full md:w-auto self-end" disabled>無法報名</button>
-                                </div>
-                            </div>
-                        </div>
+                    
+                    <!-- 聯絡我們 -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center">
+                         <h4 class="font-bold mb-3 text-gray-900 dark:text-white">需要幫助嗎?</h4>
+                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">若有任何問題，歡迎隨時與我們聯繫。</p>
+                         <button class="w-full bg-gray-700 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors duration-300">
+                            <i class="las la-envelope"></i>
+                            <span>聯絡網站管理員</span>
+                        </button>
                     </div>
                 </div>
             </div>
+        </main>
+    </div>
 
-            <!-- 右側: 廣告與聯繫方式 -->
-            <aside class="w-full lg:w-1/3 space-y-8 lg:mt-16">
-                <!-- 廣告預定位置 -->
-                <div>
-                    <h3 class="text-xl font-semibold text-white mb-4">贊助商廣告</h3>
-                    <div class="ad-placeholder rounded-lg flex items-center justify-center">
-                        <span class="text-gray-400">廣告版位</span>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 範例活動資料 ---
+            const newEventImage = "https://github.com/msw2004727/test/blob/main/ChatGPT%20Image%202025%E5%B9%B47%E6%9C%883%E6%97%A5%20%E4%B8%8B%E5%8D%8812_02_53.png?raw=true";
+            const eventsData = {
+                north: [
+                    { title: '週末熱血友誼賽', level: '休閒組', levelClass: 'tag-leisure', date: '2025/07/19 (六) 14:00', location: '台北市 | 百齡足球場', format: '5人制', organizer: '小張', coach: '林教練', current: 15, max: 20, img: newEventImage, phone: '0912-345-678', lineId: 'chang-soccer' },
+                    { title: '基隆雨都盃聯賽', level: '競技組', levelClass: 'tag-competitive', date: '2025/07/20 (日) 09:00', location: '基隆市 | 市立體育場', format: '11人制', organizer: '基隆足協', coach: '無', current: 6, max: 12, img: newEventImage, phone: '0922-111-333', lineId: 'keelungfa' },
+                    { title: '新竹科學園區足球日', level: '初心者', levelClass: 'tag-beginner', date: '2025/07/26 (六) 16:00', location: '新竹縣 | 竹北足球場', format: '8人制', organizer: '科技人聯盟', coach: '李教練', current: 18, max: 24, img: newEventImage, phone: '0933-555-888', lineId: 'sci-football' },
+                    { title: '桃園航空城挑戰賽', level: '挑戰組', levelClass: 'tag-challenge', date: '2025/08/02 (六) 13:00', location: '桃園市 | 青埔足球場', format: '11人制', organizer: '航空城體育會', coach: 'Alex', current: 9, max: 16, img: newEventImage, phone: '0988-123-456', lineId: 'taoyuan-sports' },
+                ],
+                central: [
+                    { title: '台中夜間足球派對', level: '休閒組', levelClass: 'tag-leisure', date: '2025/07/18 (五) 19:00', location: '台中市 | 太原足球場', format: '8人制', organizer: '夜貓子足球', coach: '無', current: 22, max: 30, img: newEventImage, phone: '0955-987-654', lineId: 'night-cat' },
+                    { title: '彰化八卦山盃', level: '競技組', levelClass: 'tag-competitive', date: '2025/07/27 (日) 10:00', location: '彰化縣 | 縣立體育場', format: '11人制', organizer: '彰化體育會', coach: '黃教練', current: 5, max: 12, img: newEventImage, phone: '0911-222-444', lineId: 'changhua-sports' },
+                    { title: '南投日月潭親子足球營', level: '初心者', levelClass: 'tag-beginner', date: '2025/08/09 (六) 09:30', location: '南投縣 | 埔里足球場', format: '5人制', organizer: '親子樂活', coach: '陳老師', current: 11, max: 15, img: newEventImage, phone: '0966-777-888', lineId: 'family-fun' },
+                ],
+                south: [
+                    { title: '高雄港都盃夏季聯賽', level: '挑戰組', levelClass: 'tag-challenge', date: '2025/07/19 (六) 15:00', location: '高雄市 | 國家體育場', format: '11人制', organizer: '高雄市體育處', coach: '外籍教練', current: 10, max: 16, img: newEventImage, phone: '0977-333-555', lineId: 'khh-sports' },
+                    { title: '台南古都夜踢', level: '休閒組', levelClass: 'tag-leisure', date: '2025/07/25 (五) 20:00', location: '台南市 | 市立足球場', format: '8人制', organizer: '府城足球幫', coach: '阿德', current: 19, max: 24, img: newEventImage, phone: '0918-666-222', lineId: 'tainan-kick' },
+                    { title: '屏東墾丁沙灘足球', level: '地獄組', levelClass: 'tag-hell', date: '2025/08/03 (日) 14:00', location: '屏東縣 | 南灣沙灘', format: '5人制', organizer: '極限運動協會', coach: '無', current: 7, max: 10, img: newEventImage, phone: '0925-876-543', lineId: 'beach-soccer-fun' },
+                    { title: '嘉義阿里山下友誼賽', level: '初心者', levelClass: 'tag-beginner', date: '2025/08/10 (日) 10:00', location: '嘉義縣 | 嘉義大學', format: '8人制', organizer: '大學生聯盟', coach: '吳學長', current: 12, max: 20, img: newEventImage, phone: '0978-901-234', lineId: 'chiayi-uni' },
+                ],
+                east: [
+                    { title: '花蓮太平洋盃', level: '競技組', levelClass: 'tag-competitive', date: '2025/07/26 (六) 09:00', location: '花蓮縣 | 美崙田徑場', format: '11人制', organizer: '花蓮足委會', coach: '張教練', current: 4, max: 10, img: newEventImage, phone: '0939-123-789', lineId: 'hualien-fa' },
+                    { title: '台東鐵花村草地足球', level: '休閒組', levelClass: 'tag-leisure', date: '2025/08/02 (六) 16:00', location: '台東市 | 鐵花村草皮', format: '5人制', organizer: '在地藝術家', coach: '無', current: 15, max: 20, img: newEventImage, phone: '0989-456-123', lineId: 'taitung-art' },
+                    { title: '宜蘭冬山河畔練習賽', level: '初心者', levelClass: 'tag-beginner', date: '2025/08/16 (六) 15:00', location: '宜蘭縣 | 冬山河親水公園', format: '5人制', organizer: '假日運動團', coach: '簡小姐', current: 8, max: 15, img: newEventImage, phone: '0915-789-456', lineId: 'yilan-play' },
+                ]
+            };
+            
+            // --- 函式：建立活動卡片 HTML ---
+            function createEventCard(event) {
+                const percentage = (event.current / event.max) * 100;
+                return `
+                    <div class="event-card">
+                        <div class="event-card-banner">
+                           <img src="${event.img}" alt="[圖片：${event.title}]" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/700x250/e2e8f0/4a5568?text=Image+Not+Found';">
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">${event.title}</h3>
+                                <span class="tag-label ${event.levelClass}">${event.level}</span>
+                            </div>
+                            <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                                <p><i class="las la-calendar-alt w-5"></i> ${event.date}</p>
+                                <p><i class="las la-map-marker-alt w-5"></i> ${event.location}</p>
+                                <p><i class="las la-user-friends w-5"></i> ${event.format} | 主辦人: ${event.organizer} | 教練: ${event.coach}</p>
+                            </div>
+                            
+                            <!-- 更新：聯絡資訊排版 -->
+                            <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-sm">
+                                <div class="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
+                                    <i class="las la-phone"></i>
+                                    <span>${event.phone}</span>
+                                    <a href="https://line.me/ti/p/~${event.lineId}" target="_blank" class="inline-flex items-center justify-center w-7 h-7 bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors">
+                                        <i class="lab la-line text-xl"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 flex items-center justify-between">
+                                <div class="flex items-center space-x-2 flex-grow">
+                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${percentage}%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">${event.current} / ${event.max}人</span>
+                                </div>
+                                <button class="join-btn ml-4 flex-shrink-0">立即報名</button>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                `;
+            }
 
-                <!-- 版主聯繫按鈕 -->
-                <div>
-                    <h3 class="text-xl font-semibold text-white mb-4">需要幫忙嗎？</h3>
-                    <button class="btn-secondary font-bold py-3 px-4 rounded-lg w-full">聯繫版主</button>
-                </div>
-            </aside>
+            // --- 函式：渲染所有活動 ---
+            function renderEvents() {
+                for (const region in eventsData) {
+                    const container = document.getElementById(region);
+                    if (container) {
+                        if(eventsData[region].length > 0) {
+                            container.innerHTML = eventsData[region].map(createEventCard).join('');
+                        } else {
+                            container.innerHTML = `<p class="text-center py-10 text-gray-500 dark:text-gray-400">${region === 'north' ? '北部' : region === 'central' ? '中部' : region === 'south' ? '南部' : '東部'}地區目前沒有活動</p>`;
+                        }
+                    }
+                }
+            }
 
-        </div>
-    </main>
 
-    <!-- 頁尾 -->
-    <footer class="bg-gray-800 mt-12">
-        <div class="container mx-auto py-4 px-5 text-center">
-            <p class="text-gray-400 text-sm">&copy; 2025 足球幫. All Rights Reserved.</p>
-        </div>
-    </footer>
+            // --- DOM 元素 ---
+            const welcomeModal = document.getElementById('welcome-modal');
+            const welcomeModalContent = document.getElementById('welcome-modal-content');
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            const html = document.documentElement;
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const mobileTabBtns = document.querySelectorAll('.tab-btn-mobile');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const loginBtn = document.getElementById('login-btn');
+            const userProfile = document.getElementById('user-profile');
 
+            // --- 樣式定義 ---
+            const tabBtnBaseStyle = 'py-2 px-4 rounded-md text-sm font-medium transition-colors duration-300';
+            const tabBtnActiveStyle = 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300';
+            const tabBtnInactiveStyle = 'text-gray-500 hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-gray-700';
+            const mobileTabBtnActiveStyle = 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-bold';
+            const eventCardStyle = 'bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden mb-6';
+            const eventCardBannerStyle = 'h-40 md:h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden';
+            const joinBtnStyle = 'bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors duration-300';
+
+            // --- 全局應用樣式 ---
+            function applyStyles() {
+                document.querySelectorAll('.event-card').forEach(el => el.className = eventCardStyle);
+                document.querySelectorAll('.event-card-banner').forEach(el => el.className = eventCardBannerStyle);
+                // 標籤樣式已移至 <style> 中，此處不再需要處理
+                document.querySelectorAll('.join-btn').forEach(el => {
+                    const existingClasses = el.className.split(' ');
+                    const flexShrink = existingClasses.includes('flex-shrink-0') ? 'flex-shrink-0' : '';
+                    const margin = existingClasses.find(c => c.startsWith('ml-')) || '';
+                    el.className = `${joinBtnStyle} ${flexShrink} ${margin}`;
+                });
+                updateTabStyles(document.querySelector('.tab-btn.active')?.dataset.tab || 'north');
+            }
+
+            // --- 彈出視窗邏輯 ---
+            window.closeModal = function() {
+                welcomeModalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    welcomeModal.classList.add('opacity-0');
+                    setTimeout(() => {
+                        welcomeModal.style.display = 'none';
+                    }, 300);
+                }, 150);
+            }
+
+            // --- 深淺模式邏輯 ---
+            function setDarkMode(isDark) {
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                if (isDark) {
+                    html.classList.add('dark');
+                } else {
+                    html.classList.remove('dark');
+                }
+                darkModeToggle.checked = isDark;
+            }
+
+            darkModeToggle.addEventListener('change', () => {
+                setDarkMode(darkModeToggle.checked);
+            });
+
+            // --- 漢堡選單邏輯 ---
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // --- 頁籤切換邏輯 ---
+            function updateTabStyles(activeTabId) {
+                tabBtns.forEach(btn => {
+                    btn.className = `${tabBtnBaseStyle} ${btn.dataset.tab === activeTabId ? tabBtnActiveStyle : tabBtnInactiveStyle}`;
+                });
+                mobileTabBtns.forEach(btn => {
+                    btn.className = `${btn.className.split(' ').filter(c => !c.startsWith('bg-') && !c.startsWith('text-') && c !== 'font-bold').join(' ')} ${btn.dataset.tab === activeTabId ? mobileTabBtnActiveStyle : ''}`;
+                });
+            }
+
+            function switchTab(tabId) {
+                tabContents.forEach(content => {
+                    content.classList.toggle('hidden', content.id !== tabId);
+                });
+                updateTabStyles(tabId);
+            }
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+            });
+            
+            mobileTabBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    switchTab(btn.dataset.tab);
+                    mobileMenu.classList.add('hidden'); // 點擊後關閉選單
+                });
+            });
+
+            // --- LINE 登入 (模擬) ---
+            window.handleLineLogin = function() {
+                console.log("正在模擬 LINE 登入...");
+                loginBtn.classList.add('hidden');
+                userProfile.classList.remove('hidden');
+                userProfile.classList.add('flex');
+                document.getElementById('user-nickname').textContent = "王大明";
+                document.getElementById('user-points').textContent = "8,888";
+            }
+
+            // --- 初始加載 ---
+            // 1. 渲染活動
+            renderEvents();
+
+            // 2. 應用樣式
+            applyStyles();
+
+            // 3. 顯示歡迎視窗
+            welcomeModal.classList.remove('opacity-0');
+            welcomeModalContent.classList.remove('scale-95', 'opacity-0');
+
+            // 4. 設定深淺模式
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                setDarkMode(true);
+            } else {
+                setDarkMode(false);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全台臨時踢球報名系統</title>
+    <title>全台足球場報名系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
@@ -115,8 +115,8 @@
 
     <!-- 彈出式歡迎/公告視窗 -->
     <div id="welcome-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg transform transition-all duration-300 scale-95 opacity-0" id="welcome-modal-content">
-            <div class="h-48 bg-gray-200 dark:bg-gray-700 rounded-t-2xl overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg transform transition-all duration-300 scale-95 opacity-0 border-4 border-gray-800 dark:border-gray-500" id="welcome-modal-content">
+            <div class="h-48 bg-gray-200 dark:bg-gray-700 rounded-t-lg overflow-hidden">
                 <img src="https://github.com/msw2004727/test/blob/main/8de27089-c26d-4d93-95cd-619029396aa2.png?raw=true" alt="[圖片：足球場]" class="w-full h-full object-cover">
             </div>
             <div class="p-6">
@@ -137,7 +137,7 @@
                 <div class="flex items-center justify-between h-16">
                     <div class="flex items-center space-x-2">
                          <i class="las la-futbol text-3xl text-blue-600"></i>
-                        <a href="#" class="text-xl font-bold text-gray-900 dark:text-white">一起踢球趣</a>
+                        <a href="#" class="text-xl font-bold text-gray-900 dark:text-white">全台踢球趣</a>
                     </div>
                     <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
                         <button class="tab-btn active" data-tab="events-main">尋找活動</button>
@@ -155,9 +155,9 @@
                             </div>
                         </label>
                         <div id="auth-section">
-                            <button id="login-btn" onclick="handleLineLogin()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 transition-colors duration-300">
-                                <i class="lab la-line text-2xl"></i>
-                                <span>LINE登入</span>
+                            <button id="login-btn" onclick="handleLineLogin()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-3 rounded-lg flex items-center space-x-1.5 transition-colors duration-300">
+                                <i class="lab la-line text-xl"></i>
+                                <span class="text-sm">LINE 登入</span>
                             </button>
                             <div id="user-profile" class="hidden items-center space-x-2">
                                 <div class="text-right">

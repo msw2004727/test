@@ -354,7 +354,7 @@ button { cursor: pointer; font-family: inherit; }
 /* ===== Font Size Buttons ===== */
 .font-size-btns {
   display: flex; gap: 2px;
-  margin-right: auto; /* 字體按鈕後面的項目（回首頁等）推到右側 */
+  margin-right: var(--space-xs);
 }
 .font-size-btn {
   display: flex; align-items: center; justify-content: center;
@@ -388,7 +388,7 @@ button { cursor: pointer; font-family: inherit; }
 /* ===== Language Switch ===== */
 .lang-switch {
   display: flex; align-items: center;
-  margin-right: var(--space-sm);
+  margin-right: auto; /* 語系切換之後的項目（回首頁等）推到右側 */
 }
 .lang-select {
   appearance: none;

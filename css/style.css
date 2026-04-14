@@ -1091,7 +1091,8 @@ button { cursor: pointer; font-family: inherit; }
   .header-search { width: 100%; }
   .header-search input { flex: 1; }
   .banner-slide { min-height: auto; padding: 0; }
-  .banner-arrow { display: none; } /* 手機用手勢滑動，不需要箭頭 */
+  .banner-slide img { object-fit: contain; } /* 手機版完整顯示，不裁切 */
+  .banner-arrow { display: none; }
   /* 一行兩張卡片，單數末張自動撐滿整行 */
   .quick-grid {
     grid-template-columns: repeat(2, 1fr);

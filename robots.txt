@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /scripts/
+Disallow: /dist/
+Disallow: /docs/
+Disallow: /node_modules/
+Disallow: /version.json
+Disallow: /CLAUDE.md
+
+Sitemap: {{BASE_URL}}/sitemap.xml

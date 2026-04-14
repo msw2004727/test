@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="version" content="{{VERSION}}">
+  <meta name="build-hash" content="{{BUILD_HASH}}">
+
+  <title data-i18n="site.title">休閒事業管理系 - 朝陽科技大學</title>
+  <meta name="description" content="朝陽科技大學管理學院休閒事業管理系，培養休閒產業管理專業人才。" data-i18n-content="site.description">
+  <link rel="canonical" href="{{BASE_URL}}/">
+
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://opendata.cwa.gov.tw {{API_BASE_URL}};">
+
+  <!-- Theme flash prevention (must be before CSS) -->
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('theme')
+          || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+      } catch(e) { var t = 'light'; }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <!-- Error monitoring -->
+  <script>
+    window.addEventListener('error', function(e){ console.error('[CYUT]', e.message, e.filename, e.lineno); });
+    window.addEventListener('unhandledrejection', function(e){ console.error('[CYUT Promise]', e.reason); });
+  </script>
+
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- CSS (monolithic for preview; split into 4 files in Phase 1) -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- DNS prefetch -->
+  <link rel="dns-prefetch" href="https://auth2.cyut.edu.tw">
+  <link rel="dns-prefetch" href="https://cyutis.cyut.edu.tw">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+
+  <!-- hreflang -->
+  <link rel="alternate" hreflang="zh-Hant" href="{{BASE_URL}}/?lang=zh-TW">
+  <link rel="alternate" hreflang="zh-Hans" href="{{BASE_URL}}/?lang=zh-CN">
+  <link rel="alternate" hreflang="en" href="{{BASE_URL}}/?lang=en">
+  <link rel="alternate" hreflang="vi" href="{{BASE_URL}}/?lang=vi">
+  <link rel="alternate" hreflang="th" href="{{BASE_URL}}/?lang=th">
+  <link rel="alternate" hreflang="id" href="{{BASE_URL}}/?lang=id">
+  <link rel="alternate" hreflang="x-default" href="{{BASE_URL}}/?lang=zh-TW">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="朝陽科技大學 休閒事業管理系">
+  <meta property="og:title" content="休閒事業管理系 - 朝陽科技大學">
+  <meta property="og:description" content="培養具備休閒產業管理專業知能之人才">
+  <meta property="og:url" content="{{BASE_URL}}/">
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "name": "朝陽科技大學 休閒事業管理系",
+        "alternateName": "CYUT Department of Leisure Service Management",
+        "url": "{{BASE_URL}}/",
+        "inLanguage": ["zh-Hant","zh-Hans","en","vi","th","id"]
+      },
+      {
+        "@type": "EducationalOrganization",
+        "name": "朝陽科技大學 休閒事業管理系",
+        "url": "{{BASE_URL}}/",
+        "parentOrganization": {
+          "@type": "CollegeOrUniversity",
+          "name": "朝陽科技大學",
+          "url": "https://www.cyut.edu.tw/"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "吉峰東路168號 T2-619.1室",
+          "addressLocality": "霧峰區",
+          "addressRegion": "台中市",
+          "postalCode": "413310",
+          "addressCountry": "TW"
+        },
+        "telephone": "+886-4-23323000",
+        "email": "leisure@cyut.edu.tw",
+        "sameAs": [
+          "https://www.facebook.com/people/%E6%9C%9D%E9%99%BD%E7%A7%91%E6%8A%80%E5%A4%A7%E5%AD%B8-%E4%BC%91%E9%96%92%E4%BA%8B%E6%A5%AD%E7%AE%A1%E7%90%86%E7%B3%BB/61553103520452/",
+          "https://www.instagram.com/dlsm_cyut/",
+          "https://www.threads.com/@dlsm_cyut",
+          "https://www.tiktok.com/@dlsm_cyut",
+          "https://line.me/R/ti/p/@446pcgwv"
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {"@type":"ListItem","position":1,"name":"朝陽科技大學","item":"https://www.cyut.edu.tw/"},
+          {"@type":"ListItem","position":2,"name":"管理學院"},
+          {"@type":"ListItem","position":3,"name":"休閒事業管理系","item":"{{BASE_URL}}/"}
+        ]
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<!-- Skip link (WCAG 2.4.1) -->
+<a href="#main-content" class="skip-link" data-i18n="aria.skipToContent">跳至主要內容</a>
+
+<!-- Version global -->
+<script>window.__APP_VERSION__='{{VERSION}}';</script>
+
+<!-- Language change announcer (WCAG) -->
+<div class="sr-only" aria-live="assertive" id="lang-announce"></div>
+
+<!-- ===== Top Utility Bar ===== -->
+<div class="top-util">
+  <div class="outer">
+    <!-- 主題滑動開關（左側） -->
+    <label class="theme-switch" id="theme-switch" aria-label="切換深淺主題">
+      <input type="checkbox" id="theme-checkbox" class="theme-switch__input">
+      <span class="theme-switch__track">
+        <span class="theme-switch__icon theme-switch__icon--sun" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </span>
+        <span class="theme-switch__thumb"></span>
+        <span class="theme-switch__icon theme-switch__icon--moon" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </span>
+      </span>
+    </label>
+
+    <!-- 字體大小切換（三段） -->
+    <div class="font-size-btns" aria-label="字體大小">
+      <button class="font-size-btn active" data-size="medium" aria-label="原始字體">原</button>
+      <button class="font-size-btn" data-size="large" aria-label="中字體">中</button>
+      <button class="font-size-btn" data-size="xlarge" aria-label="大字體">大</button>
+    </div>
+
+    <a href="index.html"><span data-i18n="topbar.home">回首頁</span></a>
+    <span class="sep" aria-hidden="true">|</span>
+    <a href="#"><span data-i18n="topbar.contact">聯絡我們</span></a>
+    <span class="sep" aria-hidden="true">|</span>
+    <a href="#"><span data-i18n="topbar.sitemap">網站導覽</span></a>
+  </div>
+</div>
+
+<!-- ===== Header ===== -->
+<header id="site-header" class="site-header" data-section="site-header">
+  <div class="header-banner">
+    <div class="logo-area">
+      <a href="index.html" class="logo-link">
+        <img src="assets/images/original/logo-dlsm.png" alt="DLSM 休閒事業管理系" class="logo-img">
+      </a>
+    </div>
+    <form class="header-search" action="#" method="get" role="search">
+      <input type="text" data-i18n-placeholder="search.placeholder" placeholder="關鍵字搜尋" data-i18n-aria="aria.search" aria-label="搜尋">
+      <button type="submit"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    </form>
+  </div>
+</header>
+
+<!-- ===== Navigation — 雙層設計 ===== -->
+<nav id="main-nav" class="main-nav" data-section="main-nav" aria-label="主導覽">
+
+  <!-- 上層：回首頁 + 系所簡介 + 學程 + 系友 -->
+  <div class="nav-upper">
+    <div class="outer">
+      <ul class="nav-list nav-list--upper">
+        <li>
+          <a href="#"><span data-i18n="nav.about">系所簡介</span></a>
+          <div class="dropdown">
+            <a href="#"><span data-i18n="nav.about.intro">系所介紹及發展</span></a>
+            <a href="#"><span data-i18n="nav.about.members">系所成員</span></a>
+            <a href="#"><span data-i18n="nav.about.resources">教學資源</span></a>
+          </div>
+        </li>
+        <li><a href="#"><span data-i18n="nav.usr">USR跨域創新應用微學程</span></a></li>
+        <li><a href="#"><span data-i18n="nav.lohas">精準樂活學程</span></a></li>
+        <li>
+          <a href="#"><span data-i18n="nav.alumni">系友專區</span></a>
+          <div class="dropdown">
+            <a href="#"><span data-i18n="nav.alumni.charter">系友會組織章程</span></a>
+            <a href="#"><span data-i18n="nav.alumni.outstanding">歷屆優秀系友</span></a>
+            <a href="#"><span data-i18n="nav.alumni.officers">現任系友會幹部</span></a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 下層：功能選單（項目少，不會換行） -->
+  <div class="nav-lower">
+    <div class="outer">
+      <button class="nav-toggle" aria-expanded="false" data-i18n-aria="aria.menu" aria-label="選單">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <!-- 手機版關閉按鈕（獨立於選單外，固定右上角） -->
+      <button class="nav-close" aria-label="關閉選單">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <ul class="nav-list nav-list--lower">
+        <!-- 手機版才顯示的上層項目（PC 版由 nav-upper 顯示，這裡用 CSS 隱藏） -->
+        <li class="mobile-only-item">
+          <a href="#"><span data-i18n="nav.about">系所簡介</span></a>
+          <div class="dropdown">
+            <a href="#"><span data-i18n="nav.about.intro">系所介紹及發展</span></a>
+            <a href="#"><span data-i18n="nav.about.members">系所成員</span></a>
+            <a href="#"><span data-i18n="nav.about.resources">教學資源</span></a>
+          </div>
+        </li>
+        <li class="mobile-only-item"><a href="#"><span data-i18n="nav.usr">USR跨域創新應用微學程</span></a></li>
+        <li class="mobile-only-item"><a href="#"><span data-i18n="nav.lohas">精準樂活學程</span></a></li>
+        <li class="mobile-only-item">
+          <a href="#"><span data-i18n="nav.alumni">系友專區</span></a>
+          <div class="dropdown">
+            <a href="#"><span data-i18n="nav.alumni.charter">系友會組織章程</span></a>
+            <a href="#"><span data-i18n="nav.alumni.outstanding">歷屆優秀系友</span></a>
+            <a href="#"><span data-i18n="nav.alumni.officers">現任系友會幹部</span></a>
+          </div>
+        </li>
+        <li>
+          <a href="#"><span data-i18n="nav.curriculum">課程規劃</span></a>
+          <div class="dropdown">
+            <a href="#"><span data-i18n="nav.curriculum.retake">重、補修必修科目與修習新舊課程處理方式</span></a>
+            <a href="#"><span data-i18n="nav.curriculum.map">課程地圖</span></a>
+            <a href="#"><span data-i18n="nav.curriculum.master">碩士班</span></a>
+            <a href="#"><span data-i18n="nav.curriculum.masterExec">碩士在職專班</span></a>
+            <a href="#"><span data-i18n="nav.curriculum.undergradDay">大學部（日間）</span></a>
+            <a href="#"><span data-i18n="nav.curriculum.undergradEvening">大學部（進修）</span></a>
+            <a href="#"><span data-i18n="nav.curriculum.undergradIntl">大學部（國際產學專班）</span></a>
+          </div>
+        </li>
+        <li>
+          <a href="#"><span data-i18n="nav.internship">實習專區</span></a>
+          <div class="dropdown">
+            <a href="#"><span data-i18n="nav.internship.external">校外實習</span></a>
+            <a href="#"><span data-i18n="nav.internship.internal">校內實作</span></a>
+          </div>
+        </li>
+        <li><a href="#"><span data-i18n="nav.certification">證照專區</span></a></li>
+        <li>
+          <a href="#"><span data-i18n="nav.downloads">下載專區</span></a>
+          <div class="dropdown">
+            <a href="#"><span data-i18n="nav.downloads.faculty">教師相關</span></a>
+            <a href="#"><span data-i18n="nav.downloads.advisor">導師相關</span></a>
+            <a href="#"><span data-i18n="nav.downloads.thesis">畢業專題</span></a>
+            <a href="#"><span data-i18n="nav.downloads.graduate">碩士生專區</span></a>
+            <a href="#"><span data-i18n="nav.downloads.undergrad">大學部專區</span></a>
+            <a href="#"><span data-i18n="nav.downloads.other">其他文件下載</span></a>
+          </div>
+        </li>
+        <li><a href="#"><span data-i18n="nav.admission">招生資訊</span></a></li>
+        <li><a href="#"><span data-i18n="nav.regulations">規章辦法</span></a></li>
+        <li>
+          <a href="#"><span data-i18n="nav.programs">專班專區</span></a>
+          <div class="dropdown">
+            <a href="#"><span data-i18n="nav.programs.intl">國際產學專班</span></a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== Banner ===== -->
+<section id="hero-banner" class="section banner" data-section="hero-banner" data-cms="banner" data-cms-list="true" aria-labelledby="hero-title">
+  <div class="banner-slides" data-cms-target="slides">
+    <div class="banner-slide" data-cms-item="1">
+      <img src="assets/images/original/banner/mobileadv_5037_153642_55939.png" alt="休閒系形象" loading="eager" fetchpriority="high">
+    </div>
+    <div class="banner-slide" data-cms-item="2">
+      <img src="assets/images/original/banner/mobileadv_5986_6903190_71338.png" alt="系所活動" loading="lazy">
+    </div>
+    <div class="banner-slide" data-cms-item="3">
+      <img src="assets/images/original/banner/mobileadv_5987_4375140_71320.png" alt="校園生活" loading="lazy">
+    </div>
+    <div class="banner-slide" data-cms-item="4">
+      <img src="assets/images/original/banner/mobileadv_5989_1506389_31401.png" alt="實習合作" loading="lazy">
+    </div>
+    <div class="banner-slide" data-cms-item="5">
+      <img src="assets/images/original/banner/mobileadv_6130_1631638_14108.png" alt="國際交流" loading="lazy">
+    </div>
+    <div class="banner-slide" data-cms-item="6">
+      <img src="assets/images/original/banner/mobileadv_6214_5833708_92230.png" alt="學生成果" loading="lazy">
+    </div>
+    <div class="banner-slide" data-cms-item="7">
+      <img src="assets/images/original/banner/mobileadv_6370_4554052_96736.png" alt="招生資訊" loading="lazy">
+    </div>
+  </div>
+  <button class="banner-arrow prev" data-i18n-aria="aria.bannerPrev" aria-label="上一張"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
+  <button class="banner-arrow next" data-i18n-aria="aria.bannerNext" aria-label="下一張"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg></button>
+  <div class="banner-dots">
+    <button class="banner-dot active" aria-label="Slide 1"></button>
+    <button class="banner-dot" aria-label="Slide 2"></button>
+    <button class="banner-dot" aria-label="Slide 3"></button>
+    <button class="banner-dot" aria-label="Slide 4"></button>
+    <button class="banner-dot" aria-label="Slide 5"></button>
+    <button class="banner-dot" aria-label="Slide 6"></button>
+    <button class="banner-dot" aria-label="Slide 7"></button>
+  </div>
+</section>
+
+<main id="main-content" tabindex="-1">
+
+<!-- ===== Quick Links ===== -->
+<section id="quick-links" class="section" data-section="quick-links" aria-labelledby="quicklinks-title">
+  <h2 class="sr-only" id="quicklinks-title">快速連結</h2>
+  <div class="quick-grid">
+    <a class="quick-card" href="https://auth2.cyut.edu.tw/" target="_blank" rel="noopener noreferrer">
+      <div class="q-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"/></svg></div>
+      <h3 data-i18n="quicklink.student">學生資訊系統</h3>
+    </a>
+    <a class="quick-card" href="https://cyutis.cyut.edu.tw/" target="_blank" rel="noopener noreferrer">
+      <div class="q-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <h3 data-i18n="quicklink.staff">教職員資訊系統</h3>
+    </a>
+    <a class="quick-card" href="#" target="_blank" rel="noopener noreferrer">
+      <div class="q-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+      <h3 data-i18n="quicklink.tronclass">TronClass</h3>
+    </a>
+    <a class="quick-card" href="#">
+      <div class="q-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <h3 data-i18n="quicklink.classroom">專業教室</h3>
+    </a>
+  </div>
+</section>
+
+<!-- ===== Social Media ===== -->
+<section id="social-bar" class="section social-row" data-section="social-bar" aria-label="社群媒體">
+  <span data-i18n="social.followUs">追蹤我們</span>
+  <a class="s-icon line" href="https://line.me/R/ti/p/%40446pcgwv" target="_blank" rel="noopener noreferrer" aria-label="LINE"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 5.82 2 10.5c0 4.21 3.74 7.74 8.79 8.4.34.07.81.22.92.51.1.26.07.67.03.93l-.15.89c-.04.26-.2 1.01.89.55.1-.05 5.77-3.4 7.88-5.82C22.08 14.08 22 12.36 22 10.5 22 5.82 17.52 2 12 2z"/></svg></a>
+  <a class="s-icon fb" href="https://www.facebook.com/people/%E6%9C%9D%E9%99%BD%E7%A7%91%E6%8A%80%E5%A4%A7%E5%AD%B8-%E4%BC%91%E9%96%92%E4%BA%8B%E6%A5%AD%E7%AE%A1%E7%90%86%E7%B3%BB/61553103520452/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+  <a class="s-icon ig" href="https://www.instagram.com/dlsm_cyut/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg></a>
+  <a class="s-icon threads" href="https://www.threads.com/@dlsm_cyut" target="_blank" rel="noopener noreferrer" aria-label="Threads"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.59 12c.025 3.086.718 5.496 2.057 7.164 1.432 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75a6.7 6.7 0 0 1-1.284 3.272c-.86 1.074-2.088 1.67-3.556 1.726h-.028c-1.258-.04-2.283-.463-3.048-1.258-.708-.734-1.1-1.723-1.1-2.783 0-2.199 1.673-3.834 3.893-3.834.603 0 1.178.116 1.707.342-.076-.588-.224-1.094-.442-1.507-.384-.725-1.005-1.134-1.846-1.216l.125-2.08c1.384.083 2.502.707 3.228 1.804.547.826.877 1.894.983 3.18 1.013.537 1.826 1.22 2.412 2.038.9 1.257 1.286 2.822.967 4.396-.495 2.442-2.199 4.334-4.69 5.203-1.257.438-2.688.663-4.243.675z"/></svg></a>
+  <a class="s-icon tiktok" href="https://www.tiktok.com/@dlsm_cyut" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.52a8.27 8.27 0 0 0 4.85 1.56V6.69h-1.09z"/></svg></a>
+</section>
+
+<!-- ===== Announcements ===== -->
+<section id="announcements" class="section" data-section="announcements" data-cms="announcements" data-cms-list="true" aria-labelledby="announce-title" style="content-visibility:auto; contain-intrinsic-size:auto 600px;">
+  <h2 id="announce-title" class="section__title" data-i18n="section.news">最新消息</h2>
+  <p class="content-lang-notice" data-i18n="content.langNotice" hidden>以下內容僅提供中文版本</p>
+  <ul class="tab-nav" role="tablist">
+    <li role="presentation"><a href="#" role="tab" aria-selected="true" aria-controls="tab-announce" data-tab="tab-announce" class="active" data-i18n="tab.announcements">最新公告</a></li>
+    <li role="presentation"><a href="#" role="tab" aria-selected="false" aria-controls="tab-parttime" data-tab="tab-parttime" data-i18n="tab.parttime">工讀資訊</a></li>
+    <li role="presentation"><a href="#" role="tab" aria-selected="false" aria-controls="tab-scholarship" data-tab="tab-scholarship" data-i18n="tab.scholarship">獎助學金資訊</a></li>
+  </ul>
+  <div class="tab-content">
+    <div id="tab-announce" role="tabpanel" class="tab-panel active" data-cms="announcements-list" data-cms-target="list">
+      <ul class="announce-list">
+        <li><time class="announce-date" datetime="2025-03-20">2025-03-20</time><a href="#">113學年度第2學期碩士班學位口試相關事宜公告</a></li>
+        <li><time class="announce-date" datetime="2025-03-15">2025-03-15</time><a href="#">114學年度碩士班甄試入學招生簡章公告</a></li>
+        <li><time class="announce-date" datetime="2025-03-10">2025-03-10</time><a href="#">113-2學期課程異動公告</a></li>
+        <li><time class="announce-date" datetime="2025-03-05">2025-03-05</time><a href="#">本系113學年度第2學期實習說明會</a></li>
+        <li><time class="announce-date" datetime="2025-02-28">2025-02-28</time><a href="#">113-2學期畢業專題分組名單公告</a></li>
+        <li><time class="announce-date" datetime="2025-02-20">2025-02-20</time><a href="#">113學年度第2學期校外實習廠商名單公告</a></li>
+      </ul>
+      <a href="#" class="more-link"><span data-i18n="more.announcements">更多公告</span> &raquo;</a>
+    </div>
+    <div id="tab-parttime" role="tabpanel" class="tab-panel" data-cms="parttime" data-cms-target="list" hidden>
+      <ul class="announce-list">
+        <li><time class="announce-date" datetime="2025-03-18">2025-03-18</time><a href="#">系辦公室工讀生招募（113-2學期）</a></li>
+        <li><time class="announce-date" datetime="2025-03-12">2025-03-12</time><a href="#">校內餐廳工讀人員招募公告</a></li>
+      </ul>
+      <a href="#" class="more-link"><span data-i18n="more.parttime">更多工讀資訊</span> &raquo;</a>
+    </div>
+    <div id="tab-scholarship" role="tabpanel" class="tab-panel" data-cms="scholarship" data-cms-target="list" hidden>
+      <ul class="announce-list">
+        <li><time class="announce-date" datetime="2025-03-16">2025-03-16</time><a href="#">113學年度第2學期校內獎學金申請公告</a></li>
+        <li><time class="announce-date" datetime="2025-03-08">2025-03-08</time><a href="#">財團法人獎助學金申請</a></li>
+      </ul>
+      <a href="#" class="more-link"><span data-i18n="more.scholarship">更多獎助學金</span> &raquo;</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Honor Roll ===== -->
+<section id="honor-roll" class="section" data-section="honor-roll" data-cms="honors" data-cms-list="true" aria-labelledby="honor-title" style="content-visibility:auto; contain-intrinsic-size:auto 500px;">
+  <h2 id="honor-title" class="section__title" data-i18n="section.honor">榮譽榜</h2>
+  <p class="content-lang-notice" data-i18n="content.langNotice" hidden>以下內容僅提供中文版本</p>
+  <div class="sk2-block">
+    <ul class="honor-list" data-cms-target="list">
+      <li><svg class="h-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg><time class="h-date" datetime="2025-03-15">2025-03-15</time><a href="#">張婷翔老師榮獲113學年度教學優良獎</a></li>
+      <li><svg class="h-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg><time class="h-date" datetime="2025-03-10">2025-03-10</time><a href="#">鍾佩珊同學榮獲第24屆金爵獎傳統調酒組銅牌</a></li>
+      <li><svg class="h-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg><time class="h-date" datetime="2025-03-05">2025-03-05</time><a href="#">張伃欣同學榮獲第三十屆朝陽優秀青年代表第二名</a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===== Video Section — YouTube 嵌入 ===== -->
+<section id="video-section" class="section" data-section="video-section" data-cms="videos" aria-labelledby="video-title" style="content-visibility:auto; contain-intrinsic-size:auto 400px;">
+  <h2 id="video-title" class="section__title" data-i18n="section.video">影音專區</h2>
+  <div class="video-grid" data-cms-target="list">
+    <div class="video-card" data-cms-item="1">
+      <div class="video-embed">
+        <iframe src="https://www.youtube.com/embed/sT0cWXKOMjI" title="休閒系形象影片" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <h4 data-i18n="video.promo">休閒系形象影片</h4>
+    </div>
+    <div class="video-card" data-cms-item="2">
+      <div class="video-embed">
+        <iframe src="https://www.youtube.com/embed/aX4XCz1dJrQ" title="系所活動花絮" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <h4 data-i18n="video.activities">系所活動花絮</h4>
+    </div>
+  </div>
+</section>
+
+<!-- ===== College Departments ===== -->
+<section id="college-depts" class="section" data-section="college-depts" aria-labelledby="college-title" style="content-visibility:auto; contain-intrinsic-size:auto 300px;">
+  <h2 id="college-title" class="section__title" data-i18n="section.college">管理學院各系所</h2>
+  <div class="dept-grid">
+    <a class="dept-card" href="https://mk.cyut.edu.tw/" target="_blank" rel="noopener"><h4 data-i18n="dept.marketing">行銷與流通管理系</h4></a>
+    <a class="dept-card" href="https://sa.cyut.edu.tw/" target="_blank" rel="noopener"><h4 data-i18n="dept.senior">銀髮產業管理系</h4></a>
+    <a class="dept-card" href="https://ir.cyut.edu.tw/" target="_blank" rel="noopener"><h4 data-i18n="dept.insurance">保險金融管理系</h4></a>
+    <a class="dept-card" href="https://ba.cyut.edu.tw/" target="_blank" rel="noopener"><h4 data-i18n="dept.business">企業管理系</h4></a>
+    <a class="dept-card" href="https://fi.cyut.edu.tw/" target="_blank" rel="noopener"><h4 data-i18n="dept.finance">財務金融系</h4></a>
+    <a class="dept-card" href="https://ac.cyut.edu.tw/" target="_blank" rel="noopener"><h4 data-i18n="dept.accounting">會計系</h4></a>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== Footer ===== -->
+<footer id="site-footer" class="site-footer" data-section="site-footer">
+  <div class="outer footer-grid">
+    <div class="footer-info">
+      <h4 data-i18n="footer.deptName">休閒事業管理系</h4>
+      <p>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span data-i18n="footer.address">413310 台中市霧峰區吉峰東路168號 T2-619.1室</span><br>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span>(04) 23323000</span><br>
+        <span style="padding-left:20px" data-i18n="footer.phoneExt">分機 7452、7454、7458、7463、7465、7451</span><br>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="10" width="20" height="12" rx="2"/><path d="M6 10V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v6"/><rect x="6" y="14" width="4" height="4"/></svg>
+        <span data-i18n="footer.fax">傳真：(04) 23742363</span><br>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <a href="mailto:leisure@cyut.edu.tw">leisure@cyut.edu.tw</a>
+      </p>
+    </div>
+    <div class="footer-links">
+      <h4 data-i18n="footer.quickLinks">快速連結</h4>
+      <ul>
+        <li><a href="#" data-i18n="nav.admission">招生資訊</a></li>
+        <li><a href="#" data-i18n="nav.curriculum">課程規劃</a></li>
+        <li><a href="#" data-i18n="nav.internship">實習專區</a></li>
+        <li><a href="#" data-i18n="nav.certification">證照專區</a></li>
+        <li><a href="#" data-i18n="nav.downloads">下載專區</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h4 data-i18n="footer.relatedLinks">相關連結</h4>
+      <ul>
+        <li><a href="https://www.cyut.edu.tw/" target="_blank" rel="noopener" data-i18n="footer.university">朝陽科技大學</a></li>
+        <li><a href="#" data-i18n="footer.college">管理學院</a></li>
+        <li><a href="#" data-i18n="nav.alumni">系友專區</a></li>
+        <li><a href="#" data-i18n="nav.regulations">規章辦法</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span data-i18n="footer.copyright">&copy; 朝陽科技大學 休閒事業管理系 Department of Leisure Service Management. All Rights Reserved.</span>
+    <span class="footer-version">v{{VERSION}}</span>
+  </div>
+</footer>
+
+<!-- ===== Fixed Overlays ===== -->
+<!-- Seasonal Canvas -->
+<canvas id="seasonal-canvas" aria-hidden="true" role="presentation"></canvas>
+
+<!-- Back to Top (independent, P8 compliant) -->
+<button id="back-to-top" class="back-to-top" data-i18n-aria="aria.backToTop" aria-label="回到頂部">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+</button>
+
+<!-- FAB 已移除（外觀預覽階段，Phase 3 再實作） -->
+
+<!-- nomodule fallback for old browsers -->
+<script nomodule>
+  document.body.insertAdjacentHTML('afterbegin',
+    '<div style="background:#fff3cd;padding:16px;text-align:center;font-size:14px;">' +
+    '您的瀏覽器版本過舊，部分功能可能無法使用。建議更新至最新版本。</div>');
+</script>
+
+<!-- ===== Inline JS: Theme Toggle, Nav, Banner, FAB, Back-to-Top ===== -->
+<script>
+(function() {
+  'use strict';
+
+  /* ─── Theme Toggle (滑動開關 + 追蹤系統主題) ─── */
+  var themeCheckbox = document.getElementById('theme-checkbox');
+  var html = document.documentElement;
+  var systemDarkMQ = matchMedia('(prefers-color-scheme:dark)');
+
+  function setTheme(theme, save) {
+    html.setAttribute('data-theme', theme);
+    if (themeCheckbox) themeCheckbox.checked = (theme === 'dark');
+    if (save) { try { localStorage.setItem('theme', theme); } catch(e) {} }
+  }
+
+  // 初始化：同步 checkbox 狀態與當前 data-theme
+  if (themeCheckbox) {
+    themeCheckbox.checked = (html.getAttribute('data-theme') === 'dark');
+
+    // 使用者手動切換
+    themeCheckbox.addEventListener('change', function() {
+      var next = themeCheckbox.checked ? 'dark' : 'light';
+      setTheme(next, true);
+    });
+  }
+
+  // 追蹤系統主題即時變化（手機切換深淺色時自動跟隨）
+  systemDarkMQ.addEventListener('change', function(e) {
+    // 只有在使用者未手動設定過時才自動跟隨
+    var saved;
+    try { saved = localStorage.getItem('theme'); } catch(err) {}
+    if (!saved) {
+      setTheme(e.matches ? 'dark' : 'light', false);
+    }
+  });
+
+  /* ─── Font Size Toggle (小/中/大) ─── */
+  var fontBtns = document.querySelectorAll('.font-size-btn');
+  var savedSize;
+  try { savedSize = localStorage.getItem('fontsize'); } catch(e) {}
+  if (savedSize) html.setAttribute('data-fontsize', savedSize);
+
+  fontBtns.forEach(function(btn) {
+    // 初始化 active 狀態
+    if (savedSize && btn.getAttribute('data-size') === savedSize) {
+      fontBtns.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+    }
+    btn.addEventListener('click', function() {
+      var size = btn.getAttribute('data-size');
+      html.setAttribute('data-fontsize', size);
+      fontBtns.forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      try { localStorage.setItem('fontsize', size); } catch(e) {}
+    });
+  });
+
+  /* ─── Mobile Nav Toggle ─── */
+  var navToggle = document.querySelector('.nav-toggle');
+  var navList = document.querySelector('.nav-list--lower');
+  var navClose = document.querySelector('.nav-close');
+
+  function closeNav() {
+    if (navList) navList.classList.remove('open');
+    if (navClose) navClose.classList.remove('visible');
+    if (navToggle) navToggle.setAttribute('aria-expanded', 'false');
+  }
+  function openNav() {
+    if (navList) navList.classList.add('open');
+    if (navClose) navClose.classList.add('visible');
+    if (navToggle) navToggle.setAttribute('aria-expanded', 'true');
+  }
+
+  if (navToggle) {
+    navToggle.addEventListener('click', function() {
+      navList && navList.classList.contains('open') ? closeNav() : openNav();
+    });
+  }
+  // 關閉按鈕
+  if (navClose) {
+    navClose.addEventListener('click', function(e) {
+      e.stopPropagation();
+      closeNav();
+    });
+  }
+  // 點擊遮罩區域（nav-list 本身的空白處）關閉
+  if (navList) {
+    navList.addEventListener('click', function(e) {
+      if (e.target === navList) closeNav();
+    });
+  }
+  // ESC 關閉
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && navList && navList.classList.contains('open')) closeNav();
+  });
+
+  // 手機版子選單展開/收合
+  document.querySelectorAll('.nav-list--lower > li, .nav-list--upper > li').forEach(function(li) {
+    var link = li.querySelector(':scope > a');
+    var dropdown = li.querySelector('.dropdown');
+    if (dropdown && link) {
+      link.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768) {
+          e.preventDefault();
+          dropdown.classList.toggle('open');
+        }
+      });
+    }
+  });
+
+  /* ─── Sticky Nav shadow on scroll ─── */
+  var mainNav = document.getElementById('main-nav');
+  if (mainNav) {
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 10) {
+        mainNav.classList.add('scrolled');
+      } else {
+        mainNav.classList.remove('scrolled');
+      }
+    }, { passive: true });
+  }
+
+  /* ─── Banner Carousel（scroll-snap + 手勢滑動原生支援） ─── */
+  var slidesContainer = document.querySelector('.banner-slides');
+  var slideItems = document.querySelectorAll('.banner-slide');
+  var dots = document.querySelectorAll('.banner-dot');
+  var prevBtn = document.querySelector('.banner-arrow.prev');
+  var nextBtn = document.querySelector('.banner-arrow.next');
+  var currentSlide = 0;
+  var totalSlides = slideItems.length;
+  var autoTimer;
+
+  var manualPauseTimer;
+
+  function goToSlide(i) {
+    currentSlide = ((i % totalSlides) + totalSlides) % totalSlides;
+    if (slidesContainer) {
+      // 用 scrollLeft 而非 scrollIntoView，避免整頁跳動
+      var targetX = currentSlide * slidesContainer.offsetWidth;
+      slidesContainer.scrollTo({ left: targetX, behavior: 'smooth' });
+    }
+    dots.forEach(function(d, idx) { d.classList.toggle('active', idx === currentSlide); });
+  }
+  function nextSlide() { goToSlide(currentSlide + 1); }
+  function prevSlide() { goToSlide(currentSlide - 1); }
+  function startAuto() { autoTimer = setInterval(nextSlide, 5000); }
+  function stopAuto() { clearInterval(autoTimer); clearTimeout(manualPauseTimer); }
+
+  // 手動操作後暫停 8 秒再恢復自動播放（給用戶瀏覽時間）
+  function pauseAndResume() {
+    stopAuto();
+    manualPauseTimer = setTimeout(startAuto, 8000);
+  }
+
+  if (prevBtn) prevBtn.addEventListener('click', function() { prevSlide(); pauseAndResume(); });
+  if (nextBtn) nextBtn.addEventListener('click', function() { nextSlide(); pauseAndResume(); });
+  dots.forEach(function(d, i) {
+    d.addEventListener('click', function() { goToSlide(i); pauseAndResume(); });
+  });
+
+  // 偵測手動滑動時同步 dots
+  if (slidesContainer) {
+    var scrollTimeout;
+    slidesContainer.addEventListener('scroll', function() {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(function() {
+        var scrollLeft = slidesContainer.scrollLeft;
+        var slideWidth = slidesContainer.offsetWidth;
+        var newIndex = Math.round(scrollLeft / slideWidth);
+        if (newIndex !== currentSlide && newIndex >= 0 && newIndex < totalSlides) {
+          currentSlide = newIndex;
+          dots.forEach(function(d, idx) { d.classList.toggle('active', idx === currentSlide); });
+        }
+      }, 80);
+    }, { passive: true });
+
+    // 手動觸摸：暫停，放開後等 8 秒才恢復
+    slidesContainer.addEventListener('touchstart', function() { stopAuto(); }, { passive: true });
+    slidesContainer.addEventListener('touchend', function() { manualPauseTimer = setTimeout(startAuto, 8000); }, { passive: true });
+  }
+
+  // visibilitychange 暫停
+  document.addEventListener('visibilitychange', function() { document.hidden ? stopAuto() : startAuto(); });
+  // prefers-reduced-motion
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { stopAuto(); } else { startAuto(); }
+
+  /* ─── Tabs ─── */
+  var tabLinks = document.querySelectorAll('.tab-nav a[data-tab]');
+  tabLinks.forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = link.getAttribute('data-tab');
+      // Update tabs
+      tabLinks.forEach(function(l) {
+        l.classList.remove('active');
+        l.setAttribute('aria-selected', 'false');
+      });
+      link.classList.add('active');
+      link.setAttribute('aria-selected', 'true');
+      // Update panels
+      document.querySelectorAll('.tab-panel').forEach(function(p) {
+        if (p.id === target) {
+          p.hidden = false;
+          p.classList.add('active');
+        } else {
+          p.hidden = true;
+          p.classList.remove('active');
+        }
+      });
+    });
+  });
+
+  /* ─── FAB Toggle ─── */
+  var fab = document.getElementById('fab');
+  var fabTrigger = document.getElementById('fab-trigger');
+  if (fab && fabTrigger) {
+    fabTrigger.addEventListener('click', function() {
+      var expanded = fab.getAttribute('aria-expanded') === 'true';
+      fab.setAttribute('aria-expanded', !expanded);
+    });
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+      if (!fab.contains(e.target)) {
+        fab.setAttribute('aria-expanded', 'false');
+      }
+    });
+    // Close on ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') fab.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  /* ─── Back to Top ─── */
+  var btt = document.getElementById('back-to-top');
+  if (btt) {
+    btt.removeAttribute('hidden');
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 400) {
+        btt.classList.add('visible');
+      } else {
+        btt.classList.remove('visible');
+      }
+    }, { passive: true });
+    btt.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+})();
+</script>
+</body>
+</html>

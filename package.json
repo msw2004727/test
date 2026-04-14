@@ -1,0 +1,18 @@
+{
+  "name": "cyut-leisure",
+  "version": "1.0.0",
+  "private": true,
+  "description": "朝陽科技大學 休閒事業管理系 官方網站",
+  "scripts": {
+    "dev": "npx serve . -l 3000",
+    "build": "bash scripts/build.sh",
+    "build:patch": "bash scripts/build.sh patch",
+    "build:minor": "bash scripts/build.sh minor",
+    "build:major": "bash scripts/build.sh major",
+    "i18n:check": "node scripts/i18n-sync.mjs",
+    "version:bump": "node scripts/version.mjs"
+  },
+  "devDependencies": {
+    "svgo": "^3.0.0"
+  }
+}

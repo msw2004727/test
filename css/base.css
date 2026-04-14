@@ -1,0 +1,370 @@
+/* ================================================
+   base.css — @layer reset, base
+   Custom Properties + 雙主題色彩 + 排版 + Reset
+   oklch 色彩皆有 hsl() fallback（P1 陷阱防護）
+   ================================================ */
+
+/* ─── CSS Custom Properties ─── */
+
+/* === hsl fallback（所有瀏覽器） === */
+:root,
+[data-theme="light"] {
+  /* 主色 */
+  --color-primary: hsl(220, 100%, 44%);
+  --color-primary-light: hsl(220, 40%, 95%);
+  --color-primary-dark: hsl(220, 100%, 35%);
+  --color-primary-hover: hsl(220, 100%, 40%);
+
+  /* 強調色 */
+  --color-accent: hsl(145, 50%, 45%);
+  --color-accent-hover: hsl(145, 55%, 38%);
+
+  /* 語義色 */
+  --color-success: hsl(145, 55%, 38%);
+  --color-warning: hsl(40, 80%, 55%);
+  --color-error: hsl(0, 70%, 45%);
+  --color-info: hsl(220, 60%, 50%);
+
+  /* 表面與背景 */
+  --color-bg: #ffffff;
+  --color-bg-alt: hsl(40, 20%, 97%);
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-surface-hover: hsl(240, 10%, 96%);
+
+  /* 邊框 */
+  --color-border: hsl(0, 0%, 90%);
+  --color-border-subtle: hsl(0, 0%, 93%);
+  --color-divider: hsl(0, 0%, 92%);
+
+  /* 文字 */
+  --color-text: hsl(0, 0%, 13%);
+  --color-text-secondary: hsl(0, 0%, 35%);
+  --color-text-muted: hsl(0, 0%, 40%);
+  --color-text-placeholder: hsl(0, 0%, 58%);
+
+  /* 陰影 */
+  --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.04);
+  --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.06), 0 1px 2px hsl(0 0% 0% / 0.04);
+  --shadow-md: 0 4px 6px hsl(0 0% 0% / 0.05), 0 2px 4px hsl(0 0% 0% / 0.03);
+  --shadow-lg: 0 10px 25px hsl(0 0% 0% / 0.07), 0 4px 10px hsl(0 0% 0% / 0.04);
+  --shadow-xl: 0 20px 50px hsl(0 0% 0% / 0.08), 0 8px 20px hsl(0 0% 0% / 0.04);
+
+  /* 遮罩 */
+  --overlay-bg: hsl(0 0% 0% / 0.4);
+  --overlay-blur: blur(20px);
+
+  /* 圓角 */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* 字型 */
+  --font-heading: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", system-ui, sans-serif;
+  --font-body: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* 字級比例 (Major Third 1.25) */
+  --text-xs: clamp(0.7rem, 0.65rem + 0.25vw, 0.8rem);
+  --text-sm: clamp(0.8rem, 0.75rem + 0.3vw, 0.9rem);
+  --text-base: clamp(0.95rem, 0.9rem + 0.3vw, 1.05rem);
+  --text-lg: clamp(1.1rem, 1rem + 0.4vw, 1.25rem);
+  --text-xl: clamp(1.3rem, 1.15rem + 0.6vw, 1.55rem);
+  --text-2xl: clamp(1.6rem, 1.4rem + 0.8vw, 2rem);
+  --text-3xl: clamp(2rem, 1.7rem + 1.2vw, 2.5rem);
+
+  /* 間距 */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 8rem;
+
+  /* z-index 層級 */
+  --z-base: 1;
+  --z-seasonal-canvas: 50;
+  --z-dropdown: 100;
+  --z-widget-panel: 150;
+  --z-sticky-nav: 200;
+  --z-tooltip: 300;
+  --z-toast: 400;
+  --z-back-to-top: 500;
+  --z-fab: 600;
+  --z-modal-overlay: 700;
+  --z-modal: 701;
+
+  /* 動畫 */
+  --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+}
+
+/* === oklch 增強（現代瀏覽器） === */
+@supports (color: oklch(50% 0.14 250)) {
+  :root,
+  [data-theme="light"] {
+    --color-primary: oklch(50% 0.14 250);
+    --color-primary-light: oklch(95% 0.02 250);
+    --color-primary-dark: oklch(40% 0.16 250);
+    --color-primary-hover: oklch(45% 0.16 250);
+
+    --color-accent: oklch(65% 0.16 145);
+    --color-accent-hover: oklch(55% 0.18 145);
+
+    --color-success: oklch(55% 0.16 145);
+    --color-warning: oklch(70% 0.15 80);
+    --color-error: oklch(55% 0.20 25);
+    --color-info: oklch(55% 0.12 250);
+
+    --color-bg-alt: oklch(98% 0.005 80);
+    --color-surface-hover: oklch(97% 0.003 265);
+
+    --color-border: oklch(92% 0 0);
+    --color-border-subtle: oklch(95% 0 0);
+    --color-divider: oklch(94% 0 0);
+
+    --color-text: oklch(13% 0 0);
+    --color-text-secondary: oklch(35% 0 0);
+    --color-text-muted: oklch(50% 0 0);
+    --color-text-placeholder: oklch(63% 0 0);
+
+    --shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.04);
+    --shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.06), 0 1px 2px oklch(0% 0 0 / 0.04);
+    --shadow-md: 0 4px 6px oklch(0% 0 0 / 0.05), 0 2px 4px oklch(0% 0 0 / 0.03);
+    --shadow-lg: 0 10px 25px oklch(0% 0 0 / 0.07), 0 4px 10px oklch(0% 0 0 / 0.04);
+    --shadow-xl: 0 20px 50px oklch(0% 0 0 / 0.08), 0 8px 20px oklch(0% 0 0 / 0.04);
+
+    --overlay-bg: oklch(0% 0 0 / 0.4);
+  }
+}
+
+/* === Dark Theme — hsl fallback === */
+[data-theme="dark"] {
+  --color-primary: hsl(215, 100%, 67%);
+  --color-primary-light: hsl(220, 30%, 22%);
+  --color-primary-dark: hsl(215, 80%, 55%);
+  --color-primary-hover: hsl(215, 90%, 72%);
+
+  --color-accent: hsl(145, 45%, 50%);
+  --color-accent-hover: hsl(145, 40%, 55%);
+
+  --color-success: hsl(145, 40%, 48%);
+  --color-warning: hsl(40, 70%, 58%);
+  --color-error: hsl(0, 60%, 52%);
+  --color-info: hsl(220, 55%, 55%);
+
+  --color-bg: hsl(220, 13%, 10%);
+  --color-bg-alt: hsl(220, 13%, 13%);
+  --color-surface: hsl(220, 13%, 15%);
+  --color-surface-elevated: hsl(220, 10%, 20%);
+  --color-surface-hover: hsl(220, 10%, 24%);
+
+  --color-border: hsl(220, 10%, 26%);
+  --color-border-subtle: hsl(220, 10%, 22%);
+  --color-divider: hsl(220, 10%, 23%);
+
+  --color-text: hsl(0, 0%, 87%);
+  --color-text-secondary: hsl(0, 0%, 60%);
+  --color-text-muted: hsl(0, 0%, 50%);
+  --color-text-placeholder: hsl(0, 0%, 40%);
+
+  --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.2);
+  --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.3), 0 1px 2px hsl(0 0% 0% / 0.2);
+  --shadow-md: 0 4px 6px hsl(0 0% 0% / 0.3), 0 2px 4px hsl(0 0% 0% / 0.2);
+  --shadow-lg: 0 10px 25px hsl(0 0% 0% / 0.4), 0 4px 10px hsl(0 0% 0% / 0.3);
+  --shadow-xl: 0 20px 50px hsl(0 0% 0% / 0.5), 0 8px 20px hsl(0 0% 0% / 0.3);
+
+  --overlay-bg: hsl(0 0% 0% / 0.65);
+}
+
+/* === Dark Theme — oklch 增強 === */
+@supports (color: oklch(50% 0.14 250)) {
+  [data-theme="dark"] {
+    --color-primary: oklch(70% 0.14 250);
+    --color-primary-light: oklch(25% 0.04 250);
+    --color-primary-dark: oklch(60% 0.16 250);
+    --color-primary-hover: oklch(75% 0.12 250);
+
+    --color-accent: oklch(70% 0.14 145);
+    --color-accent-hover: oklch(75% 0.12 145);
+
+    --color-success: oklch(65% 0.14 145);
+    --color-warning: oklch(75% 0.14 80);
+    --color-error: oklch(65% 0.16 25);
+    --color-info: oklch(65% 0.10 250);
+
+    --color-bg: oklch(13% 0.01 260);
+    --color-bg-alt: oklch(15% 0.01 260);
+    --color-surface: oklch(17% 0.01 260);
+    --color-surface-elevated: oklch(22% 0.01 260);
+    --color-surface-hover: oklch(26% 0.01 260);
+
+    --color-border: oklch(28% 0.01 260);
+    --color-border-subtle: oklch(24% 0.01 260);
+    --color-divider: oklch(25% 0.01 260);
+
+    --color-text: oklch(88% 0 0);
+    --color-text-secondary: oklch(65% 0 0);
+    --color-text-muted: oklch(56% 0 0);
+    --color-text-placeholder: oklch(45% 0 0);
+
+    --shadow-xs: 0 1px 2px oklch(0% 0 0 / 0.2);
+    --shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.3), 0 1px 2px oklch(0% 0 0 / 0.2);
+    --shadow-md: 0 4px 6px oklch(0% 0 0 / 0.3), 0 2px 4px oklch(0% 0 0 / 0.2);
+    --shadow-lg: 0 10px 25px oklch(0% 0 0 / 0.4), 0 4px 10px oklch(0% 0 0 / 0.3);
+    --shadow-xl: 0 20px 50px oklch(0% 0 0 / 0.5), 0 8px 20px oklch(0% 0 0 / 0.3);
+
+    --overlay-bg: oklch(0% 0 0 / 0.65);
+  }
+}
+
+/* ─── Reset ─── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--color-text);
+  background: var(--color-bg);
+  min-height: 100vh;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--duration-normal) var(--ease-out),
+              color var(--duration-normal) var(--ease-out);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--duration-fast);
+}
+a:hover {
+  text-decoration: underline;
+}
+
+img, svg {
+  max-width: 100%;
+  display: block;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: var(--text-base);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-md);
+  outline: none;
+  transition: border-color var(--duration-fast);
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--color-primary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-text);
+}
+
+h1 { font-size: var(--text-3xl); }
+h2 { font-size: var(--text-2xl); }
+h3 { font-size: var(--text-xl); }
+h4 { font-size: var(--text-lg); }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
+/* ─── Selection ─── */
+::selection {
+  background: var(--color-primary-light);
+  color: var(--color-text);
+}
+
+/* ─── Screen Reader Only ─── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─── Skip Link (WCAG 2.4.1) ─── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--space-md);
+  z-index: var(--z-modal);
+  background: var(--color-primary);
+  color: #fff;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  font-weight: 600;
+  transition: top var(--duration-fast);
+}
+.skip-link:focus {
+  top: 0;
+  text-decoration: none;
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Print ─── */
+@media print {
+  body { background: #fff; color: #000; }
+  .top-util, .main-nav, .fab, .back-to-top, #seasonal-canvas { display: none !important; }
+}

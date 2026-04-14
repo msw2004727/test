@@ -121,16 +121,93 @@
 /* ===== Reset ===== */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+
+/* 全站最大寬度限制 — 置中，兩側留白 */
+html { background: var(--color-bg-alt); } /* body 外灰色 */
+[data-theme="dark"] { background: hsl(220 15% 6%); }
 html[data-fontsize="medium"] { font-size: 16px; }
 html[data-fontsize="large"] { font-size: 18px; }
 html[data-fontsize="xlarge"] { font-size: 20px; }
+
+/* 字體放大時 UI 控制元素維持固定尺寸，只有內容文字放大 */
+html[data-fontsize="large"] .top-util,
+html[data-fontsize="large"] .nav-list--upper,
+html[data-fontsize="large"] .nav-list--lower,
+html[data-fontsize="large"] .tab-nav,
+html[data-fontsize="large"] .font-size-btn,
+html[data-fontsize="large"] .theme-switch,
+html[data-fontsize="large"] .header-search,
+html[data-fontsize="large"] .social-row > span,
+html[data-fontsize="large"] .more-link,
+html[data-fontsize="large"] .footer-bottom,
+html[data-fontsize="large"] .banner-dot,
+html[data-fontsize="xlarge"] .top-util,
+html[data-fontsize="xlarge"] .nav-list--upper,
+html[data-fontsize="xlarge"] .nav-list--lower,
+html[data-fontsize="xlarge"] .tab-nav,
+html[data-fontsize="xlarge"] .font-size-btn,
+html[data-fontsize="xlarge"] .theme-switch,
+html[data-fontsize="xlarge"] .header-search,
+html[data-fontsize="xlarge"] .social-row > span,
+html[data-fontsize="xlarge"] .more-link,
+html[data-fontsize="xlarge"] .footer-bottom,
+html[data-fontsize="xlarge"] .banner-dot {
+  font-size: 16px; /* 固定不放大 */
+}
+
+/* 導覽列內所有連結固定字級 */
+html[data-fontsize="large"] .nav-list--upper a,
+html[data-fontsize="large"] .nav-list--lower > li > a,
+html[data-fontsize="large"] .dropdown a,
+html[data-fontsize="xlarge"] .nav-list--upper a,
+html[data-fontsize="xlarge"] .nav-list--lower > li > a,
+html[data-fontsize="xlarge"] .dropdown a {
+  font-size: 14px;
+}
+
+/* tab 頁籤固定 */
+html[data-fontsize="large"] .tab-nav a,
+html[data-fontsize="xlarge"] .tab-nav a {
+  font-size: 14px;
+  padding: 6px 12px;
+}
+
+/* 頁尾連結固定 */
+html[data-fontsize="large"] .footer-links a,
+html[data-fontsize="large"] .footer-info p,
+html[data-fontsize="xlarge"] .footer-links a,
+html[data-fontsize="xlarge"] .footer-info p {
+  font-size: 13px;
+}
+
+/* logo 固定 */
+html[data-fontsize="large"] .header-banner h1,
+html[data-fontsize="xlarge"] .header-banner h1 {
+  font-size: 22px;
+}
+
+/* 快速連結標題固定 */
+html[data-fontsize="large"] .quick-card h3,
+html[data-fontsize="xlarge"] .quick-card h3 {
+  font-size: 14px;
+}
+
+/* 院系卡片固定 */
+html[data-fontsize="large"] .dept-card h4,
+html[data-fontsize="xlarge"] .dept-card h4 {
+  font-size: 13px;
+}
 body {
   font-family: var(--font-body);
   font-size: 1rem;
   color: var(--color-text);
-  background: var(--color-bg-alt);
+  background: var(--color-surface);
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: var(--shadow-lg);
 }
 a { color: var(--color-primary); text-decoration: none; }
 a:hover { text-decoration: underline; }
@@ -590,7 +667,7 @@ button { cursor: pointer; font-family: inherit; }
   position: relative; overflow: hidden;
   background: var(--color-bg-alt);
   border-radius: 0;
-  height: 238px;
+  height: 301px;
 }
 .banner-slides {
   display: flex;
@@ -682,7 +759,7 @@ button { cursor: pointer; font-family: inherit; }
 .social-row {
   display: flex; align-items: center; justify-content: center;
   gap: var(--space-md);
-  padding: var(--space-sm) var(--space-xl);
+  padding: var(--space-md) var(--space-xl);
   background: var(--color-surface);
   border-radius: var(--radius-md);
   margin: 0 var(--space-xl); /* 與 .section 左右 padding 一致 */
@@ -801,11 +878,11 @@ button { cursor: pointer; font-family: inherit; }
 }
 .announce-list li:last-child { border-bottom: none; }
 .announce-date {
-  color: var(--color-text-muted); font-size: 0.8rem;
+  color: var(--color-text-muted); font-size: 13px;
   white-space: nowrap; flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
-.announce-list li a { color: var(--color-text); }
+.announce-list li a { color: var(--color-text); font-size: 0.88rem; }
 .announce-list li a:hover { color: var(--color-primary); }
 .more-link {
   display: inline-block; margin-top: var(--space-md);
@@ -830,11 +907,11 @@ button { cursor: pointer; font-family: inherit; }
 .honor-list li:last-child { border-bottom: none; }
 .h-icon { color: var(--color-warning); flex-shrink: 0; }
 .h-date {
-  color: var(--color-text-muted); font-size: 0.8rem;
+  color: var(--color-text-muted); font-size: 13px;
   white-space: nowrap; flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
-.honor-list a { color: var(--color-text); }
+.honor-list a { color: var(--color-text); font-size: 0.88rem; }
 .honor-list a:hover { color: var(--color-primary); }
 
 /* ===== Department Links — 卡片網格 ===== */

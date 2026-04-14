@@ -150,6 +150,18 @@
       <button class="font-size-btn" data-size="xlarge" aria-label="大字體">大</button>
     </div>
 
+    <!-- 語系切換 -->
+    <div class="lang-switch" aria-label="語言切換">
+      <select id="lang-select" class="lang-select">
+        <option value="zh-TW" selected>繁體中文</option>
+        <option value="zh-CN">简体中文</option>
+        <option value="en">English</option>
+        <option value="vi">Tiếng Việt</option>
+        <option value="th">ภาษาไทย</option>
+        <option value="id">Bahasa Indonesia</option>
+      </select>
+    </div>
+
     <a href="index.html"><span data-i18n="topbar.home">回首頁</span></a>
     <span class="sep" aria-hidden="true">|</span>
     <a href="#"><span data-i18n="topbar.contact">聯絡我們</span></a>
@@ -556,6 +568,65 @@
       try { localStorage.setItem('fontsize', size); } catch(e) {}
     });
   });
+
+  /* ─── Language Switch (i18n) ─── */
+  var langSelect = document.getElementById('lang-select');
+  var langAnnounce = document.getElementById('lang-announce');
+  var currentLang;
+  try { currentLang = localStorage.getItem('lang'); } catch(e) {}
+  if (!currentLang) currentLang = 'zh-TW';
+
+  // 初始化 select 狀態
+  if (langSelect) langSelect.value = currentLang;
+
+  function applyTranslations(data) {
+    // textContent
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n');
+      if (data[key]) el.textContent = data[key];
+    });
+    // placeholder
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n-placeholder');
+      if (data[key]) el.placeholder = data[key];
+    });
+    // aria-label
+    document.querySelectorAll('[data-i18n-aria]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n-aria');
+      if (data[key]) el.setAttribute('aria-label', data[key]);
+    });
+    // html lang
+    if (data['_meta.lang']) html.setAttribute('lang', data['_meta.lang']);
+    // title
+    if (data['site.title']) document.title = data['site.title'];
+    // 播報語系變更
+    if (langAnnounce && data['_meta.name']) langAnnounce.textContent = data['_meta.name'];
+    // 非中文時顯示內容語言提示
+    document.querySelectorAll('.content-lang-notice').forEach(function(el) {
+      el.hidden = (currentLang === 'zh-TW');
+    });
+  }
+
+  var langController = null;
+  function loadLanguage(lang) {
+    currentLang = lang;
+    try { localStorage.setItem('lang', lang); } catch(e) {}
+    if (langController) langController.abort();
+    langController = new AbortController();
+    fetch('i18n/' + lang + '.json', { signal: langController.signal })
+      .then(function(r) { return r.json(); })
+      .then(applyTranslations)
+      .catch(function() {}); // 失敗靜默，保留原文
+  }
+
+  // 非預設語系時自動載入
+  if (currentLang !== 'zh-TW') loadLanguage(currentLang);
+
+  if (langSelect) {
+    langSelect.addEventListener('change', function() {
+      loadLanguage(langSelect.value);
+    });
+  }
 
   /* ─── Mobile Nav Toggle ─── */
   var navToggle = document.querySelector('.nav-toggle');

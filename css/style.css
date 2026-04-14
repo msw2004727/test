@@ -727,7 +727,7 @@ button { cursor: pointer; font-family: inherit; }
 /* ===== Quick Links — 卡片網格 ===== */
 .quick-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: var(--space-md);
 }
 .quick-card {

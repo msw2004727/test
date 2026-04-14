@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>專案報價表 — 朝陽科技大學 休閒事業管理系 官方網站改版</title>
+<style>
+  :root {
+    --brand: #8b1a1a;
+    --brand-light: #f8f0f0;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --border: #d2d2d7;
+    --bg: #ffffff;
+    --bg-alt: #f5f5f7;
+    --green: #2d8a4e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif; color: var(--text); background: var(--bg-alt); line-height: 1.6; }
+  .page { max-width: 1000px; margin: 0 auto; background: var(--bg); box-shadow: 0 0 40px rgba(0,0,0,.08); }
+
+  /* Header */
+  .q-header { background: var(--brand); color: #fff; padding: 40px; text-align: center; }
+  .q-header h1 { font-size: 1.6rem; letter-spacing: 2px; margin-bottom: 8px; }
+  .q-header .subtitle { font-size: 0.95rem; opacity: 0.85; }
+  .q-header .logo-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px; }
+  .q-header .logo-row img { height: 48px; }
+
+  /* Info bar */
+  .info-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); }
+  .info-bar .cell { background: var(--bg); padding: 16px 20px; text-align: center; }
+  .info-bar .cell .label { font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; }
+  .info-bar .cell .value { font-size: 0.9rem; font-weight: 700; }
+
+  /* Section */
+  .q-section { padding: 30px 40px; }
+  .q-section + .q-section { border-top: 1px solid var(--border); }
+  .q-section h2 { font-size: 1.1rem; color: var(--brand); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--brand); display: inline-block; }
+  .q-section p { font-size: 0.88rem; color: var(--muted); margin-bottom: 16px; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  thead th { background: var(--bg-alt); color: var(--text); font-weight: 600; padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--border); }
+  thead th:nth-child(4), thead th:nth-child(5) { text-align: right; }
+  tbody td { padding: 9px 12px; border-bottom: 1px solid #eee; vertical-align: top; }
+  tbody td:nth-child(4), tbody td:nth-child(5) { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody tr:hover { background: var(--brand-light); }
+  .cat-row td { background: var(--bg-alt); font-weight: 700; color: var(--brand); padding: 12px; }
+  .subtotal td { font-weight: 700; background: #fafafa; border-top: 2px solid var(--border); }
+  .note-cell { font-size: 0.78rem; color: var(--muted); }
+
+  /* Summary */
+  .summary-box { background: var(--bg-alt); border: 2px solid var(--brand); border-radius: 12px; padding: 30px; margin: 20px 40px 30px; }
+  .summary-grid { display: grid; grid-template-columns: 1fr auto; gap: 8px 40px; font-size: 0.95rem; }
+  .summary-grid .label { color: var(--muted); }
+  .summary-grid .value { text-align: right; font-weight: 600; }
+  .summary-grid .total { font-size: 1.3rem; color: var(--brand); border-top: 2px solid var(--brand); padding-top: 12px; margin-top: 8px; }
+  .summary-grid .total-val { font-size: 1.3rem; color: var(--brand); font-weight: 800; border-top: 2px solid var(--brand); padding-top: 12px; margin-top: 8px; text-align: right; }
+  .discount { color: var(--green); }
+
+  /* Terms */
+  .terms { padding: 20px 40px 30px; font-size: 0.8rem; color: var(--muted); }
+  .terms h3 { font-size: 0.9rem; color: var(--text); margin-bottom: 10px; }
+  .terms ul { padding-left: 20px; }
+  .terms li { margin-bottom: 6px; }
+
+  /* Footer */
+  .q-footer { background: var(--text); color: #999; text-align: center; padding: 20px; font-size: 0.75rem; }
+
+  /* Signature */
+  .sign-area { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding: 30px 40px; }
+  .sign-block { border-top: 1px solid var(--border); padding-top: 16px; }
+  .sign-block .role { font-size: 0.82rem; color: var(--muted); margin-bottom: 40px; }
+  .sign-block .line { border-bottom: 1px solid var(--text); margin-bottom: 6px; height: 30px; }
+  .sign-block .date-line { font-size: 0.78rem; color: var(--muted); }
+
+  /* Badge */
+  .badge { display: inline-block; font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
+  .badge-core { background: var(--brand-light); color: var(--brand); }
+  .badge-enhance { background: #e8f5e9; color: #2d8a4e; }
+  .badge-optional { background: #fff3e0; color: #e65100; }
+
+  /* Print */
+  @media print {
+    body { background: #fff; }
+    .page { box-shadow: none; max-width: 100%; }
+    .q-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none; }
+  }
+  @media (max-width: 768px) {
+    .q-section { padding: 20px; }
+    .info-bar { grid-template-columns: 1fr; }
+    .sign-area { grid-template-columns: 1fr; }
+    .summary-box { margin: 20px; }
+    table { font-size: 0.78rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+<!-- ===== Header ===== -->
+<div class="q-header">
+  <div class="logo-row">
+    <img src="assets/images/original/logo-dlsm.png" alt="DLSM Logo" onerror="this.style.display='none'">
+  </div>
+  <h1>官方網站改版專案 報價表</h1>
+  <div class="subtitle">朝陽科技大學 管理學院 休閒事業管理系</div>
+</div>
+
+<!-- ===== Info Bar ===== -->
+<div class="info-bar">
+  <div class="cell"><div class="label">報價編號</div><div class="value">CYUT-DLSM-2026-001</div></div>
+  <div class="cell"><div class="label">報價日期</div><div class="value">2026 年 4 月 14 日</div></div>
+  <div class="cell"><div class="label">有效期限</div><div class="value">報價後 30 日內</div></div>
+</div>
+
+<!-- ===== Project Overview ===== -->
+<div class="q-section">
+  <h2>一、專案概述</h2>
+  <p>
+    將現有朝陽科技大學休閒事業管理系官方網站（leisure.cyut.edu.tw）從傳統 CMS 架構全面翻修為現代化響應式網站。
+    採用原生 HTML5 / CSS3 / ES Module 技術棧，不依賴第三方框架，支援六國語系、深淺雙主題、管理後台對接，
+    並預留季節特效與小工具擴充架構。全案含 101 項核心功能、30 條品質陷阱防護規範、3,036 行技術規格書。
+  </p>
+</div>
+
+<!-- ===== Pricing Table ===== -->
+<div class="q-section">
+  <h2>二、功能報價明細</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:5%">#</th>
+        <th style="width:40%">項目說明</th>
+        <th style="width:18%">規格</th>
+        <th style="width:12%">單價 (NT$)</th>
+        <th style="width:12%">小計 (NT$)</th>
+        <th style="width:13%">分類</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- ===== 1. 前端基礎架構 ===== -->
+      <tr class="cat-row"><td colspan="6">A. 前端基礎架構與設計系統</td></tr>
+      <tr><td>A-1</td><td>Apple 風格灰白淺色主題設計</td><td>CSS Custom Properties + oklch/hsl 雙模式</td><td>35,000</td><td>35,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>A-2</td><td>深色主題設計（GitHub/Vercel 風格）</td><td>完整色彩對照 + 即時切換</td><td>25,000</td><td>25,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>A-3</td><td>CSS 四檔架構拆分</td><td>base / layout / components / utilities + @layer</td><td>15,000</td><td>15,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>A-4</td><td>響應式設計（三斷點）</td><td>手機 / 平板 / 桌面 + 橫向模式</td><td>30,000</td><td>30,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>A-5</td><td>字體大小切換（原/中/大）</td><td>UI 控制元素固定 + 內容文字放大</td><td>8,000</td><td>8,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>A-6</td><td>SVG 圖示系統（33 個）</td><td>currentColor 繼承 + 主題自動適配</td><td>12,000</td><td>12,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>A-7</td><td>版面最大寬度限制</td><td>1200px + 置中 + 陰影分層</td><td>5,000</td><td>5,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>A-8</td><td>Print 列印樣式</td><td>隱藏 UI 控制 + 強制淺色 + 連結顯示 URL</td><td>5,000</td><td>5,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr class="subtotal"><td colspan="4">A 小計</td><td>135,000</td><td></td></tr>
+
+      <!-- ===== 2. 導覽系統 ===== -->
+      <tr class="cat-row"><td colspan="6">B. 導覽系統</td></tr>
+      <tr><td>B-1</td><td>雙層導覽列設計</td><td>上層：系所/學程/系友 | 下層：功能選單</td><td>20,000</td><td>20,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>B-2</td><td>桌面版下拉子選單</td><td>淡入動畫 + 圓角卡片 + 12 主選單 + 22 子選單</td><td>15,000</td><td>15,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>B-3</td><td>手機版毛玻璃全屏選單</td><td>backdrop-filter + 卡片式項目 + 淡入滑出子選單</td><td>25,000</td><td>25,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>B-4</td><td>圓形關閉按鈕</td><td>fixed 定位 + 半透明背景</td><td>3,000</td><td>3,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>B-5</td><td>回到頂部按鈕</td><td>滾動偵測 + smooth scroll + safe-area</td><td>5,000</td><td>5,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr class="subtotal"><td colspan="4">B 小計</td><td>68,000</td><td></td></tr>
+
+      <!-- ===== 3. 首頁內容模組 ===== -->
+      <tr class="cat-row"><td colspan="6">C. 首頁內容模組</td></tr>
+      <tr><td>C-1</td><td>Banner 幻燈片輪播</td><td>7 張圖 + scroll-snap + 觸控/滑鼠拖曳 + 自動播放 + 暫停</td><td>25,000</td><td>25,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>C-2</td><td>快速連結區（5 卡片）</td><td>學生/教職員/TronClass/專業教室/競賽與活動</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>C-3</td><td>社群媒體列</td><td>LINE/FB/IG/Threads/TikTok + SVG/PNG 圖示</td><td>8,000</td><td>8,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>C-4</td><td>公告分頁系統（3 Tab）</td><td>最新公告/工讀/獎助學金 + ARIA tab pattern</td><td>18,000</td><td>18,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>C-5</td><td>榮譽榜</td><td>卡片列表 + 展開更多</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>C-6</td><td>影音專區（YouTube 嵌入）</td><td>16:9 響應式 iframe + 2 欄 / 手機並排滑動</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>C-7</td><td>管理學院各系連結</td><td>6 卡片 + 外部連結</td><td>5,000</td><td>5,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>C-8</td><td>頁尾設計</td><td>聯絡資訊/快速連結/相關連結 + 手機卡片式 + 版號</td><td>12,000</td><td>12,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr class="subtotal"><td colspan="4">C 小計</td><td>98,000</td><td></td></tr>
+
+      <!-- ===== 4. 多語系 ===== -->
+      <tr class="cat-row"><td colspan="6">D. 多語系系統（i18n）</td></tr>
+      <tr><td>D-1</td><td>i18n 架構設計</td><td>data-i18n 屬性 + JSON 載入 + AbortController</td><td>20,000</td><td>20,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>D-2</td><td>繁體中文翻譯檔（主檔）</td><td>156 keys — 所有 UI 文字</td><td>—</td><td>—</td><td class="note-cell">含於 D-1</td></tr>
+      <tr><td>D-3</td><td>简体中文翻譯</td><td>156 keys</td><td>5,000</td><td>5,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>D-4</td><td>English 翻譯</td><td>156 keys</td><td>8,000</td><td>8,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>D-5</td><td>Tiếng Việt 越南語翻譯</td><td>156 keys + Noto Sans 字型處理</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>D-6</td><td>ภาษาไทย 泰語翻譯</td><td>156 keys + Noto Sans Thai + FOUT 防護</td><td>12,000</td><td>12,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>D-7</td><td>Bahasa Indonesia 印尼語翻譯</td><td>156 keys + 日期/數字格式化</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>D-8</td><td>PC 語系按鈕列 + 手機下拉選單</td><td>雙模式 UI + localStorage 記憶</td><td>8,000</td><td>8,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>D-9</td><td>i18n 同步驗證腳本</td><td>i18n-sync.mjs — 自動檢查 missing/extra keys</td><td>5,000</td><td>5,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr class="subtotal"><td colspan="4">D 小計</td><td>78,000</td><td></td></tr>
+
+      <!-- ===== 5. 無障礙 ===== -->
+      <tr class="cat-row"><td colspan="6">E. 無障礙與 WCAG 2.1 AA 合規</td></tr>
+      <tr><td>E-1</td><td>ARIA 標籤與角色</td><td>tab/tabpanel/dialog/aria-expanded/aria-selected</td><td>15,000</td><td>15,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>E-2</td><td>鍵盤導覽</td><td>Tab/ESC/方向鍵 + 焦點管理 + skip link</td><td>12,000</td><td>12,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>E-3</td><td>色彩對比度合規</td><td>4 輪審計 + oklch/hsl 修正 + WCAG AA 驗證</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>E-4</td><td>prefers-reduced-motion 全站支援</td><td>所有動畫/transition 降級方案</td><td>8,000</td><td>8,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr class="subtotal"><td colspan="4">E 小計</td><td>45,000</td><td></td></tr>
+
+      <!-- ===== 6. SEO ===== -->
+      <tr class="cat-row"><td colspan="6">F. SEO 與 AI 搜尋最佳化</td></tr>
+      <tr><td>F-1</td><td>Meta 標籤 + Open Graph</td><td>title/description/og:image/canonical/hreflang</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>F-2</td><td>JSON-LD 結構化資料</td><td>WebSite + EducationalOrganization + BreadcrumbList</td><td>12,000</td><td>12,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>F-3</td><td>CSP + 安全強化</td><td>Content-Security-Policy + noreferrer + 版號驗證</td><td>8,000</td><td>8,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>F-4</td><td>robots.txt + sitemap.xml</td><td>動態 {{BASE_URL}} 注入 + 頁面管理</td><td>5,000</td><td>5,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr class="subtotal"><td colspan="4">F 小計</td><td>35,000</td><td></td></tr>
+
+      <!-- ===== 7. 效能 ===== -->
+      <tr class="cat-row"><td colspan="6">G. 效能最佳化與版號系統</td></tr>
+      <tr><td>G-1</td><td>Critical CSS 內聯 + 非同步載入</td><td>FCP < 1.2s 目標</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>G-2</td><td>modulepreload + 動態 import</td><td>消除 waterfall + 懶載入非首屏模組</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>G-3</td><td>Skeleton Loading + content-visibility</td><td>GPU 合成動畫 + 個別 contain-intrinsic-size</td><td>8,000</td><td>8,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>G-4</td><td>版號管理系統</td><td>version.json + version.mjs + MAJOR.MINOR.PATCH</td><td>8,000</td><td>8,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>G-5</td><td>Build Script</td><td>CSS 合併 + WebP 轉換 + SVG 壓縮 + 版號注入 + 驗證</td><td>15,000</td><td>15,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>G-6</td><td>Service Worker（可選）</td><td>版號快取 + activate 清理 + 離線 fallback</td><td>12,000</td><td>12,000</td><td><span class="badge badge-enhance">增強</span></td></tr>
+      <tr class="subtotal"><td colspan="4">G 小計</td><td>63,000</td><td></td></tr>
+
+      <!-- ===== 8. JS 模組化 ===== -->
+      <tr class="cat-row"><td colspan="6">H. JS 模組化架構</td></tr>
+      <tr><td>H-1</td><td>模組進入點 main.js</td><td>初始化順序 + async i18n + 動態 import 框架</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>H-2</td><td>navigation.js</td><td>雙層導覽 + 漢堡選單 + 手機子選單展開</td><td>12,000</td><td>12,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>H-3</td><td>banner.js</td><td>scroll-snap + 滑鼠拖曳 + 觸控 + 自動播放暫停</td><td>15,000</td><td>15,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>H-4</td><td>tabs.js + templates</td><td>ARIA tab pattern + template cloneNode 渲染</td><td>12,000</td><td>12,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>H-5</td><td>scroll-effects.js</td><td>IntersectionObserver 進場動畫 + 懶載入</td><td>8,000</td><td>8,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>H-6</td><td>modal.js</td><td>焦點鎖定 + ESC + 內容 hash dismiss + lang:ready</td><td>15,000</td><td>15,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>H-7</td><td>theme.js + i18n.js</td><td>系統主題追蹤 + AbortController + CustomEvent</td><td>12,000</td><td>12,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>H-8</td><td>data-service.js</td><td>API 抽象層 + sessionStorage 快取 + fallback</td><td>20,000</td><td>20,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr class="subtotal"><td colspan="4">H 小計</td><td>104,000</td><td></td></tr>
+
+      <!-- ===== 9. 管理後台 ===== -->
+      <tr class="cat-row"><td colspan="6">I. 管理後台對接</td></tr>
+      <tr><td>I-1</td><td>管理者登入頁</td><td>/admin/ 獨立 SPA + JWT 驗證</td><td>25,000</td><td>25,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>I-2</td><td>公告 CRUD 管理</td><td>富文字編輯器 + 附件上傳 + 分類</td><td>35,000</td><td>35,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>I-3</td><td>Banner 輪播管理</td><td>圖片上傳/替換/排序 + 標題設定</td><td>15,000</td><td>15,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>I-4</td><td>榮譽榜管理</td><td>CRUD + 排序 + 上下架</td><td>12,000</td><td>12,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>I-5</td><td>檔案下載管理</td><td>6 分類 + 檔案上傳 + 類型白名單</td><td>15,000</td><td>15,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>I-6</td><td>系所成員管理</td><td>個人資料 + 照片上傳</td><td>12,000</td><td>12,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>I-7</td><td>API 契約文件</td><td>8 端點 RESTful JSON 規格</td><td>8,000</td><td>8,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr class="subtotal"><td colspan="4">I 小計</td><td>122,000</td><td></td></tr>
+
+      <!-- ===== 10. 子頁面 ===== -->
+      <tr class="cat-row"><td colspan="6">J. 子頁面製作</td></tr>
+      <tr><td>J-1</td><td>系所簡介頁</td><td>系所介紹/成員/教學資源</td><td>15,000</td><td>15,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>J-2</td><td>課程規劃頁</td><td>課程地圖 + 碩士/大學部分頁</td><td>15,000</td><td>15,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>J-3</td><td>實習專區頁</td><td>校外實習/校內實作</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>J-4</td><td>證照/下載/招生/規章頁</td><td>4 頁 × 標準版型</td><td>8,000</td><td>32,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>J-5</td><td>專班/系友頁</td><td>2 頁 × 標準版型</td><td>8,000</td><td>16,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr class="subtotal"><td colspan="4">J 小計</td><td>88,000</td><td></td></tr>
+
+      <!-- ===== 11. 增強功能 ===== -->
+      <tr class="cat-row"><td colspan="6">K. 增強功能（v1.1 可延後）</td></tr>
+      <tr><td>K-1</td><td>季節特效引擎</td><td>Canvas 粒子 + 4 季配置 + 外掛式架構</td><td>35,000</td><td>35,000</td><td><span class="badge badge-enhance">增強</span></td></tr>
+      <tr><td>K-2</td><td>Widget 系統 + Registry</td><td>外掛架構 + timer 管理 + 錯誤隔離</td><td>20,000</td><td>20,000</td><td><span class="badge badge-enhance">增強</span></td></tr>
+      <tr><td>K-3</td><td>日曆 Widget（含農曆）</td><td>月曆 + 查表法 1900-2100 + 節氣</td><td>25,000</td><td>25,000</td><td><span class="badge badge-enhance">增強</span></td></tr>
+      <tr><td>K-4</td><td>天氣 Widget</td><td>CWA API + serverless proxy + 快取</td><td>18,000</td><td>18,000</td><td><span class="badge badge-enhance">增強</span></td></tr>
+      <tr><td>K-5</td><td>時鐘 + 假日倒數 Widget</td><td>即時更新 + 六語假日名稱</td><td>12,000</td><td>12,000</td><td><span class="badge badge-enhance">增強</span></td></tr>
+      <tr><td>K-6</td><td>FAB 浮球按鈕</td><td>社群快捷 + 展開/收合動畫</td><td>10,000</td><td>10,000</td><td><span class="badge badge-optional">選配</span></td></tr>
+      <tr class="subtotal"><td colspan="4">K 小計</td><td>120,000</td><td></td></tr>
+
+      <!-- ===== 12. 品質保證 ===== -->
+      <tr class="cat-row"><td colspan="6">L. 品質保證與專案管理</td></tr>
+      <tr><td>L-1</td><td>技術規格書撰寫</td><td>CLAUDE.md 3,036 行 + features.md 282 行</td><td>30,000</td><td>30,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>L-2</td><td>四輪 AI 專家審計</td><td>21 位次 × 229 項發現 × 124 項修正</td><td>25,000</td><td>25,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>L-3</td><td>30 條品質陷阱防護</td><td>P1-P30 致命陷阱表 + 速查卡</td><td>—</td><td>—</td><td class="note-cell">含於 L-2</td></tr>
+      <tr><td>L-4</td><td>Lighthouse 調校</td><td>Performance ≥90 / Accessibility 100 / SEO ≥95</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>L-5</td><td>CI/CD 部署設定</td><td>GitHub Actions + GitHub Pages</td><td>8,000</td><td>8,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr><td>L-6</td><td>教育訓練與文件交接</td><td>操作手冊 + 內容更新指南</td><td>10,000</td><td>10,000</td><td><span class="badge badge-core">核心</span></td></tr>
+      <tr class="subtotal"><td colspan="4">L 小計</td><td>83,000</td><td></td></tr>
+
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Summary ===== -->
+<div class="summary-box">
+  <div class="summary-grid">
+    <div class="label">A. 前端基礎架構與設計系統</div><div class="value">NT$ 135,000</div>
+    <div class="label">B. 導覽系統</div><div class="value">NT$ 68,000</div>
+    <div class="label">C. 首頁內容模組</div><div class="value">NT$ 98,000</div>
+    <div class="label">D. 多語系系統（i18n）</div><div class="value">NT$ 78,000</div>
+    <div class="label">E. 無障礙與 WCAG 合規</div><div class="value">NT$ 45,000</div>
+    <div class="label">F. SEO 與 AI 搜尋最佳化</div><div class="value">NT$ 35,000</div>
+    <div class="label">G. 效能最佳化與版號系統</div><div class="value">NT$ 63,000</div>
+    <div class="label">H. JS 模組化架構</div><div class="value">NT$ 104,000</div>
+    <div class="label">I. 管理後台對接</div><div class="value">NT$ 122,000</div>
+    <div class="label">J. 子頁面製作</div><div class="value">NT$ 88,000</div>
+    <div class="label">K. 增強功能（v1.1 可延後）</div><div class="value">NT$ 120,000</div>
+    <div class="label">L. 品質保證與專案管理</div><div class="value">NT$ 83,000</div>
+    <div class="label" style="font-weight:700;">小計</div><div class="value" style="font-weight:700;">NT$ 1,039,000</div>
+    <div class="label discount">學術單位專案優惠（-15%）</div><div class="value discount">- NT$ 155,850</div>
+    <div class="total">專案總價</div><div class="total-val">NT$ 883,150</div>
+  </div>
+  <p style="text-align:center; margin-top:16px; font-size:0.82rem; color:var(--muted);">
+    ※ 若僅執行核心功能（不含 K 增強功能），總價為 <strong>NT$ 780,650</strong><br>
+    ※ 以上報價含稅，付款方式可分期（簽約 40% / 驗收 40% / 結案 20%）
+  </p>
+</div>
+
+<!-- ===== Timeline ===== -->
+<div class="q-section">
+  <h2>三、預估時程</h2>
+  <table>
+    <thead>
+      <tr><th style="width:15%">階段</th><th style="width:40%">內容</th><th style="width:20%">工期</th><th style="width:25%">交付物</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Phase 1</td><td>CSS 四檔 + theme.js + i18n.js + navigation.js + main.js</td><td>2-3 週</td><td>基礎架構可運行</td></tr>
+      <tr><td>Phase 2</td><td>banner.js + tabs.js + scroll-effects.js + templates</td><td>1-2 週</td><td>首頁完整互動</td></tr>
+      <tr><td>Phase 3</td><td>modal.js + fab.js + 回到頂部完善</td><td>1 週</td><td>互動覆蓋層</td></tr>
+      <tr><td>Phase 4</td><td>data-service.js + admin/ 管理後台</td><td>2-3 週</td><td>後台可操作</td></tr>
+      <tr><td>Phase 5</td><td>Widget 系統 + 季節特效（可延後）</td><td>2-3 週</td><td>增強功能</td></tr>
+      <tr><td>Phase 6</td><td>9 支子頁面</td><td>2 週</td><td>全站頁面完成</td></tr>
+      <tr><td>Phase 7</td><td>SW + CI/CD + Lighthouse 調校 + 交接</td><td>1 週</td><td>上線部署</td></tr>
+      <tr style="font-weight:700;"><td colspan="2">合計</td><td>11-15 週</td><td></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== Terms ===== -->
+<div class="terms">
+  <h3>四、注意事項</h3>
+  <ul>
+    <li>本報價基於 CLAUDE.md 技術規格書（v1.0.0, 3,036 行）及 features.md（101 項功能）之範圍。</li>
+    <li>需求變更超出規格書範圍時，將另行評估報價。</li>
+    <li>K 類增強功能可於 v1.1 分期交付，不影響核心功能上線。</li>
+    <li>管理後台對接（I 類）需現有後台提供 API 介面，前端負責 Adapter 對接。</li>
+    <li>六語翻譯初版由 AI 產出，建議由校方母語人士校閱。</li>
+    <li>本報價包含一年免費技術支援（Bug 修正），不含內容更新代操。</li>
+    <li>原始碼與所有資產完整交付，甲方擁有全部著作財產權。</li>
+    <li>專案採用 Git 版本控制，每次交付均有完整 commit 記錄。</li>
+  </ul>
+</div>
+
+<!-- ===== Signature ===== -->
+<div class="sign-area">
+  <div class="sign-block">
+    <div class="role">甲方（委託單位）</div>
+    <div class="line"></div>
+    <div class="date-line">單位：朝陽科技大學 休閒事業管理系</div>
+    <div class="date-line">代表人：________________</div>
+    <div class="date-line">日期：＿＿＿年＿＿月＿＿日</div>
+  </div>
+  <div class="sign-block">
+    <div class="role">乙方（承攬方）</div>
+    <div class="line"></div>
+    <div class="date-line">單位：________________</div>
+    <div class="date-line">代表人：________________</div>
+    <div class="date-line">日期：＿＿＿年＿＿月＿＿日</div>
+  </div>
+</div>
+
+<!-- ===== Footer ===== -->
+<div class="q-footer">
+  CYUT-DLSM-2026-001 | 本報價表為機密文件，未經同意請勿轉載 | Generated with project spec v1.0.0
+</div>
+
+</div><!-- /.page -->
+
+</body>
+</html>

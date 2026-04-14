@@ -2,23 +2,18 @@
   "_meta.lang": "zh-Hans",
   "_meta.dir": "ltr",
   "_meta.name": "简体中文",
-
   "site.title": "休闲事业管理系 - 朝阳科技大学",
   "site.description": "朝阳科技大学管理学院休闲事业管理系，培养休闲产业管理专业人才。",
   "site.keywords": "朝阳科技大学,休闲事业管理系,休闲管理,观光,餐旅,硕士班,大学部",
-
   "header.deptName": "休闲事业管理系",
   "header.deptNameEn": "Department of Leisure Service Management",
   "header.university": "朝阳科技大学",
   "header.college": "管理学院",
-
   "topbar.home": "回首页",
   "topbar.contact": "联系我们",
   "topbar.sitemap": "网站导览",
-
   "search.placeholder": "关键字搜索",
   "search.button": "搜索",
-
   "nav.home": "回首页",
   "nav.about": "系所简介",
   "nav.about.intro": "系所介绍及发展",
@@ -53,25 +48,20 @@
   "nav.alumni.charter": "系友会组织章程",
   "nav.alumni.outstanding": "历届优秀系友",
   "nav.alumni.officers": "现任系友会干部",
-
   "banner.slide1.title": "欢迎来到休闲事业管理系",
   "banner.slide1.desc": "培养具备休闲产业管理专业知能的人才",
   "banner.slide2.title": "多元实习与就业接轨",
   "banner.slide2.desc": "与知名企业合作，提供丰富实习机会",
   "banner.slide3.title": "国际化学习环境",
   "banner.slide3.desc": "国际产学专班，培养全球移动力",
-
   "quicklink.student": "学生信息系统",
   "quicklink.staff": "教职员信息系统",
   "quicklink.tronclass": "TronClass",
   "quicklink.classroom": "专业教室",
-
   "social.followUs": "关注我们",
-
   "section.video": "影音专区",
   "video.promo": "休闲系形象影片",
   "video.activities": "系所活动花絮",
-
   "section.news": "最新消息",
   "tab.announcements": "最新公告",
   "tab.parttime": "工读信息",
@@ -79,10 +69,8 @@
   "more.announcements": "更多公告",
   "more.parttime": "更多工读信息",
   "more.scholarship": "更多奖助学金",
-
   "section.honor": "荣誉榜",
   "honor.more": "展开更多",
-
   "section.college": "管理学院各系所",
   "dept.marketing": "行销与流通管理系",
   "dept.senior": "银发产业管理系",
@@ -90,7 +78,6 @@
   "dept.business": "企业管理系",
   "dept.finance": "财务金融系",
   "dept.accounting": "会计系",
-
   "footer.deptName": "休闲事业管理系",
   "footer.address": "413310 台中市雾峰区吉峰东路168号 T2-619.1室",
   "footer.phone": "(04) 23323000 分机 7452、7454、7458、7463、7465、7451",
@@ -101,24 +88,19 @@
   "footer.university": "朝阳科技大学",
   "footer.college": "管理学院",
   "footer.copyright": "© 朝阳科技大学 休闲事业管理系 Department of Leisure Service Management. All Rights Reserved.",
-
   "theme.light": "浅色模式",
   "theme.dark": "深色模式",
   "theme.toggle": "切换主题",
-
   "modal.title": "重要公告",
   "modal.close": "关闭",
   "modal.dontShow": "不再显示此公告",
-
   "fab.open": "打开快速菜单",
   "fab.close": "关闭快速菜单",
   "fab.line": "LINE 联系",
   "fab.facebook": "Facebook 粉专",
   "fab.phone": "电话联系",
   "fab.email": "Email 联系",
-
   "backToTop": "回到顶部",
-
   "widget.panel": "小工具面板",
   "widget.calendar": "日历",
   "widget.clock": "时钟",
@@ -127,11 +109,9 @@
   "widget.weather.unavailable": "暂时无法获取天气信息",
   "widget.holiday.daysLeft": "天后",
   "widget.holiday.today": "今天！",
-
   "seasonal.toggle": "季节特效",
   "seasonal.on": "开启",
   "seasonal.off": "关闭",
-
   "aria.menu": "菜单",
   "aria.search": "搜索",
   "aria.backToTop": "回到顶部",
@@ -143,16 +123,25 @@
   "aria.externalLink": "另开新窗口",
   "aria.widgetPanel": "小工具面板",
   "aria.skipToContent": "跳至主要内容",
-
-  "weekday.sun": "日", "weekday.mon": "一", "weekday.tue": "二",
-  "weekday.wed": "三", "weekday.thu": "四", "weekday.fri": "五",
+  "weekday.sun": "日",
+  "weekday.mon": "一",
+  "weekday.tue": "二",
+  "weekday.wed": "三",
+  "weekday.thu": "四",
+  "weekday.fri": "五",
   "weekday.sat": "六",
-
-  "month.1": "一月", "month.2": "二月", "month.3": "三月",
-  "month.4": "四月", "month.5": "五月", "month.6": "六月",
-  "month.7": "七月", "month.8": "八月", "month.9": "九月",
-  "month.10": "十月", "month.11": "十一月", "month.12": "十二月",
-
+  "month.1": "一月",
+  "month.2": "二月",
+  "month.3": "三月",
+  "month.4": "四月",
+  "month.5": "五月",
+  "month.6": "六月",
+  "month.7": "七月",
+  "month.8": "八月",
+  "month.9": "九月",
+  "month.10": "十月",
+  "month.11": "十一月",
+  "month.12": "十二月",
   "holiday.newYear": "元旦",
   "holiday.lunarNewYear": "农历新年",
   "holiday.lantern": "元宵节",
@@ -162,5 +151,8 @@
   "holiday.dragonboat": "端午节",
   "holiday.midautumn": "中秋节",
   "holiday.nationalday": "国庆日",
-  "holiday.teachersday": "教师节"
+  "holiday.teachersday": "教师节",
+  "content.langNotice": "以下内容仅提供中文版本",
+  "quicklink.competitions": "竞赛与活动",
+  "footer.phoneExt": "分机 7452、7454、7458、7463、7465、7451"
 }

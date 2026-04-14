@@ -2,23 +2,18 @@
   "_meta.lang": "th",
   "_meta.dir": "ltr",
   "_meta.name": "ภาษาไทย",
-
   "site.title": "ภาควิชาการจัดการบริการนันทนาการ - CYUT",
   "site.description": "ภาควิชาการจัดการบริการนันทนาการ คณะบริหารธุรกิจ มหาวิทยาลัยเทคโนโลยีเฉาหยาง",
   "site.keywords": "CYUT,การจัดการนันทนาการ,การท่องเที่ยว,การโรงแรม",
-
   "header.deptName": "ภาควิชาการจัดการบริการนันทนาการ",
   "header.deptNameEn": "Department of Leisure Service Management",
   "header.university": "มหาวิทยาลัยเทคโนโลยีเฉาหยาง",
   "header.college": "คณะบริหารธุรกิจ",
-
   "topbar.home": "หน้าแรก",
   "topbar.contact": "ติดต่อเรา",
   "topbar.sitemap": "แผนผังเว็บไซต์",
-
   "search.placeholder": "ค้นหา...",
   "search.button": "ค้นหา",
-
   "nav.home": "หน้าแรก",
   "nav.about": "เกี่ยวกับเรา",
   "nav.about.intro": "ข้อมูลและพัฒนาการ",
@@ -53,25 +48,20 @@
   "nav.alumni.charter": "กฎบัตรสมาคมศิษย์เก่า",
   "nav.alumni.outstanding": "ศิษย์เก่าดีเด่น",
   "nav.alumni.officers": "คณะกรรมการปัจจุบัน",
-
   "banner.slide1.title": "ยินดีต้อนรับสู่ภาควิชาฯ",
   "banner.slide1.desc": "ผลิตบัณฑิตผู้เชี่ยวชาญด้านการจัดการนันทนาการ",
   "banner.slide2.title": "โอกาสฝึกงานหลากหลาย",
   "banner.slide2.desc": "ร่วมมือกับองค์กรชั้นนำ",
   "banner.slide3.title": "สภาพแวดล้อมการเรียนรู้ระดับนานาชาติ",
   "banner.slide3.desc": "โปรแกรมนานาชาติ สร้างศักยภาพระดับโลก",
-
   "quicklink.student": "ระบบนักศึกษา",
   "quicklink.staff": "ระบบบุคลากร",
   "quicklink.tronclass": "TronClass",
   "quicklink.classroom": "ห้องเรียนเฉพาะทาง",
-
   "social.followUs": "ติดตามเรา",
-
   "section.video": "วิดีโอ",
   "video.promo": "วิดีโอแนะนำภาควิชา",
   "video.activities": "กิจกรรมเด่น",
-
   "section.news": "ข่าวสารล่าสุด",
   "tab.announcements": "ประกาศ",
   "tab.parttime": "งานพาร์ทไทม์",
@@ -79,10 +69,8 @@
   "more.announcements": "ประกาศเพิ่มเติม",
   "more.parttime": "งานเพิ่มเติม",
   "more.scholarship": "ทุนเพิ่มเติม",
-
   "section.honor": "เกียรติยศ",
   "honor.more": "ดูเพิ่มเติม",
-
   "section.college": "ภาควิชาในคณะบริหารธุรกิจ",
   "dept.marketing": "การตลาดและการจัดจำหน่าย",
   "dept.senior": "การจัดการอุตสาหกรรมผู้สูงอายุ",
@@ -90,7 +78,6 @@
   "dept.business": "บริหารธุรกิจ",
   "dept.finance": "การเงิน",
   "dept.accounting": "การบัญชี",
-
   "footer.deptName": "ภาควิชาการจัดการบริการนันทนาการ",
   "footer.address": "เลขที่ 168 ถ. จีเฟิงตะวันออก เขตอู่เฟิง เมืองไถจง 413310 ไต้หวัน ห้อง T2-619.1",
   "footer.phone": "โทร: +886-4-23323000 ต่อ 7452, 7454, 7458, 7463, 7465, 7451",
@@ -101,24 +88,19 @@
   "footer.university": "มหาวิทยาลัย CYUT",
   "footer.college": "คณะบริหารธุรกิจ",
   "footer.copyright": "© CYUT ภาควิชาการจัดการบริการนันทนาการ All Rights Reserved.",
-
   "theme.light": "โหมดสว่าง",
   "theme.dark": "โหมดมืด",
   "theme.toggle": "สลับธีม",
-
   "modal.title": "ประกาศสำคัญ",
   "modal.close": "ปิด",
   "modal.dontShow": "ไม่แสดงอีก",
-
   "fab.open": "เปิดเมนูด่วน",
   "fab.close": "ปิดเมนูด่วน",
   "fab.line": "LINE",
   "fab.facebook": "Facebook",
   "fab.phone": "โทรหาเรา",
   "fab.email": "ส่งอีเมล",
-
   "backToTop": "กลับด้านบน",
-
   "widget.panel": "วิดเจ็ต",
   "widget.calendar": "ปฏิทิน",
   "widget.clock": "นาฬิกา",
@@ -127,11 +109,9 @@
   "widget.weather.unavailable": "ไม่สามารถรับข้อมูลอากาศ",
   "widget.holiday.daysLeft": "วันเหลือ",
   "widget.holiday.today": "วันนี้!",
-
   "seasonal.toggle": "เอฟเฟกต์ตามฤดู",
   "seasonal.on": "เปิด",
   "seasonal.off": "ปิด",
-
   "aria.menu": "เมนู",
   "aria.search": "ค้นหา",
   "aria.backToTop": "กลับด้านบน",
@@ -143,16 +123,25 @@
   "aria.externalLink": "เปิดในแท็บใหม่",
   "aria.widgetPanel": "แผงวิดเจ็ต",
   "aria.skipToContent": "ข้ามไปยังเนื้อหาหลัก",
-
-  "weekday.sun": "อา.", "weekday.mon": "จ.", "weekday.tue": "อ.",
-  "weekday.wed": "พ.", "weekday.thu": "พฤ.", "weekday.fri": "ศ.",
+  "weekday.sun": "อา.",
+  "weekday.mon": "จ.",
+  "weekday.tue": "อ.",
+  "weekday.wed": "พ.",
+  "weekday.thu": "พฤ.",
+  "weekday.fri": "ศ.",
   "weekday.sat": "ส.",
-
-  "month.1": "ม.ค.", "month.2": "ก.พ.", "month.3": "มี.ค.",
-  "month.4": "เม.ย.", "month.5": "พ.ค.", "month.6": "มิ.ย.",
-  "month.7": "ก.ค.", "month.8": "ส.ค.", "month.9": "ก.ย.",
-  "month.10": "ต.ค.", "month.11": "พ.ย.", "month.12": "ธ.ค.",
-
+  "month.1": "ม.ค.",
+  "month.2": "ก.พ.",
+  "month.3": "มี.ค.",
+  "month.4": "เม.ย.",
+  "month.5": "พ.ค.",
+  "month.6": "มิ.ย.",
+  "month.7": "ก.ค.",
+  "month.8": "ส.ค.",
+  "month.9": "ก.ย.",
+  "month.10": "ต.ค.",
+  "month.11": "พ.ย.",
+  "month.12": "ธ.ค.",
   "holiday.newYear": "วันปีใหม่",
   "holiday.lunarNewYear": "ตรุษจีน",
   "holiday.lantern": "เทศกาลโคมไฟ",
@@ -162,5 +151,8 @@
   "holiday.dragonboat": "เทศกาลไหว้บ๊ะจ่าง",
   "holiday.midautumn": "เทศกาลไหว้พระจันทร์",
   "holiday.nationalday": "วันชาติ",
-  "holiday.teachersday": "วันครู"
+  "holiday.teachersday": "วันครู",
+  "content.langNotice": "เนื้อหาต่อไปนี้มีเฉพาะภาษาจีนเท่านั้น",
+  "quicklink.competitions": "การแข่งขันและกิจกรรม",
+  "footer.phoneExt": "ต่อ 7452, 7454, 7458, 7463, 7465, 7451"
 }

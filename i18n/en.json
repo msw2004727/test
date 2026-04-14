@@ -2,23 +2,18 @@
   "_meta.lang": "en",
   "_meta.dir": "ltr",
   "_meta.name": "English",
-
   "site.title": "Dept. of Leisure Service Management - CYUT",
   "site.description": "Department of Leisure Service Management, College of Management, Chaoyang University of Technology.",
   "site.keywords": "CYUT,Leisure Service Management,Tourism,Hospitality,Master,Undergraduate",
-
   "header.deptName": "Dept. of Leisure Service Management",
   "header.deptNameEn": "Department of Leisure Service Management",
   "header.university": "Chaoyang University of Technology",
   "header.college": "College of Management",
-
   "topbar.home": "Home",
   "topbar.contact": "Contact Us",
   "topbar.sitemap": "Sitemap",
-
   "search.placeholder": "Search...",
   "search.button": "Search",
-
   "nav.home": "Home",
   "nav.about": "About",
   "nav.about.intro": "Introduction & Development",
@@ -53,25 +48,20 @@
   "nav.alumni.charter": "Alumni Association Charter",
   "nav.alumni.outstanding": "Outstanding Alumni",
   "nav.alumni.officers": "Current Officers",
-
   "banner.slide1.title": "Welcome to Leisure Service Management",
   "banner.slide1.desc": "Cultivating professionals in leisure industry management",
   "banner.slide2.title": "Diverse Internship Opportunities",
   "banner.slide2.desc": "Partnering with leading enterprises for practical experience",
   "banner.slide3.title": "International Learning Environment",
   "banner.slide3.desc": "Global mobility through international programs",
-
   "quicklink.student": "Student Portal",
   "quicklink.staff": "Faculty Portal",
   "quicklink.tronclass": "TronClass",
   "quicklink.classroom": "Classrooms",
-
   "social.followUs": "Follow Us",
-
   "section.video": "Videos",
   "video.promo": "Department Promo Video",
   "video.activities": "Event Highlights",
-
   "section.news": "Latest News",
   "tab.announcements": "Announcements",
   "tab.parttime": "Part-time Jobs",
@@ -79,10 +69,8 @@
   "more.announcements": "More Announcements",
   "more.parttime": "More Part-time Jobs",
   "more.scholarship": "More Scholarships",
-
   "section.honor": "Honor Roll",
   "honor.more": "Show More",
-
   "section.college": "College of Management Departments",
   "dept.marketing": "Marketing & Distribution Management",
   "dept.senior": "Silver Industry Management",
@@ -90,7 +78,6 @@
   "dept.business": "Business Administration",
   "dept.finance": "Finance",
   "dept.accounting": "Accounting",
-
   "footer.deptName": "Dept. of Leisure Service Management",
   "footer.address": "No.168, Jifeng E. Rd., Wufeng Dist., Taichung City 413310, Taiwan (R.O.C.) Room T2-619.1",
   "footer.phone": "Tel: +886-4-23323000 ext. 7452, 7454, 7458, 7463, 7465, 7451",
@@ -101,24 +88,19 @@
   "footer.university": "Chaoyang University of Technology",
   "footer.college": "College of Management",
   "footer.copyright": "© Chaoyang University of Technology, Dept. of Leisure Service Management. All Rights Reserved.",
-
   "theme.light": "Light Mode",
   "theme.dark": "Dark Mode",
   "theme.toggle": "Toggle Theme",
-
   "modal.title": "Important Notice",
   "modal.close": "Close",
   "modal.dontShow": "Don't show this again",
-
   "fab.open": "Open Quick Menu",
   "fab.close": "Close Quick Menu",
   "fab.line": "LINE",
   "fab.facebook": "Facebook",
   "fab.phone": "Call Us",
   "fab.email": "Email Us",
-
   "backToTop": "Back to Top",
-
   "widget.panel": "Widgets",
   "widget.calendar": "Calendar",
   "widget.clock": "Clock",
@@ -127,11 +109,9 @@
   "widget.weather.unavailable": "Weather data unavailable",
   "widget.holiday.daysLeft": "days left",
   "widget.holiday.today": "Today!",
-
   "seasonal.toggle": "Seasonal Effects",
   "seasonal.on": "On",
   "seasonal.off": "Off",
-
   "aria.menu": "Menu",
   "aria.search": "Search",
   "aria.backToTop": "Back to top",
@@ -143,16 +123,25 @@
   "aria.externalLink": "Opens in new window",
   "aria.widgetPanel": "Widget panel",
   "aria.skipToContent": "Skip to main content",
-
-  "weekday.sun": "Sun", "weekday.mon": "Mon", "weekday.tue": "Tue",
-  "weekday.wed": "Wed", "weekday.thu": "Thu", "weekday.fri": "Fri",
+  "weekday.sun": "Sun",
+  "weekday.mon": "Mon",
+  "weekday.tue": "Tue",
+  "weekday.wed": "Wed",
+  "weekday.thu": "Thu",
+  "weekday.fri": "Fri",
   "weekday.sat": "Sat",
-
-  "month.1": "January", "month.2": "February", "month.3": "March",
-  "month.4": "April", "month.5": "May", "month.6": "June",
-  "month.7": "July", "month.8": "August", "month.9": "September",
-  "month.10": "October", "month.11": "November", "month.12": "December",
-
+  "month.1": "January",
+  "month.2": "February",
+  "month.3": "March",
+  "month.4": "April",
+  "month.5": "May",
+  "month.6": "June",
+  "month.7": "July",
+  "month.8": "August",
+  "month.9": "September",
+  "month.10": "October",
+  "month.11": "November",
+  "month.12": "December",
   "holiday.newYear": "New Year's Day",
   "holiday.lunarNewYear": "Lunar New Year",
   "holiday.lantern": "Lantern Festival",
@@ -162,5 +151,8 @@
   "holiday.dragonboat": "Dragon Boat Festival",
   "holiday.midautumn": "Mid-Autumn Festival",
   "holiday.nationalday": "National Day",
-  "holiday.teachersday": "Teachers' Day"
+  "holiday.teachersday": "Teachers' Day",
+  "content.langNotice": "The following content is available in Chinese only",
+  "quicklink.competitions": "Competitions & Events",
+  "footer.phoneExt": "Ext. 7452, 7454, 7458, 7463, 7465, 7451"
 }

@@ -2,23 +2,18 @@
   "_meta.lang": "id",
   "_meta.dir": "ltr",
   "_meta.name": "Bahasa Indonesia",
-
   "site.title": "Jurusan Manajemen Layanan Rekreasi - CYUT",
   "site.description": "Jurusan Manajemen Layanan Rekreasi, Fakultas Manajemen, Universitas Teknologi Chaoyang.",
   "site.keywords": "CYUT,Manajemen Rekreasi,Pariwisata,Perhotelan",
-
   "header.deptName": "Jurusan Manajemen Layanan Rekreasi",
   "header.deptNameEn": "Department of Leisure Service Management",
   "header.university": "Universitas Teknologi Chaoyang",
   "header.college": "Fakultas Manajemen",
-
   "topbar.home": "Beranda",
   "topbar.contact": "Hubungi Kami",
   "topbar.sitemap": "Peta Situs",
-
   "search.placeholder": "Cari...",
   "search.button": "Cari",
-
   "nav.home": "Beranda",
   "nav.about": "Tentang Kami",
   "nav.about.intro": "Profil & Perkembangan",
@@ -53,25 +48,20 @@
   "nav.alumni.charter": "Anggaran Dasar Alumni",
   "nav.alumni.outstanding": "Alumni Berprestasi",
   "nav.alumni.officers": "Pengurus Saat Ini",
-
   "banner.slide1.title": "Selamat Datang di Jurusan Manajemen Layanan Rekreasi",
   "banner.slide1.desc": "Mencetak profesional manajemen industri rekreasi",
   "banner.slide2.title": "Peluang Magang Beragam",
   "banner.slide2.desc": "Bermitra dengan perusahaan terkemuka",
   "banner.slide3.title": "Lingkungan Belajar Internasional",
   "banner.slide3.desc": "Program internasional untuk mobilitas global",
-
   "quicklink.student": "Portal Mahasiswa",
   "quicklink.staff": "Portal Dosen",
   "quicklink.tronclass": "TronClass",
   "quicklink.classroom": "Ruang Kelas Khusus",
-
   "social.followUs": "Ikuti Kami",
-
   "section.video": "Video",
   "video.promo": "Video Profil Jurusan",
   "video.activities": "Sorotan Kegiatan",
-
   "section.news": "Berita Terbaru",
   "tab.announcements": "Pengumuman",
   "tab.parttime": "Kerja Paruh Waktu",
@@ -79,10 +69,8 @@
   "more.announcements": "Pengumuman Lainnya",
   "more.parttime": "Lowongan Lainnya",
   "more.scholarship": "Beasiswa Lainnya",
-
   "section.honor": "Daftar Kehormatan",
   "honor.more": "Lihat Selengkapnya",
-
   "section.college": "Jurusan di Fakultas Manajemen",
   "dept.marketing": "Manajemen Pemasaran & Distribusi",
   "dept.senior": "Manajemen Industri Lansia",
@@ -90,7 +78,6 @@
   "dept.business": "Administrasi Bisnis",
   "dept.finance": "Keuangan",
   "dept.accounting": "Akuntansi",
-
   "footer.deptName": "Jurusan Manajemen Layanan Rekreasi",
   "footer.address": "No.168, Jl. Jifeng Timur, Distrik Wufeng, Kota Taichung 413310, Taiwan. Ruang T2-619.1",
   "footer.phone": "Tel: +886-4-23323000 ext. 7452, 7454, 7458, 7463, 7465, 7451",
@@ -101,24 +88,19 @@
   "footer.university": "Universitas CYUT",
   "footer.college": "Fakultas Manajemen",
   "footer.copyright": "© CYUT Jurusan Manajemen Layanan Rekreasi. All Rights Reserved.",
-
   "theme.light": "Mode Terang",
   "theme.dark": "Mode Gelap",
   "theme.toggle": "Ganti Tema",
-
   "modal.title": "Pengumuman Penting",
   "modal.close": "Tutup",
   "modal.dontShow": "Jangan tampilkan lagi",
-
   "fab.open": "Buka Menu Cepat",
   "fab.close": "Tutup Menu Cepat",
   "fab.line": "LINE",
   "fab.facebook": "Facebook",
   "fab.phone": "Telepon",
   "fab.email": "Email",
-
   "backToTop": "Kembali ke Atas",
-
   "widget.panel": "Widget",
   "widget.calendar": "Kalender",
   "widget.clock": "Jam",
@@ -127,11 +109,9 @@
   "widget.weather.unavailable": "Data cuaca tidak tersedia",
   "widget.holiday.daysLeft": "hari lagi",
   "widget.holiday.today": "Hari ini!",
-
   "seasonal.toggle": "Efek Musiman",
   "seasonal.on": "Nyala",
   "seasonal.off": "Mati",
-
   "aria.menu": "Menu",
   "aria.search": "Cari",
   "aria.backToTop": "Kembali ke atas",
@@ -143,16 +123,25 @@
   "aria.externalLink": "Buka di tab baru",
   "aria.widgetPanel": "Panel widget",
   "aria.skipToContent": "Langsung ke konten utama",
-
-  "weekday.sun": "Min", "weekday.mon": "Sen", "weekday.tue": "Sel",
-  "weekday.wed": "Rab", "weekday.thu": "Kam", "weekday.fri": "Jum",
+  "weekday.sun": "Min",
+  "weekday.mon": "Sen",
+  "weekday.tue": "Sel",
+  "weekday.wed": "Rab",
+  "weekday.thu": "Kam",
+  "weekday.fri": "Jum",
   "weekday.sat": "Sab",
-
-  "month.1": "Januari", "month.2": "Februari", "month.3": "Maret",
-  "month.4": "April", "month.5": "Mei", "month.6": "Juni",
-  "month.7": "Juli", "month.8": "Agustus", "month.9": "September",
-  "month.10": "Oktober", "month.11": "November", "month.12": "Desember",
-
+  "month.1": "Januari",
+  "month.2": "Februari",
+  "month.3": "Maret",
+  "month.4": "April",
+  "month.5": "Mei",
+  "month.6": "Juni",
+  "month.7": "Juli",
+  "month.8": "Agustus",
+  "month.9": "September",
+  "month.10": "Oktober",
+  "month.11": "November",
+  "month.12": "Desember",
   "holiday.newYear": "Tahun Baru",
   "holiday.lunarNewYear": "Tahun Baru Imlek",
   "holiday.lantern": "Festival Lampion",
@@ -162,5 +151,8 @@
   "holiday.dragonboat": "Festival Perahu Naga",
   "holiday.midautumn": "Festival Pertengahan Musim Gugur",
   "holiday.nationalday": "Hari Nasional",
-  "holiday.teachersday": "Hari Guru"
+  "holiday.teachersday": "Hari Guru",
+  "content.langNotice": "Konten berikut hanya tersedia dalam bahasa Mandarin",
+  "quicklink.competitions": "Kompetisi & Kegiatan",
+  "footer.phoneExt": "Ext. 7452, 7454, 7458, 7463, 7465, 7451"
 }

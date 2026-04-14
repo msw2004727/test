@@ -418,7 +418,7 @@ button { cursor: pointer; font-family: inherit; }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23aaa'/%3E%3C/svg%3E");
 }
 @media (max-width: 768px) {
-  .lang-select { font-size: 11px; padding: 2px 20px 2px 6px; }
+  .lang-select { font-size: 10px; padding: 2px 16px 2px 4px; width: 48px; }
 }
 
 .logo-area { display: flex; align-items: center; }

@@ -151,8 +151,21 @@
       <button class="font-size-btn" data-size="xlarge" aria-label="大字體">大</button>
     </div>
 
-    <!-- 語系切換 -->
-    <div class="lang-switch" aria-label="語言切換">
+    <!-- 語系切換：PC 版按鈕列 + 手機版下拉 -->
+    <div class="lang-btns" aria-label="語言切換">
+      <a href="?lang=zh-TW" class="lang-btn active" data-lang="zh-TW">繁體</a>
+      <span class="sep" aria-hidden="true">|</span>
+      <a href="?lang=zh-CN" class="lang-btn" data-lang="zh-CN">简体</a>
+      <span class="sep" aria-hidden="true">|</span>
+      <a href="?lang=en" class="lang-btn" data-lang="en">English</a>
+      <span class="sep" aria-hidden="true">|</span>
+      <a href="?lang=vi" class="lang-btn" data-lang="vi">Tiếng Việt</a>
+      <span class="sep" aria-hidden="true">|</span>
+      <a href="?lang=th" class="lang-btn" data-lang="th">ภาษาไทย</a>
+      <span class="sep" aria-hidden="true">|</span>
+      <a href="?lang=id" class="lang-btn" data-lang="id">Indonesia</a>
+    </div>
+    <div class="lang-switch-mobile" aria-label="語言切換">
       <select id="lang-select" class="lang-select">
         <option value="zh-TW" selected>繁中</option>
         <option value="zh-CN">简中</option>
@@ -625,12 +638,32 @@
       .catch(function() {}); // 失敗靜默，保留原文
   }
 
+  // 初始化 active 狀態
+  var langBtns = document.querySelectorAll('.lang-btn');
+  function syncLangUI(lang) {
+    langBtns.forEach(function(b) { b.classList.toggle('active', b.getAttribute('data-lang') === lang); });
+    if (langSelect) langSelect.value = lang;
+  }
+  syncLangUI(currentLang);
+
   // 非預設語系時自動載入
   if (currentLang !== 'zh-TW') loadLanguage(currentLang);
 
+  // PC 按鈕列
+  langBtns.forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var lang = btn.getAttribute('data-lang');
+      loadLanguage(lang);
+      syncLangUI(lang);
+    });
+  });
+
+  // 手機下拉選單
   if (langSelect) {
     langSelect.addEventListener('change', function() {
       loadLanguage(langSelect.value);
+      syncLangUI(langSelect.value);
     });
   }
 

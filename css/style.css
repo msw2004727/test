@@ -783,8 +783,8 @@ button { cursor: pointer; font-family: inherit; }
 .s-icon.line { background: #06c755; }
 .s-icon.fb { background: #1877f2; }
 .s-icon.ig { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
-.s-icon.threads { background: #86868b; }
-.s-icon.tiktok { background: #86868b; }
+.s-icon.threads { background: transparent; padding: 0; overflow: hidden; }
+.s-icon.tiktok { background: #000; }
 
 /* ===== Video Section — YouTube 嵌入 2 欄 ===== */
 .video-grid {

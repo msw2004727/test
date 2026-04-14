@@ -88,11 +88,60 @@
     .no-print { display: none; }
   }
   @media (max-width: 768px) {
-    .q-section { padding: 20px; }
+    .q-header { padding: 24px 16px; }
+    .q-header h1 { font-size: 1.2rem; letter-spacing: 1px; }
+    .q-header .subtitle { font-size: 0.82rem; }
+    .q-header .logo-row img { height: 36px; }
     .info-bar { grid-template-columns: 1fr; }
-    .sign-area { grid-template-columns: 1fr; }
-    .summary-box { margin: 20px; }
-    table { font-size: 0.78rem; }
+    .info-bar .cell { padding: 10px 16px; text-align: left; display: flex; gap: 8px; align-items: center; }
+    .info-bar .cell .label { margin-bottom: 0; min-width: 60px; }
+    .q-section { padding: 16px; }
+    .q-section h2 { font-size: 0.95rem; }
+    .q-section p { font-size: 0.8rem; }
+    .summary-box { margin: 16px; padding: 20px; }
+    .summary-grid { font-size: 0.85rem; gap: 6px 16px; }
+    .summary-grid .total, .summary-grid .total-val { font-size: 1.1rem; }
+    .sign-area { grid-template-columns: 1fr; gap: 24px; padding: 20px 16px; }
+    .terms { padding: 16px; }
+
+    /* 表格改為卡片式排列 */
+    table, thead, tbody, th, td, tr { display: block; }
+    thead { display: none; } /* 隱藏表頭，每個 cell 自帶 label */
+    tbody tr {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      padding: 12px;
+      position: relative;
+    }
+    tbody tr:hover { background: var(--brand-light); }
+    tbody td {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 4px 0;
+      border-bottom: 1px solid #f0f0f0;
+      text-align: left;
+      font-size: 0.82rem;
+    }
+    tbody td:last-child { border-bottom: none; }
+    tbody td::before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 0.75rem;
+      min-width: 60px;
+      flex-shrink: 0;
+      margin-right: 8px;
+    }
+    tbody td:nth-child(4), tbody td:nth-child(5) { text-align: right; }
+
+    /* 分類列 */
+    .cat-row td { background: var(--bg-alt); border-radius: 8px; font-size: 0.88rem; display: block; padding: 10px; }
+    .cat-row td::before { display: none; }
+    .subtotal td { display: flex; font-size: 0.88rem; }
+    .subtotal td::before { display: none; }
   }
 </style>
 </head>
@@ -356,5 +405,19 @@
 
 </div><!-- /.page -->
 
+<script>
+// 自動為表格 td 加上 data-label（手機卡片模式用）
+document.querySelectorAll('table').forEach(function(table) {
+  var headers = [];
+  table.querySelectorAll('thead th').forEach(function(th) {
+    headers.push(th.textContent.trim());
+  });
+  table.querySelectorAll('tbody tr:not(.cat-row):not(.subtotal)').forEach(function(tr) {
+    tr.querySelectorAll('td').forEach(function(td, i) {
+      if (headers[i]) td.setAttribute('data-label', headers[i]);
+    });
+  });
+});
+</script>
 </body>
 </html>

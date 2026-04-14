@@ -676,36 +676,43 @@
     slidesContainer.addEventListener('touchstart', function() { stopAuto(); }, { passive: true });
     slidesContainer.addEventListener('touchend', function() { manualPauseTimer = setTimeout(startAuto, 8000); }, { passive: true });
 
-    // 桌面滑鼠拖曳滑動
-    var isDragging = false, dragStartX = 0, dragScrollLeft = 0;
+    // 桌面滑鼠拖曳 — 絲滑無縫跟手滑動
+    var isDragging = false, dragStartX = 0, dragScrollLeft = 0, dragMoved = false;
+
     slidesContainer.addEventListener('mousedown', function(e) {
       isDragging = true;
+      dragMoved = false;
       dragStartX = e.pageX;
       dragScrollLeft = slidesContainer.scrollLeft;
-      slidesContainer.style.cursor = 'grabbing';
+      slidesContainer.classList.add('dragging'); // 關閉 scroll-snap
       stopAuto();
       e.preventDefault();
     });
-    slidesContainer.addEventListener('mousemove', function(e) {
+
+    document.addEventListener('mousemove', function(e) {
       if (!isDragging) return;
       var dx = e.pageX - dragStartX;
+      if (Math.abs(dx) > 3) dragMoved = true;
+      // 直接跟手，1:1 對應滑鼠移動距離
       slidesContainer.scrollLeft = dragScrollLeft - dx;
     });
-    slidesContainer.addEventListener('mouseup', function(e) {
+
+    document.addEventListener('mouseup', function(e) {
       if (!isDragging) return;
       isDragging = false;
-      slidesContainer.style.cursor = 'grab';
-      // 滑動超過 50px 才切換，否則回彈
-      var dx = e.pageX - dragStartX;
-      if (Math.abs(dx) > 50) {
-        if (dx < 0) nextSlide(); else prevSlide();
-      }
-      pauseAndResume();
-    });
-    slidesContainer.addEventListener('mouseleave', function() {
-      if (isDragging) {
-        isDragging = false;
-        slidesContainer.style.cursor = 'grab';
+      slidesContainer.classList.remove('dragging'); // 恢復 scroll-snap
+
+      if (dragMoved) {
+        // 放開後讓 scroll-snap 自動吸附到最近的 slide
+        // 需要微觸發一下 scroll 讓 snap 生效
+        requestAnimationFrame(function() {
+          var slideWidth = slidesContainer.offsetWidth;
+          var targetIndex = Math.round(slidesContainer.scrollLeft / slideWidth);
+          targetIndex = Math.max(0, Math.min(targetIndex, totalSlides - 1));
+          slidesContainer.scrollTo({ left: targetIndex * slideWidth, behavior: 'smooth' });
+          currentSlide = targetIndex;
+          dots.forEach(function(d, idx) { d.classList.toggle('active', idx === currentSlide); });
+        });
         pauseAndResume();
       }
     });

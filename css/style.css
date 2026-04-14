@@ -602,8 +602,12 @@ button { cursor: pointer; font-family: inherit; }
   -webkit-overflow-scrolling: touch;
 }
 .banner-slides::-webkit-scrollbar { display: none; }
-.banner-slides { cursor: grab; }
-.banner-slides:active { cursor: grabbing; }
+.banner-slides { cursor: grab; user-select: none; }
+.banner-slides.dragging {
+  cursor: grabbing;
+  scroll-snap-type: none; /* 拖曳中關閉 snap，實現絲滑跟手 */
+  scroll-behavior: auto;  /* 拖曳中不要 smooth，直接跟手 */
+}
 .banner-slide {
   min-width: 100%;
   height: 100%;
@@ -615,6 +619,7 @@ button { cursor: pointer; font-family: inherit; }
   height: 100%;
   display: block;
   object-fit: cover;
+  pointer-events: none; /* 防止圖片拖曳干擾手勢滑動 */
 }
 @media (max-width: 768px) {
   .banner { height: 139px; }
@@ -982,12 +987,12 @@ button { cursor: pointer; font-family: inherit; }
     gap: var(--space-sm);
   }
   .quick-card {
-    padding: var(--space-sm) var(--space-sm);
+    padding: var(--space-md) var(--space-sm);
     gap: var(--space-xs);
   }
-  .q-icon { width: 36px; height: 36px; }
-  .q-icon svg { width: 20px; height: 20px; }
-  .quick-card h3 { font-size: 0.78rem; }
+  .q-icon { width: 40px; height: 40px; }
+  .q-icon svg { width: 22px; height: 22px; }
+  .quick-card h3 { font-size: 0.8rem; }
   .quick-card:last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }

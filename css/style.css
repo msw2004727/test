@@ -194,7 +194,7 @@ button { cursor: pointer; font-family: inherit; }
 .theme-switch {
   cursor: pointer;
   display: flex; align-items: center;
-  margin-right: auto; /* push other items to the right */
+  margin-right: 0;
   flex-shrink: 0;
 }
 .theme-switch__input {
@@ -277,7 +277,7 @@ button { cursor: pointer; font-family: inherit; }
 /* ===== Font Size Buttons ===== */
 .font-size-btns {
   display: flex; gap: 2px;
-  margin-right: var(--space-sm);
+  margin-right: auto; /* 字體按鈕後面的項目（回首頁等）推到右側 */
 }
 .font-size-btn {
   display: flex; align-items: center; justify-content: center;
@@ -602,6 +602,8 @@ button { cursor: pointer; font-family: inherit; }
   -webkit-overflow-scrolling: touch;
 }
 .banner-slides::-webkit-scrollbar { display: none; }
+.banner-slides { cursor: grab; }
+.banner-slides:active { cursor: grabbing; }
 .banner-slide {
   min-width: 100%;
   height: 100%;
@@ -618,7 +620,7 @@ button { cursor: pointer; font-family: inherit; }
   .banner { height: 139px; }
 }
 @media (max-width: 480px) {
-  .banner { height: 99px; }
+  .banner { height: 119px; }
 }
 .banner-arrow {
   position: absolute; top: 50%; transform: translateY(-50%);
@@ -760,7 +762,7 @@ button { cursor: pointer; font-family: inherit; }
   display: flex; gap: 2px; margin-bottom: 0;
 }
 .tab-nav a {
-  display: block; padding: var(--space-sm) var(--space-lg);
+  display: block; padding: var(--space-sm) var(--space-md);
   font-size: 0.88rem; font-weight: 600;
   color: var(--color-text-muted);
   background: var(--color-bg-alt);
@@ -977,9 +979,17 @@ button { cursor: pointer; font-family: inherit; }
   /* 一行兩張卡片，單數末張自動撐滿整行 */
   .quick-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
   }
+  .quick-card {
+    padding: var(--space-sm) var(--space-sm);
+    gap: var(--space-xs);
+  }
+  .q-icon { width: 36px; height: 36px; }
+  .q-icon svg { width: 20px; height: 20px; }
+  .quick-card h3 { font-size: 0.78rem; }
   .quick-card:last-child:nth-child(odd) {
-    grid-column: 1 / -1; /* 單數末張撐滿 */
+    grid-column: 1 / -1;
   }
   /* video-carousel handled by its own responsive rules above */
   .dept-grid { grid-template-columns: repeat(2, 1fr); }

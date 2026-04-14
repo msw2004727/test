@@ -675,6 +675,40 @@
     // 手動觸摸：暫停，放開後等 8 秒才恢復
     slidesContainer.addEventListener('touchstart', function() { stopAuto(); }, { passive: true });
     slidesContainer.addEventListener('touchend', function() { manualPauseTimer = setTimeout(startAuto, 8000); }, { passive: true });
+
+    // 桌面滑鼠拖曳滑動
+    var isDragging = false, dragStartX = 0, dragScrollLeft = 0;
+    slidesContainer.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      dragStartX = e.pageX;
+      dragScrollLeft = slidesContainer.scrollLeft;
+      slidesContainer.style.cursor = 'grabbing';
+      stopAuto();
+      e.preventDefault();
+    });
+    slidesContainer.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      var dx = e.pageX - dragStartX;
+      slidesContainer.scrollLeft = dragScrollLeft - dx;
+    });
+    slidesContainer.addEventListener('mouseup', function(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      slidesContainer.style.cursor = 'grab';
+      // 滑動超過 50px 才切換，否則回彈
+      var dx = e.pageX - dragStartX;
+      if (Math.abs(dx) > 50) {
+        if (dx < 0) nextSlide(); else prevSlide();
+      }
+      pauseAndResume();
+    });
+    slidesContainer.addEventListener('mouseleave', function() {
+      if (isDragging) {
+        isDragging = false;
+        slidesContainer.style.cursor = 'grab';
+        pauseAndResume();
+      }
+    });
   }
 
   // visibilitychange 暫停

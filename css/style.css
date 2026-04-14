@@ -267,10 +267,50 @@ button { cursor: pointer; font-family: inherit; }
   padding: var(--space-sm) var(--space-md);
   max-width: 1100px; margin: 0 auto;
 }
-/* ===== Theme Toggle Button ===== */
+/* ===== Theme: PC 滑動開關 ===== */
+.theme-switch {
+  cursor: pointer;
+  display: flex; align-items: center;
+  flex-shrink: 0;
+  margin-right: var(--space-xs);
+}
+.theme-switch__input { position: absolute; opacity: 0; width: 0; height: 0; }
+.theme-switch__track {
+  position: relative;
+  width: 50px; height: 26px;
+  background: hsl(0, 0%, 85%);
+  border-radius: var(--radius-full);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 5px;
+  transition: background 0.3s;
+  box-shadow: inset 0 1px 3px hsl(0 0% 0% / 0.1);
+}
+[data-theme="dark"] .theme-switch__track { background: hsl(220, 40%, 30%); }
+.theme-switch__thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  background: #fff;
+  border-radius: var(--radius-full);
+  box-shadow: 0 1px 3px hsl(0 0% 0% / 0.15);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+[data-theme="dark"] .theme-switch__thumb {
+  transform: translateX(24px);
+  background: hsl(220, 20%, 20%);
+}
+.theme-switch__icon { display: flex; align-items: center; justify-content: center; z-index: 1; }
+.theme-switch__icon--sun { color: hsl(0, 0%, 45%); }
+.theme-switch__icon--moon { color: hsl(220, 60%, 75%); }
+[data-theme="light"] .theme-switch__icon--moon { opacity: 0.3; }
+[data-theme="dark"] .theme-switch__icon--sun { opacity: 0.3; }
+.theme-switch__input:focus-visible + .theme-switch__track { outline: 2px solid var(--color-text-muted); outline-offset: 2px; }
+
+/* ===== Theme: 手機版按鈕 ===== */
 .theme-btn {
-  display: flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px;
+  display: none; /* PC 版隱藏 */
+  align-items: center; justify-content: center;
+  width: 24px; height: 24px;
   background: transparent;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -278,20 +318,19 @@ button { cursor: pointer; font-family: inherit; }
   cursor: pointer;
   flex-shrink: 0;
   margin-right: var(--space-xs);
-  transition: background 0.15s, color 0.15s;
 }
 .theme-btn:hover { background: var(--color-bg-alt); color: var(--color-text); }
-.theme-btn:focus-visible { outline: 2px solid var(--color-text-muted); outline-offset: 1px; }
-/* Light mode: show sun, hide moon */
 [data-theme="light"] .theme-btn__moon { display: none; }
-[data-theme="light"] .theme-btn__sun { display: block; }
-/* Dark mode: show moon, hide sun */
 [data-theme="dark"] .theme-btn__sun { display: none; }
-[data-theme="dark"] .theme-btn__moon { display: block; }
 
+/* 手機版：隱藏滑動開關，顯示按鈕 */
 @media (max-width: 768px) {
-  .theme-btn { width: 24px; height: 24px; }
-  .theme-btn svg { width: 14px; height: 14px; }
+  .theme-switch { display: none; }
+  .theme-btn { display: flex; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-switch__thumb { transition: none; }
 }
 
 /* ===== Font Size Buttons ===== */

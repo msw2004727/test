@@ -255,7 +255,7 @@ button { cursor: pointer; font-family: inherit; }
   padding: var(--space-xs) 0;
   font-size: 0.8rem;
 }
-.top-util .outer { display: flex; justify-content: flex-end; align-items: center; gap: var(--space-sm); }
+.top-util .outer { display: flex; justify-content: flex-end; align-items: center; gap: var(--space-sm); padding-left: var(--space-sm); }
 .top-util a { color: var(--color-text-muted); white-space: nowrap; }
 .top-util a:hover { color: var(--color-primary); text-decoration: none; }
 .top-util .sep { color: var(--color-border); }
